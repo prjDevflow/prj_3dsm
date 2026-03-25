@@ -11,13 +11,8 @@
 - [Funcionalidades](#-funcionalidades)
 - [Tecnologias Utilizadas](#-tecnologias-utilizadas)
 - [Product Backlog](#-product-backlog)
-- [Burndown Chart](#-burndown-chart)
-- [UML](#-uml)
-- [Design](#-design)
-- [Como Executar](#-como-executar)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
 
-## 🚀 Sobre o Projeto
+## Sobre o Projeto
 
 O **DevFlow** é uma plataforma desenvolvida para centralizar, gerenciar e analisar leads comerciais da **1000 Valle Multimarcas**, revendedora de veículos com múltiplas unidades, em parceria com a **FATEC Jacareí**.
 
@@ -25,7 +20,7 @@ A plataforma integra dados de diferentes canais de captação:
 - **Canais Presenciais:** Visitas em loja e contato telefônico
 - **Canais Digitais:** WhatsApp, Instagram, formulários digitais e outros meios de captação
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 - **👤 Controle de Acesso:** Autenticação com JWT e perfis hierárquicos (Atendente, Gerente, Gerente Geral e Administrador)
 - **📋 Gestão de Leads:** Registro, acompanhamento e evolução de negociações
