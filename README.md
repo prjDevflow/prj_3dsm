@@ -159,6 +159,10 @@ A plataforma integra dados de diferentes canais de captação:
 ## Diagrama de Classes
 <img height="400" alt="Diagrama de Classes" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/UML-Classe.png" />
 
+## Sprint 1 — Planejamento (Poker Planning)
+
+### Estimativa de Tarefas e Story Points
+
 | #  | Item                                                                               | Pontos | Status      |
 | -- | ---------------------------------------------------------------------------------- | ------ | ----------- |
 | 1  | [FE] Página de Login                                                               | 3      | ✅ Concluído |
