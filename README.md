@@ -150,3 +150,30 @@ A plataforma integra dados de diferentes canais de captação:
 - Cada log armazena data, hora e usuário responsável pela operação.
 - Apenas o Administrador tem acesso à visualização completa dos logs.
 </details>
+
+# 📝 UML
+
+## Diagrama de Casos de Uso
+<img height="1000" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/UML-Casos_De_Uso.png" />
+
+## Diagrama de Classes
+<img height="400" alt="Diagrama de Classes" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/UML-Classe.png" />
+
+| #  | Item                                                                               | Pontos | Status      |
+| -- | ---------------------------------------------------------------------------------- | ------ | ----------- |
+| 1  | [FE] Página de Login                                                               | 3      | ✅ Concluído |
+| 2  | [FE] Página Dashboard <br> + Filtros (por nível de permissão)                      | 8      | ✅ Concluído |
+| 3  | [FE] Página Leads <br> + Filtros (por nível de permissão)                          | 8      | ✅ Concluído |
+| 4  | [FE] Página Configuração                                                           | 3      | ✅ Concluído |
+| 5  | [FE] Página Usuários                                                               | 5      | ✅ Concluído |
+| 6  | [FE] Página Equipes                                                                | 5      | ✅ Concluído |
+| 7  | [FE] Página Logs                                                                   | 3      | ✅ Concluído |
+| 8  | [BE] RF01 – Autenticação com JWT <br> + Bcrypt (expiração 1 dia)                   | 5      | ✅ Concluído |
+| 9  | [BE] RF02 – RBAC: controle de acesso <br> por perfil nos filtros e dashboard       | 8      | ✅ Concluído |
+| 10 | [BE] RF06 – Filtros Temporais <br> com DateValidator (limite 12 meses)             | 3      | ✅ Concluído |
+| 11 | [BE] Infraestrutura: Camadas <br> Controller/Service/Repository <br> + Middlewares | 5      | ✅ Concluído |
+| 12 | [BE] Documentação inicial <br> via Swagger                                         | 2      | ✅ Concluído |
+|    | **Total**                                                                          | **58** |             |
+
+### Burndown Chart
+<img height="400" alt="Burndown Chart Sprint 1" src= "https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/burndown_sprint1.png" />
