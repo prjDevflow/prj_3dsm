@@ -179,5 +179,3 @@ A plataforma integra dados de diferentes canais de captação:
 | 12 | [BE] Documentação inicial <br> via Swagger                                         | 2      | ✅ Concluído |
 |    | **Total**                                                                          | **58** |             |
 
-### Burndown Chart
-<img height="400" alt="Burndown Chart Sprint 1" src= "https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/burndown_sprint1.png" />
