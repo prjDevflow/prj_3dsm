@@ -1,0 +1,195 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "1000 Valle Multimarcas - API Documentation",
+    "description": "Documentação do sistema de Gestão de Leads - Projeto ABP 2026",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/sessions": {
+      "post": {
+        "tags": ["Autenticação"],
+        "summary": "Realizar login de usuário",
+        "description": "Gera um token JWT para acesso às rotas protegidas (RF01).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "admin@1000valle.com.br" },
+                  "senha": { "type": "string", "example": "123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Token gerado com sucesso" },
+          "401": { "description": "Credenciais inválidas" }
+        }
+      }
+    },
+    "/leads": {
+      "post": {
+        "tags": ["Leads"],
+        "summary": "Criar um novo Lead",
+        "description": "Regista um novo lead e inicia automaticamente uma negociação vinculada (RF03).",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["clienteId", "lojaId", "origem"],
+                "properties": {
+                  "clienteId": { "type": "string" },
+                  "lojaId": { "type": "string" },
+                  "origem": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Lead criado com sucesso" },
+          "400": { "description": "Erro de validação (Zod)" },
+          "401": { "description": "Não autorizado" }
+        }
+      },
+      "/leads/negotiations/{id}": {
+      "put": {
+        "tags": ["Negotiations"],
+        "summary": "Atualiza o status e estágio de uma negociação",
+        "description": "Permite atualizar os dados de uma negociação ativa. Regra de Ouro: Um Atendente só pode alterar a negociação se for o proprietário do Lead associado. Todas as validações de autorização ocorrem no backend.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID da negociação que será atualizada",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["ABERTA", "GANHO", "PERDIDO"],
+                    "description": "Novo status da negociação (RF03)"
+                  },
+                  "estagio": {
+                    "type": "string",
+                    "description": "Novo estágio no funil de vendas (ex: 'Proposta Enviada', 'Em Análise de Crédito')"
+                  }
+                },
+                "required": ["status", "estagio"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Negociação atualizada com sucesso e histórico gerado."
+          },
+          "400": {
+            "description": "Erro de validação nos dados enviados (ex: status inválido)."
+          },
+          "401": {
+            "description": "Não autorizado. Token JWT ausente, expirado ou inválido."
+          },
+          "403": {
+            "description": "Acesso negado (Forbidden). Ocorre quando um Atendente tenta atualizar uma negociação que pertence a outro utilizador."
+          },
+          "404": {
+            "description": "Negociação não encontrada."
+          }
+        }
+      }
+    },
+      "get": {
+        "tags": ["Leads"],
+        "summary": "Listar Leads",
+        "description": "Lista leads respeitando a hierarquia: Atendentes veem os seus, Gerentes veem da equipa, Admin vê tudo (RF02).",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Data inicial para filtro. Limite de 12 meses para não-administradores (RNF).",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "equipeId",
+            "in": "query",
+            "description": "ID da equipa para filtragem (obrigatório para Gerentes).",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Lista de leads retornada com sucesso" },
+          "400": { "description": "Erro na validação de datas ou parâmetros" },
+          "401": { "description": "Token ausente ou inválido" }
+        }
+      }
+    },
+    "/dashboard": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "Obter métricas de performance",
+        "description": "Retorna o total de leads, conversões e performance por loja (RF06).",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": true,
+            "description": "Data inicial para o cálculo das métricas. Respeita a regra de 12 meses para não-admins.",
+            "schema": { "type": "string", "format": "date" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Métricas calculadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalLeads": { "type": "number" },
+                    "totalConvertidos": { "type": "number" },
+                    "taxaConversao": { "type": "string" },
+                    "performanceLoja": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Data inicial obrigatória ou fora do limite permitido" },
+          "401": { "description": "Não autorizado" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
