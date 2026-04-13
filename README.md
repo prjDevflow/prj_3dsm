@@ -1,11 +1,11 @@
-# 🚗 DevFlow - Sistema de Gestão de Leads
+#  DevFlow - Sistema de Gestão de Leads
 
 **Uma plataforma web para gestão de leads e análise de desempenho comercial, desenvolvida para a 1000 Valle Multimarcas.**
 
 [![LICENSE](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://choosealicense.com/licenses/mit/)
 [![Stack](https://img.shields.io/badge/Stack-React%20%2B%20Node.js%20%2B%20PostgreSQL-blue)](https://github.com/seu-usuario/prj_3dsm)
 
-## 📋 Tabela de Conteúdos
+##  Tabela de Conteúdos
 
 - [Sobre o Projeto](#-sobre-o-projeto)
 - [Funcionalidades](#-funcionalidades)
@@ -46,7 +46,7 @@ A plataforma integra dados de diferentes canais de captação:
 ### Infraestrutura
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-## 📝 Product Backlog
+##  Product Backlog
 
 <details>
 <summary><b>RF01 — Autenticação de Usuários</b></summary>
@@ -151,7 +151,7 @@ A plataforma integra dados de diferentes canais de captação:
 - Apenas o Administrador tem acesso à visualização completa dos logs.
 </details>
 
-# 📝 UML
+#  UML
 
 ## Diagrama de Casos de Uso
 <img height="1000" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/UML-Casos_De_Uso.png" />
