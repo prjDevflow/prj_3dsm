@@ -29,22 +29,22 @@ A plataforma integra dados de diferentes canais de captação:
 - **🔍 Filtros Temporais:** Filtre dados por semana, mês, ano ou período customizado
 - **🗂️ Logs de Auditoria:** Registro completo de operações e acessos do sistema
 
-## 🛠 Tecnologias Utilizadas
+##  Tecnologias Utilizadas
 
 ### Front-End
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![React](https://skillicons.dev/icons?i=react)
+![TypeScript](https://skillicons.dev/icons?i=ts)
 
 ### Back-End
-![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
-![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Node.js](https://skillicons.dev/icons?i=nodejs)
+![Express](https://skillicons.dev/icons?i=express)
+![TypeScript](https://skillicons.dev/icons?i=ts)
 
 ### Banco de Dados
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![PostgreSQL](https://skillicons.dev/icons?i=postgresql)
 
 ### Infraestrutura
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Docker](https://skillicons.dev/icons?i=docker)
 
 ##  Product Backlog
 
@@ -158,6 +158,53 @@ A plataforma integra dados de diferentes canais de captação:
 
 ## Diagrama de Classes
 <img height="400" alt="Diagrama de Classes" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/UML-Classe.png" />
+
+##  Diagramas de Sequência
+
+<details>
+<summary><b> Autenticação de Usuário</b></summary>
+
+<br>
+
+<img height="500" alt="Diagrama de Sequência" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/autenticacao.png" />
+
+</details>
+
+<details>
+<summary><b> Criação de Lead</b></summary>
+
+<br>
+
+<img height="500" alt="Diagrama de Sequência" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/lead.png" />
+
+</details>
+
+<details>
+<summary><b> Atualizar Estágio da Negociação</b></summary>
+
+<br>
+
+<img height="500" alt="Diagrama de Sequência" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/estagio.png" />
+
+</details>
+
+<details>
+<summary><b> Visualizar Dashboard (Gerente)</b></summary>
+
+<br>
+
+<img height="500" alt="Diagrama de Sequência" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/dashboard.png" />
+
+</details>
+
+<details>
+<summary><b> Visualizar Logs (Administrador)</b></summary>
+
+<br>
+
+<img height="500" alt="Diagrama de Sequência" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/logs.png" />
+
+</details>
 
 ## Sprint 1 — Planejamento (Poker Planning)
 
