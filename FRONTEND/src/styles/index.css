@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #0F3B5E;
+  }
+
+  .compact {
+    --spacing-base: 0.75rem;
+    --spacing-lg: 1rem;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-800;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .badge {
+    @apply px-2.5 py-1 text-xs font-medium rounded-full;
+  }
+  
+  .btn-primary {
+    @apply bg-[#0F3B5E] text-white px-4 py-2 rounded-lg hover:bg-[#1E5A7A] transition-colors duration-200 font-medium text-sm;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-slate-700 px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors duration-200 font-medium text-sm;
+  }
+  
+  .input {
+    @apply border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#0F3B5E]/20 focus:border-[#0F3B5E] transition-all;
+  }
+}
+
+/* Animações */
+@keyframes shrink {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+.animate-shrink {
+  animation: shrink 5s linear forwards;
+}
