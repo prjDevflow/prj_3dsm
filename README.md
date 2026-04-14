@@ -228,3 +228,4 @@ A plataforma integra dados de diferentes canais de captação:
 
 ### Burndown Chart
 
+<img height="500" alt="Burndown" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/burndown_sprint1.png" />
