@@ -249,13 +249,4 @@ Desenvolvido como parte do desafio de frontend da FATEC.
 ⭐ Se este projeto te ajudou, considere dar uma estrela no GitHub!
 ```
 
----
 
-## ✅ Como usar
-
-1. Crie um arquivo `README.md` na raiz do seu projeto
-2. Copie e cole todo o conteúdo acima
-3. Substitua `https://github.com/seu-usuario/analyticspro-frontend.git` pelo link real do seu repositório
-4. Ajuste qualquer informação que queira personalizar
-
-O README está completo, bem estruturado e pronto para impressionar no GitHub! 🚀
