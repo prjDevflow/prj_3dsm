@@ -139,8 +139,6 @@ O servidor estará disponível em `http://localhost:3333`.
 | Comando | Descrição |
 | :--- | :--- |
 | `npm run dev` | Inicia o servidor em modo de desenvolvimento com **Hot Reload** via `ts-node-dev`. |
-| `npm run build` | Compila o TypeScript para JavaScript otimizado na pasta `dist/`. |
-| `npm start` | Executa o código compilado (`dist/`) com o Node nativo. Indicado para **produção**. |
 
 ### Banco de Dados (Prisma)
 
