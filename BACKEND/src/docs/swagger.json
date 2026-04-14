@@ -1,0 +1,340 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API 1000 Valle Multimarcas - ABP FATEC",
+    "description": "Documentação da API para o sistema de gestão de vendas e leads da 1000 Valle Multimarcas. Atende aos requisitos funcionais (RF01 a RF07) e restrições.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Equipa de Desenvolvimento FATEC"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3333",
+      "description": "Servidor Local de Desenvolvimento"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Usuario": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "nome": { "type": "string" },
+          "email": { "type": "string" },
+          "role": { "type": "string", "example": "ADMIN" },
+          "equipeId": { "type": "string", "format": "uuid" }
+        }
+      },
+      "Cliente": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "nome": { "type": "string" },
+          "email": { "type": "string" },
+          "telefone": { "type": "string" }
+        }
+      },
+      "Loja": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "nome": { "type": "string" }
+        }
+      },
+      "Origem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "nome": { "type": "string" }
+        }
+      },
+      "Lead": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "clienteId": { "type": "string", "format": "uuid" },
+          "atendenteId": { "type": "string", "format": "uuid" },
+          "lojaId": { "type": "string", "format": "uuid" },
+          "origem": { "type": "string" },
+          "status": { "type": "string", "example": "NOVO" }
+        }
+      },
+      "Negociacao": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "leadId": { "type": "string", "format": "uuid" },
+          "importancia": { "type": "string", "enum": ["FRIO", "MORNO", "QUENTE"] },
+          "estagio": { "type": "string", "example": "Contato Inicial" },
+          "status": { "type": "string", "example": "ABERTA" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth": {
+      "post": {
+        "tags": ["Autenticação"],
+        "summary": "Realiza o login no sistema (RF01)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "admin@1000valle.com.br" },
+                  "senha": { "type": "string", "example": "123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login realizado com sucesso. Retorna o Token JWT." },
+          "400": { "description": "E-mail ou palavra-passe incorretos." }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "tags": ["Utilizadores"],
+        "summary": "Cria um novo utilizador",
+        "description": "Apenas Administradores podem aceder a esta rota (RF02).",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": { "type": "string", "example": "João Vendedor" },
+                  "email": { "type": "string", "example": "joao@1000valle.com.br" },
+                  "senha": { "type": "string", "example": "senha123" },
+                  "role": { "type": "string", "example": "ATENDENTE" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Utilizador criado com sucesso" }
+        }
+      }
+    },
+    "/clientes": {
+      "post": {
+        "tags": ["Clientes"],
+        "summary": "Cria um novo Cliente",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": { "type": "string", "example": "Maria Oliveira" },
+                  "email": { "type": "string", "example": "maria@email.com" },
+                  "telefone": { "type": "string", "example": "12999999999" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Cliente criado com sucesso" },
+          "400": { "description": "E-mail já cadastrado" }
+        }
+      }
+    },
+    "/lojas": {
+      "post": {
+        "tags": ["Lojas"],
+        "summary": "Cria uma nova Loja (Requer ADMIN)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": { "type": "string", "example": "Filial SP" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Loja criada com sucesso" }
+        }
+      }
+    },
+    "/dashboard": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "Retorna métricas operacionais e analíticas (RF04/RF05)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "inicio", "in": "query", "schema": { "type": "string" }, "description": "Data ISO (YYYY-MM-DD)" },
+          { "name": "fim", "in": "query", "schema": { "type": "string" }, "description": "Data ISO (YYYY-MM-DD)" }
+        ],
+        "responses": {
+          "200": { "description": "Métricas calculadas com sucesso." }
+        }
+      }
+    },
+    "/leads/negotiations/{id}": {
+      "put": {
+        "tags": ["Negociações"],
+        "summary": "Atualiza uma negociação e gera histórico (RF03)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": { "type": "string", "example": "FINALIZADO" },
+                  "estagio": { "type": "string", "example": "Venda Concluída" },
+                  "importancia": { "type": "string", "example": "QUENTE" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Negociação atualizada." }
+        }
+      }
+    },
+    "/logs": {
+      "get": {
+        "tags": ["Auditoria"],
+        "summary": "Lista todos os logs do sistema (Apenas ADMIN)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de logs retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "acao": { "type": "string" },
+                      "entidade": { "type": "string" },
+                      "usuarioResponsavelId": { "type": "string" },
+                      "criadoEm": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Acesso negado: Apenas administradores." }
+        }
+      }
+    },
+    "/origens": {
+      "post": {
+        "tags": ["Origens"],
+        "summary": "Cria uma nova Origem (Requer ADMIN)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": { "type": "string", "example": "LinkedIn" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Origem criada com sucesso" }
+        }
+      }
+    },
+    "/leads": {
+      "get": {
+        "tags": ["Leads"],
+        "summary": "Lista os leads conforme a permissão (RF02)",
+        "description": "Atendente vê apenas os seus. Gerente vê da equipa. Admin vê todos.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Listagem retornada com sucesso." }
+        }
+      },
+      "post": {
+        "tags": ["Leads"],
+        "summary": "Cria um novo Lead associado ao usuário logado",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "clienteId": { "type": "string", "format": "uuid", "example": "ID_DO_CLIENTE_AQUI" },
+                  "lojaId": { "type": "string", "format": "uuid", "example": "ID_DA_LOJA_AQUI" },
+                  "origem": { "type": "string", "example": "WhatsApp" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Lead criado com sucesso" }
+        }
+      }
+    },
+    "/leads/negotiations": {
+      "post": {
+        "tags": ["Negociações"],
+        "summary": "Abre uma nova negociação para um Lead (RF03)",
+        "description": "Gera erro se o Lead já possuir uma negociação ativa.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "leadId": { "type": "string", "format": "uuid", "example": "ID_DO_LEAD_AQUI" },
+                  "importancia": { "type": "string", "enum": ["FRIO", "MORNO", "QUENTE"], "example": "MORNO" },
+                  "estagio": { "type": "string", "example": "Contato Inicial" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Negociação criada com sucesso" },
+          "400": { "description": "Regra de Negócio Violada: Este Lead já possui uma negociação ativa." }
+        }
+      }
+    }
+  }
+}
