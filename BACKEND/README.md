@@ -1,6 +1,6 @@
 # 1000 Valle Multimarcas — Backend API
 
-> Backend do sistema corporativo de gestão de leads e negociações automotivas da **1000 Valle Multimarcas**.
+> Backend do sistema corporativo de gestão de leads e negociações automotivas da **1000 Valle Multimarcas**.  
 > Projeto ABP — FATEC Jacareí.
 
 ---
@@ -11,8 +11,10 @@
 - [Arquitetura e Padrões de Projeto](#-arquitetura-e-padrões-de-projeto)
 - [Requisitos Funcionais](#-requisitos-funcionais-implementados)
 - [Como Executar](#-como-executar-o-projeto)
-- [Comandos do Projeto](#-referência-de-comandos)
+- [Referência de Comandos](#-referência-de-comandos)
+- [Documentação da API (Swagger)](#-documentação-interativa-da-api-swagger)
 - [Testes Automatizados](#-testes-automatizados)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
 
 ---
 
@@ -25,6 +27,7 @@
 | **ORM** | Prisma |
 | **Banco de Dados** | PostgreSQL |
 | **Segurança** | JWT (JSON Web Tokens) + `bcryptjs` |
+| **Documentação** | Swagger (OpenAPI) |
 | **Testes** | Jest & Supertest |
 
 ---
@@ -52,15 +55,15 @@ Aplicado nas classes da pasta `services` (ex: `CreateNegotiationService`).
 - **Vantagem:** Facilita reutilização e testes. O Service valida as regras de negócio (ex: bloquear segunda negociação ativa — RF03) antes de acionar o Repositório.
 
 ### 4. Middleware Pattern / Chain of Responsibility
-Aplicado em `ensureAuthenticated` e `ensureRole`.
+Aplicado em `ensureAuthenticated`, `ensureRole` e `validateRequest`.
 
 - **O que faz:** Intercepta requisições HTTP antes de chegarem ao Controller.
 - **Vantagem:** Centraliza extração do token JWT, injeção de dados do utilizador (`req.user.id`) e o Controlo de Acesso Baseado em Papéis (RBAC). Rotas restritas barram requisições não autorizadas imediatamente.
 
 ### 5. DTO (Data Transfer Object)
-Utilizado em interfaces como `ICreateLeadRequest` e `ICreateNegotiationRequest`.
+Utilizado em interfaces como `ICreateLeadRequest` e `ICreateNegotiationRequest`, com validação via `schemas.ts`.
 
-- **O que faz:** Modela estritamente os dados que transitam entre o Controller e o Service.
+- **O que faz:** Modela e valida estritamente os dados que transitam entre o Controller e o Service.
 - **Vantagem:** Impede que dados indesejados cheguem ao banco, protegendo a integridade da aplicação.
 
 ### 6. Dependency Injection
@@ -148,17 +151,37 @@ O servidor estará disponível em `http://localhost:3333`.
 
 ---
 
-## Testes Automatizados
+## Documentação Interativa da API (Swagger)
 
-A suíte de testes de integração (`FullSystem.spec.ts`) valida o fluxo completo da aplicação, de ponta a ponta. Os testes são executados em sequência e cada um depende dos resultados do anterior.
+A API possui documentação completa e interativa construída com **Swagger (OpenAPI)**, configurada em `src/docs/swagger.json`.
+
+A interface permite que qualquer membro da equipa — especialmente o Front-end — explore todos os endpoints, valide os formatos de entrada e saída (DTOs) e teste requisições diretamente pelo navegador.
+
+### Como acessar
+
+1. Certifique-se de que o servidor está rodando (`npm run dev`).
+2. Acesse no navegador:
+
+```
+http://localhost:3333/api-docs
+```
+
+### Funcionalidades
+
+- **Testes autenticados em tempo real:** Faça o login via `POST /sessions`, copie o token retornado e cole no botão **🔒 Authorize** no topo da página. A partir daí, todas as rotas protegidas por JWT podem ser testadas diretamente na interface.
+- **Contratos claros:** O Swagger define exatamente quais campos são obrigatórios (ex: `importancia`, `estagio` para Negociações) e quais os códigos HTTP de resposta esperados (`200`, `201`, `400`, `401`, `500`), reduzindo erros de integração entre Front-end e Back-end.
 
 ---
+
+## Testes Automatizados
+
+A suíte de testes de integração (`src/tests/FullSystem.spec.ts`) valida o fluxo completo da aplicação de ponta a ponta. Os testes são executados em sequência e cada etapa depende dos resultados da anterior.
 
 ### Fluxo da Suíte de Testes
 
 **1. Login como Admin e recebimento do Token JWT**
 
-Simula o fluxo de autenticação com `POST /sessions`. Valida o hash da senha (bcrypt) e confirma o retorno do Token JWT com `Status 200`. O token é armazenado e usado como passaporte em todos os testes seguintes.
+Simula o fluxo de autenticação com `POST /sessions`. Valida o hash da senha (bcrypt) e confirma o retorno do Token JWT com `Status 200`. O token é armazenado e utilizado como passaporte em todos os testes seguintes.
 
 ---
 
@@ -201,5 +224,110 @@ Envia `GET /logs` com o token de Admin. Valida o comportamento passivo do sistem
 **8. Retornar as métricas do Dashboard (RF04/RF05)**
 
 Simula a abertura da página inicial com `GET /dashboard`. Valida as consultas analíticas de conversão de leads, agrupamentos por status e os filtros rigorosos de data via `DateValidator`, confirmando `Status 200 OK` sem sobrecarga.
+
+---
+
+## Estrutura do Projeto
+
+O projeto segue uma arquitetura modular onde cada domínio da aplicação (`auth`, `clientes`, `leads`, `dashboard`, `logs`) está encapsulado dentro de `src/modules`, isolando responsabilidades e facilitando a manutenção.
+
+```text
+├── jest.config.ts
+├── jest.setup.ts
+├── package.json
+├── prisma.config.ts
+├── tsconfig.json
+├── prisma
+│   ├── schema.prisma
+│   ├── seed.ts
+│   └── migrations
+│       ├── migration_lock.toml
+│       └── 20260413231753_init_db
+│           └── migration.sql
+└── src
+    ├── docs
+    │   └── swagger.json                         # Configuração da documentação OpenAPI
+    ├── domain
+    │   └── models                               # Modelos de domínio (entidades puras)
+    │       ├── Lead.ts
+    │       ├── Log.ts
+    │       ├── Negotiation.ts
+    │       ├── User.ts
+    │       └── UserRole.ts
+    ├── modules
+    │   ├── auth                                 # Autenticação e gestão de utilizadores
+    │   │   ├── controllers
+    │   │   │   └── AuthenticateUserController.ts
+    │   │   ├── infra/http/routes
+    │   │   │   └── auth.routes.ts
+    │   │   ├── repositories
+    │   │   │   └── UsersRepository.ts
+    │   │   └── services
+    │   │       ├── AuthService.ts
+    │   │       └── CreateUserService.ts
+    │   ├── clientes                             # Registo de clientes
+    │   │   └── controllers
+    │   │       └── CreateClienteController.ts
+    │   ├── dashboard                            # Métricas e análise (RF04/RF05)
+    │   │   ├── controllers
+    │   │   │   └── DashboardController.ts
+    │   │   ├── infra/http/routes
+    │   │   │   └── dashboard.routes.ts
+    │   │   └── services
+    │   │       └── DashboardService.ts
+    │   ├── leads                                # Funil de Vendas (RF02/RF03)
+    │   │   ├── controllers
+    │   │   │   ├── CreateLeadController.ts
+    │   │   │   ├── CreateNegotiationController.ts
+    │   │   │   ├── ListLeadsController.ts
+    │   │   │   └── UpdateNegotiationController.ts
+    │   │   ├── infra/http/routes
+    │   │   │   └── leads.routes.ts
+    │   │   ├── repositories
+    │   │   │   ├── INegotiationsRepository.ts   # Interface para Injeção de Dependência
+    │   │   │   ├── LeadsRepository.ts
+    │   │   │   └── NegotiationsRepository.ts
+    │   │   └── services
+    │   │       ├── CreateLeadService.ts
+    │   │       ├── CreateNegotiationService.ts
+    │   │       ├── ListLeadsService.ts
+    │   │       └── UpdateNegotiationService.ts
+    │   ├── logs                                 # Auditoria passiva (RF07)
+    │   │   ├── controllers
+    │   │   │   └── ListLogsController.ts
+    │   │   ├── repositories
+    │   │   │   └── LogsRepository.ts
+    │   │   └── services
+    │   │       ├── CreateLogService.ts
+    │   │       └── ListLogsService.ts
+    │   ├── lojas                                # Gestão de lojas
+    │   │   └── controllers
+    │   │       └── CreateLojaController.ts
+    │   └── origens                              # Origens dos Leads (WhatsApp, etc.)
+    │       └── controllers
+    │           └── CreateOrigemController.ts
+    ├── shared
+    │   ├── errors
+    │   │   └── AppError.ts                      # Classe de erros padronizados
+    │   ├── infra/http
+    │   │   ├── middlewares
+    │   │   │   ├── ensureAuthenticated.ts       # Validação do token JWT
+    │   │   │   ├── ensureRole.ts                # Controlo de Acesso (RBAC)
+    │   │   │   └── validateRequest.ts           # Validação de DTOs via schemas
+    │   │   ├── routes
+    │   │   │   ├── index.ts
+    │   │   │   ├── leads.routes.ts
+    │   │   │   └── logs.routes.ts
+    │   │   ├── server.ts
+    │   │   └── validators
+    │   │       └── schemas.ts                   # Schemas de validação de entrada
+    │   └── utils
+    │       └── DateValidator.ts                 # Validador de intervalos de datas (RF04/RF05)
+    ├── tests
+    │   └── FullSystem.spec.ts                   # Suíte de testes de integração E2E
+    └── @types
+        └── express
+            └── index.d.ts                       # Extensão do tipo Request (req.user)
+```
 
 ---
