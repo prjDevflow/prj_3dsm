@@ -163,7 +163,6 @@ src/
 └── main.tsx             # Ponto de entrada
 ```
 
----
 
 ## 🚀 Como Executar
 
