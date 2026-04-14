@@ -1,4 +1,4 @@
-```markdown
+
 # 📊 AnalyticsPro - Sistema de Gestão de Leads
 
 Dashboard analítico profissional para gestão de leads, negociações, equipes e usuários, desenvolvido com React + TypeScript.
@@ -9,7 +9,7 @@ Dashboard analítico profissional para gestão de leads, negociações, equipes 
 ![Vite](https://img.shields.io/badge/Vite-5.2.0-646CFF?logo=vite)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
----
+
 
 ## 📋 Índice
 
@@ -24,7 +24,7 @@ Dashboard analítico profissional para gestão de leads, negociações, equipes 
 - [Próximos Passos](#próximos-passos)
 - [Licença](#licença)
 
----
+
 
 ## 🎯 Sobre o Projeto
 
@@ -36,7 +36,7 @@ O **AnalyticsPro** é um sistema completo de gestão de leads desenvolvido para 
 - Logs detalhados de todas as ações do sistema
 - Interface moderna, responsiva e acessível
 
----
+
 
 ## ✨ Funcionalidades
 
@@ -76,7 +76,7 @@ O **AnalyticsPro** é um sistema completo de gestão de leads desenvolvido para 
 - Filtros por usuário, ação, tipo de entidade e período
 - Exportação para CSV
 
----
+
 
 ## 👑 Perfis de Acesso
 
@@ -87,7 +87,6 @@ O **AnalyticsPro** é um sistema completo de gestão de leads desenvolvido para 
 | **Gerente Geral** | `gerente_geral@email.com` | `123456` | Visualizar dados consolidados de todas as equipes, dashboard global |
 | **Administrador** | `admin@email.com` | `123456` | Acesso total (usuários, equipes, logs, configurações) |
 
----
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -106,7 +105,7 @@ O **AnalyticsPro** é um sistema completo de gestão de leads desenvolvido para 
 | MSW | 2.2.13 | Mock de API |
 | Jest | 29.7.0 | Testes unitários |
 
----
+
 
 ## 📁 Estrutura do Projeto
 
