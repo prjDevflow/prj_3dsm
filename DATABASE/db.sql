@@ -1,0 +1,107 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE papeis (
+    id_papel UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nome_papel VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE equipes (
+    id_equipe UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nome_equipe VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE lojas (
+    id_loja UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nome_loja VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE usuarios (
+    id_usuario UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nome_usuario VARCHAR(150) NOT NULL,
+    email_usuario VARCHAR(150) NOT NULL UNIQUE,
+    senha_hash_usuario VARCHAR(255) NOT NULL,
+    id_papel UUID NOT NULL,
+    id_equipe UUID, -- Pode ser nulo (ex: Admin Global)
+    data_criacao_usuario TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_usuario_papel FOREIGN KEY (id_papel) REFERENCES papeis (id_papel),
+    CONSTRAINT fk_usuario_equipe FOREIGN KEY (id_equipe) REFERENCES equipes (id_equipe)
+);
+
+CREATE TABLE clientes (
+    id_cliente UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nome_cliente VARCHAR(150) NOT NULL,
+    telefone_cliente VARCHAR(20) NOT NULL,
+    email_cliente VARCHAR(150) NOT NULL UNIQUE
+);
+
+CREATE TABLE origens (
+    id_origem UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nome_origem VARCHAR(150) NOT NULL UNIQUE
+);
+
+
+CREATE TABLE leads (
+    id_lead UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    data_criacao_lead TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_cliente UUID NOT NULL,
+    id_loja UUID NOT NULL,
+    id_origem UUID NOT NULL,
+    id_usuario UUID, 
+    
+    CONSTRAINT fk_lead_cliente FOREIGN KEY (id_cliente) REFERENCES clientes (id_cliente),
+    CONSTRAINT fk_lead_loja FOREIGN KEY (id_loja) REFERENCES lojas (id_loja),
+    CONSTRAINT fk_lead_origem FOREIGN KEY (id_origem) REFERENCES origens (id_origem),
+    CONSTRAINT fk_lead_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
+);
+
+CREATE TABLE estagios (
+    id_estagio UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nome_estagio VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE status (
+    id_status UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nome_status VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE negociacoes (
+    id_negociacao UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_lead UUID NOT NULL,
+    importancia_negociacao VARCHAR(50) NOT NULL,
+    estado_abertura_negociacao BOOLEAN NOT NULL DEFAULT true,
+    motivo_finalizacao_negociacao TEXT, -- Nulo enquanto estiver aberta
+    data_criacao_negociacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_estagio UUID NOT NULL,
+    id_status UUID NOT NULL,
+    
+    CONSTRAINT fk_negociacao_lead FOREIGN KEY (id_lead) REFERENCES leads (id_lead),
+    CONSTRAINT fk_negociacao_estagio FOREIGN KEY (id_estagio) REFERENCES estagios (id_estagio),
+    CONSTRAINT fk_negociacao_status FOREIGN KEY (id_status) REFERENCES status (id_status)
+);
+
+-- Aplicação da Regra de Negócio: No máximo uma negociação ativa por lead
+CREATE UNIQUE INDEX idx_uma_negociacao_ativa_por_lead 
+ON negociacoes (id_lead) 
+WHERE estado_abertura_negociacao = true;
+
+CREATE TABLE historicos_negociacoes (
+    id_historico UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_negociacao UUID NOT NULL,
+    id_usuario UUID NOT NULL, -- Quem fez a alteração
+    detalhe_alteracao_historico TEXT NOT NULL,
+    data_alteracao_historico TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_historico_negociacao FOREIGN KEY (id_negociacao) REFERENCES negociacoes (id_negociacao),
+    CONSTRAINT fk_historico_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
+);
+
+CREATE TABLE logs_operacoes (
+    id_log UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_usuario UUID NOT NULL,
+    acao_log VARCHAR(50) NOT NULL, 
+    tabela_afetada_log VARCHAR(50), 
+    data_hora_log TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_log_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
+);
