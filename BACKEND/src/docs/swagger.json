@@ -80,7 +80,7 @@
     }
   },
   "paths": {
-    "/auth": {
+    "/sessions": {
       "post": {
         "tags": ["Autenticação"],
         "summary": "Realiza o login no sistema (RF01)",
