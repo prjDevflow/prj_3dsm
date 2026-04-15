@@ -6,7 +6,6 @@ import { loginSchema } from '../../../../../shared/infra/http/validators/schemas
 const authRoutes = Router();
 const authenticateUserController = new AuthenticateUserController();
 
-
 authRoutes.post(
   '/', 
   validateRequest(loginSchema), 

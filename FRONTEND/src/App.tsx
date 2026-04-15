@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import Login from './pages/Login';
+import Login from './pages/Login/page';
 import Dashboard from './pages/Dashboard';
-import Leads from './pages/Leads';
+import Leads from './pages/Leads/page';
 import LeadDetail from './pages/LeadDetail';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
