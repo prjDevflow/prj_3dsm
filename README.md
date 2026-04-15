@@ -154,7 +154,7 @@ A plataforma integra dados de diferentes canais de captação:
 #  UML
 
 ## Diagrama de Casos de Uso
-<img height="1000" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/UML-Casos_De_Uso.png" />
+<img height="1000" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/UML-Casos.png" />
 
 ## Diagrama de Classes
 <img height="400" alt="Diagrama de Classes" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/UML-Classe.png" />
