@@ -21,9 +21,8 @@ CREATE TABLE usuarios (
     email_usuario VARCHAR(150) NOT NULL UNIQUE,
     senha_hash_usuario VARCHAR(255) NOT NULL,
     id_papel UUID NOT NULL,
-    id_equipe UUID, -- Pode ser nulo (ex: Admin Global)
+    id_equipe UUID, 
     data_criacao_usuario TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     CONSTRAINT fk_usuario_papel FOREIGN KEY (id_papel) REFERENCES papeis (id_papel),
     CONSTRAINT fk_usuario_equipe FOREIGN KEY (id_equipe) REFERENCES equipes (id_equipe)
 );
@@ -40,7 +39,6 @@ CREATE TABLE origens (
     nome_origem VARCHAR(150) NOT NULL UNIQUE
 );
 
-
 CREATE TABLE leads (
     id_lead UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     data_criacao_lead TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -48,7 +46,6 @@ CREATE TABLE leads (
     id_loja UUID NOT NULL,
     id_origem UUID NOT NULL,
     id_usuario UUID, 
-    
     CONSTRAINT fk_lead_cliente FOREIGN KEY (id_cliente) REFERENCES clientes (id_cliente),
     CONSTRAINT fk_lead_loja FOREIGN KEY (id_loja) REFERENCES lojas (id_loja),
     CONSTRAINT fk_lead_origem FOREIGN KEY (id_origem) REFERENCES origens (id_origem),
@@ -70,17 +67,16 @@ CREATE TABLE negociacoes (
     id_lead UUID NOT NULL,
     importancia_negociacao VARCHAR(50) NOT NULL,
     estado_abertura_negociacao BOOLEAN NOT NULL DEFAULT true,
-    motivo_finalizacao_negociacao TEXT, -- Nulo enquanto estiver aberta
+    motivo_finalizacao_negociacao TEXT,
     data_criacao_negociacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_estagio UUID NOT NULL,
     id_status UUID NOT NULL,
-    
     CONSTRAINT fk_negociacao_lead FOREIGN KEY (id_lead) REFERENCES leads (id_lead),
     CONSTRAINT fk_negociacao_estagio FOREIGN KEY (id_estagio) REFERENCES estagios (id_estagio),
     CONSTRAINT fk_negociacao_status FOREIGN KEY (id_status) REFERENCES status (id_status)
 );
 
--- Aplicação da Regra de Negócio: No máximo uma negociação ativa por lead
+-- Trava de segurança no banco
 CREATE UNIQUE INDEX idx_uma_negociacao_ativa_por_lead 
 ON negociacoes (id_lead) 
 WHERE estado_abertura_negociacao = true;
@@ -88,10 +84,9 @@ WHERE estado_abertura_negociacao = true;
 CREATE TABLE historicos_negociacoes (
     id_historico UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_negociacao UUID NOT NULL,
-    id_usuario UUID NOT NULL, -- Quem fez a alteração
+    id_usuario UUID NOT NULL,
     detalhe_alteracao_historico TEXT NOT NULL,
     data_alteracao_historico TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     CONSTRAINT fk_historico_negociacao FOREIGN KEY (id_negociacao) REFERENCES negociacoes (id_negociacao),
     CONSTRAINT fk_historico_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
 );
@@ -99,9 +94,8 @@ CREATE TABLE historicos_negociacoes (
 CREATE TABLE logs_operacoes (
     id_log UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_usuario UUID NOT NULL,
-    acao_log VARCHAR(50) NOT NULL, 
+    acao_log VARCHAR(50) NOT NULL,
     tabela_afetada_log VARCHAR(50), 
     data_hora_log TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     CONSTRAINT fk_log_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
 );
