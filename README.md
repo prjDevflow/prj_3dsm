@@ -46,6 +46,10 @@ A plataforma integra dados de diferentes canais de captação:
 ### Infraestrutura
 ![Docker](https://skillicons.dev/icons?i=docker)
 
+## Trello
+
+[![Trello](https://img.shields.io/badge/Trello-Board-blue?logo=trello&logoColor=white)](https://trello.com/b/TtUCzMT8/3dsm-abpsprint-1)
+
 ##  Product Backlog
 
 <details>
