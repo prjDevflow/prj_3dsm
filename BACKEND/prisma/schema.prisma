@@ -40,12 +40,11 @@ model Usuario {
   id_equipe            String?  @db.Uuid
   data_criacao_usuario DateTime @default(now()) @db.Timestamp()
 
-  // Relacionamentos
   papel                Papel                  @relation(fields: [id_papel], references: [id_papel])
   equipe               Equipe?                @relation(fields: [id_equipe], references: [id_equipe])
-  leads                Lead[]                 // Leads que o atendente gerencia
-  historicos           HistoricoNegociacao[]  // Histórico de alterações feitas por este usuário
-  logs                 LogOperacao[]          // Logs gerados por este usuário (RF07)
+  leads                Lead[]                 
+  historicos           HistoricoNegociacao[]  
+  logs                 LogOperacao[]          // Logs gerados (RF07)
 
   @@map("usuarios")
 }
@@ -71,8 +70,7 @@ model Origem {
 model Status {
   id_status   String        @id @default(uuid()) @db.Uuid
   nome_status String        @unique @db.VarChar(50)
-  leads       Lead[]
-  negociacoes Negociacao[]
+  negociacoes Negociacao[]  // Removida a ligação aos Leads
 
   @@map("status")
 }
@@ -88,19 +86,16 @@ model Estagio {
 model Lead {
   id_lead               String   @id @default(uuid()) @db.Uuid
   id_cliente            String   @db.Uuid
-  id_usuario            String   @db.Uuid // Atendente responsável (RF02)
+  id_usuario            String   @db.Uuid // Atendente (RF02)
   id_loja               String   @db.Uuid
   id_origem             String   @db.Uuid
-  id_status             String   @db.Uuid
+  // id_status e data_atualizacao_lead removidos
   data_criacao_lead     DateTime @default(now()) @db.Timestamp()
-  data_atualizacao_lead DateTime @default(now()) @updatedAt @db.Timestamp()
 
-  // Relacionamentos
   cliente               Cliente      @relation(fields: [id_cliente], references: [id_cliente])
   usuario               Usuario      @relation(fields: [id_usuario], references: [id_usuario])
   loja                  Loja         @relation(fields: [id_loja], references: [id_loja])
   origem                Origem       @relation(fields: [id_origem], references: [id_origem])
-  status                Status       @relation(fields: [id_status], references: [id_status])
   negociacoes           Negociacao[]
 
   @@map("leads")
@@ -110,16 +105,16 @@ model Negociacao {
   id_negociacao              String   @id @default(uuid()) @db.Uuid
   id_lead                    String   @db.Uuid
   estado_abertura_negociacao Boolean  @default(true)
-  importancia_negociacao     String   @db.VarChar(20) // FRIO, MORNO, QUENTE
+  importancia_negociacao     String   @db.VarChar(50) 
+  motivo_finalizacao_negociacao String? @db.Text // ADICIONADO para o RF05
   data_criacao_negociacao    DateTime @default(now()) @db.Timestamp()
   id_estagio                 String   @db.Uuid
   id_status                  String   @db.Uuid
 
-  // Relacionamentos
   lead                       Lead                  @relation(fields: [id_lead], references: [id_lead])
   estagio                    Estagio               @relation(fields: [id_estagio], references: [id_estagio])
   status                     Status                @relation(fields: [id_status], references: [id_status])
-  historicos                 HistoricoNegociacao[] // RF03 - Histórico de mudanças
+  historicos                 HistoricoNegociacao[] // RF03
 
   @@map("negociacoes")
 }
@@ -127,7 +122,7 @@ model Negociacao {
 model HistoricoNegociacao {
   id_historico             String   @id @default(uuid()) @db.Uuid
   id_negociacao            String   @db.Uuid
-  id_usuario               String   @db.Uuid // Quem fez a alteração
+  id_usuario               String   @db.Uuid
   detalhe_alteracao_historico String
   data_alteracao_historico DateTime @default(now()) @db.Timestamp()
 

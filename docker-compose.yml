@@ -18,6 +18,12 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - abp_network
+    # ADICIONADO: Healthcheck para garantir que o banco está pronto
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_abp -d abp_leads"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # 2. Contêiner do Backend (Node.js + Prisma)
   backend:
@@ -27,11 +33,10 @@ services:
     container_name: abp_backend
     restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy # ADICIONADO: Só inicia se o DB estiver "healthy"
     environment:
-      # A URL de conexão com a base de dados utilizando o nome do serviço 'db'
       DATABASE_URL: "postgresql://admin_abp:abp_secure_password@db:5432/abp_leads?schema=public"
-      # Chave secreta obrigatória para o RF01 (Geração de JWT)
       JWT_SECRET: "chave-super-secreta-para-jwt-mudar-em-producao"
       PORT: 3333
     ports:
@@ -49,18 +54,15 @@ services:
     depends_on:
       - backend
     environment:
-      # Variável para o frontend saber onde a API está a correr
       VITE_API_URL: "http://localhost:3333"
     ports:
       - "5173:5173"
     networks:
       - abp_network
 
-# Definição dos Volumes para persistência de dados
 volumes:
   pgdata:
 
-# Definição da rede partilhada entre os contêineres
 networks:
   abp_network:
     driver: bridge

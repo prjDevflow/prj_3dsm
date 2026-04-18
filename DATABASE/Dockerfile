@@ -1,16 +1,15 @@
-# Utiliza a imagem oficial do PostgreSQL (versão baseada em Alpine para ser mais leve)
+# Utiliza a imagem oficial do PostgreSQL baseada em Alpine
 FROM postgres:15-alpine
 
-# Define as variáveis de ambiente padrão para a criação inicial da base de dados
-# Em produção, estes valores devem ser passados pelo docker-compose.yml ou ficheiro .env
-ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=123
-ENV POSTGRES_DB=abp_leads
+# 1. Copia o DDL e DML base (criação de tabelas e chaves)
+# Renomeamos virtualmente para 01-db.sql para garantir que seja executado primeiro
+COPY ./db.sql /docker-entrypoint-initdb.d/01-db.sql
 
-# Copia o script SQL com DDL (tabelas) e DML (cargas iniciais de papéis/roles e admin)
-# O PostgreSQL executa automaticamente qualquer ficheiro na pasta /docker-entrypoint-initdb.d/ 
-# na primeira vez que a base de dados é construída.
-COPY ./db.sql /docker-entrypoint-initdb.d/
+# 2. Copia o arquivo CSV para um diretório temporário dentro do contêiner
+COPY ./dados_dashboard_ficticios.csv /tmp/dados_dashboard_ficticios.csv
 
-# Expõe a porta padrão do PostgreSQL para que o backend consiga conectar-se
+# 3. Copia um novo script (que criaremos a seguir) responsável apenas pela importação
+# O prefixo 02- garante que ele rode APÓS as tabelas serem criadas
+COPY ./import.sql /docker-entrypoint-initdb.d/02-import.sql
+
 EXPOSE 5432

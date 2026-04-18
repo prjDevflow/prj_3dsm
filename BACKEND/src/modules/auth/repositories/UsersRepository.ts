@@ -1,60 +1,115 @@
 import { PrismaClient } from '@prisma/client';
-import { User } from "../../../domain/models/User";
-import { UserRole } from "../../../domain/models/UserRole";
 
 const prisma = new PrismaClient();
 
 export class UsersRepository {
   
-  /**
-   * RF01 - Busca de utilizador por e-mail para autenticação
-   */
-  async findByEmail(email: string): Promise<User | null> {
-    const usuario = await prisma.usuario.findUnique({
+  // ----------------------------------------------------------------------
+  // Método utilizado pelo AuthService (RF01 - Autenticação)
+  // ----------------------------------------------------------------------
+  async findByEmail(email: string) {
+    const user = await prisma.usuario.findUnique({
       where: { email_usuario: email },
-      include: { 
-        papel: true // JOIN obrigatório para extrair a Role e aplicar o RF02
-      } 
+      include: { papel: true } // Necessário para extrair o 'role' para o JWT
     });
 
-    if (!usuario) {
-      return null;
-    }
+    if (!user) return null;
 
-    return this.mapToDomain(usuario);
-  }
-
-  /**
-   * Auxiliar para recuperar utilizador por ID (Usado internamente e no Middleware JWT)
-   */
-  async findById(id: string): Promise<User | null> {
-    const usuario = await prisma.usuario.findUnique({
-      where: { id_usuario: id },
-      include: { 
-        papel: true 
-      }
-    });
-
-    if (!usuario) {
-      return null;
-    }
-
-    return this.mapToDomain(usuario);
-  }
-
-  /**
-   * Mapeamento seguro da Base de Dados para o nosso Domínio de Aplicação
-   * RNF13 - Separação de responsabilidades e coesão
-   */
-  private mapToDomain(usuario: any): User {
     return {
-      id: usuario.id_usuario,
-      nome: usuario.nome_usuario,
-      email: usuario.email_usuario,
-      senha: usuario.senha_hash_usuario, // Hash bcrypt (RNF02)
-      role: usuario.papel.nome_papel as UserRole, // Converte a string do banco para o nosso Enum de Domínio
-      equipeId: usuario.id_equipe || undefined,
-      criadoEm: usuario.data_criacao_usuario
+      id: user.id_usuario,
+      nome: user.nome_usuario,
+      email: user.email_usuario,
+      senha: user.senha_hash_usuario,
+      role: user.papel.nome_papel,
+      equipeId: user.id_equipe || undefined
+    };
+  }
+
+  // ----------------------------------------------------------------------
+  // Método utilizado pelo UpdateUserCredentialsService (RF01 - Atualização)
+  // E também pelo BindUserToTeamService (RF02 - Validação de Perfil)
+  // ----------------------------------------------------------------------
+  async findById(id: string) {
+    const user = await prisma.usuario.findUnique({
+      where: { id_usuario: id },
+      include: { papel: true } 
+    });
+
+    if (!user) return null;
+
+    return {
+      id: user.id_usuario,
+      nome: user.nome_usuario,
+      email: user.email_usuario,
+      senha: user.senha_hash_usuario,
+      role: user.papel.nome_papel,
+      equipeId: user.id_equipe || undefined
+    };
+  }
+
+  // ----------------------------------------------------------------------
+  // Método utilizado para persistir alterações de credenciais na base (RF01)
+  // ----------------------------------------------------------------------
+  async save(user: any) {
+    const updated = await prisma.usuario.update({
+      where: { id_usuario: user.id },
+      data: {
+        email_usuario: user.email,
+        senha_hash_usuario: user.senha
+      },
+      include: { papel: true }
+    });
+
+    return {
+      id: updated.id_usuario,
+      nome: updated.nome_usuario,
+      email: updated.email_usuario,
+      senha: updated.senha_hash_usuario,
+      role: updated.papel.nome_papel,
+      equipeId: updated.id_equipe || undefined
+    };
+  }
+
+  // ----------------------------------------------------------------------
+  // Método utilizado pelo CreateUserService (Administrador cria usuários)
+  // ----------------------------------------------------------------------
+  async create(data: any) {
+    const newUser = await prisma.usuario.create({
+      data: {
+        nome_usuario: data.nome,
+        email_usuario: data.email,
+        senha_hash_usuario: data.senha,
+        id_papel: data.papelId,
+        id_equipe: data.equipeId || null
+      },
+      include: { papel: true }
+    });
+
+    return {
+      id: newUser.id_usuario,
+      nome: newUser.nome_usuario,
+      email: newUser.email_usuario,
+      role: newUser.papel.nome_papel,
+      equipeId: newUser.id_equipe || undefined
+    };
+  }
+
+  // ----------------------------------------------------------------------
+  // NOVO: Método utilizado pelo BindUserToTeamService (RF02 - Gerente vincula)
+  // ----------------------------------------------------------------------
+  async updateTeam(userId: string, equipeId: string) {
+    const updated = await prisma.usuario.update({
+      where: { id_usuario: userId },
+      data: { id_equipe: equipeId },
+      include: { papel: true }
+    });
+
+    return {
+      id: updated.id_usuario,
+      nome: updated.nome_usuario,
+      email: updated.email_usuario,
+      role: updated.papel.nome_papel,
+      equipeId: updated.id_equipe || undefined
     };
   }
 }
