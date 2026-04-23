@@ -14,7 +14,6 @@ const authenticateUserController = new AuthenticateUserController();
 const updateCredentialsController = new UpdateUserCredentialsController();
 const bindUserToTeamController = new BindUserToTeamController();
 
-
 authRoutes.post(
   '/', 
   validateRequest(loginSchema), 

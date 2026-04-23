@@ -2,13 +2,13 @@ export type UserRole = 'atendente' | 'gerente' | 'gerente_geral' | 'admin';
 
 export interface User {
   id: string;
-  name: string;
+  nome: string;
   email: string;
   role: UserRole;
-  teamId?: string;
-  active: boolean;
-  createdAt: string;
-  updatedAt: string;
+  // teamId?: string;
+  // active: boolean;
+  // createdAt: string;
+  // updatedAt: string;
 }
 
 export interface Team {

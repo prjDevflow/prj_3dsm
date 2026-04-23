@@ -21,7 +21,7 @@ import {
   Lock
 } from 'lucide-react';
 import { format } from 'date-fns';
-import api from '../services/api';
+import api from '../services/instanceApi';
 import { useQueryClient } from '@tanstack/react-query';
 
 const LeadDetail = () => {

@@ -1,10 +1,11 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { User, LoginCredentials } from '../types';
+import { User } from '../types';
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
-  login: (credentials: LoginCredentials) => Promise<boolean>;
+  login: (data: { user: User; token: string }) => void;
   logout: () => void;
   hasRole: (roles: User['role'][]) => boolean;
 }
@@ -23,86 +24,28 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Mock de usuários com TODOS os campos da interface User
-const MOCK_USERS: User[] = [
-  {
-    id: '1',
-    name: 'Atendente Teste',
-    email: 'atendente@email.com',
-    role: 'atendente',
-    active: true,
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    id: '2',
-    name: 'Gerente Teste',
-    email: 'gerente@email.com',
-    role: 'gerente',
-    active: true,
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    id: '3',
-    name: 'Admin Teste',
-    email: 'admin@email.com',
-    role: 'admin',
-    active: true,
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    id: '7',
-    name: 'João Silva',
-    email: 'joao.silva@email.com',
-    role: 'atendente',
-    teamId: '1',
-    active: true,
-    createdAt: '2025-01-15T10:00:00Z',
-    updatedAt: '2025-01-15T10:00:00Z',
-  },
-  {
-    id: '8',
-    name: 'Maria Santos',
-    email: 'maria.santos@email.com',
-    role: 'atendente',
-    teamId: '1',
-    active: true,
-    createdAt: '2025-01-20T14:30:00Z',
-    updatedAt: '2025-01-20T14:30:00Z',
-  },
-];
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem('@dashboard:user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    const saved = localStorage.getItem('@dashboard:user');
+    return saved ? JSON.parse(saved) : null;
   });
 
-  const login = async (credentials: LoginCredentials): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Buscar usuário pelo email e senha
-        const foundUser = MOCK_USERS.find(
-          (u) => u.email === credentials.email
-        );
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem('@dashboard:token');
+  });
 
-        // Aceitar qualquer senha 123456 para mock
-        if (foundUser && credentials.password === '123456') {
-          setUser(foundUser);
-          localStorage.setItem('@dashboard:user', JSON.stringify(foundUser));
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      }, 500);
-    });
+  const login = ({ user, token }: { user: User; token: string }) => {
+    setUser(user);
+    setToken(token);
+    localStorage.setItem('@dashboard:user', JSON.stringify(user));
+    localStorage.setItem('@dashboard:token', token);
   };
 
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem('@dashboard:user');
+    localStorage.removeItem('@dashboard:token');
   };
 
   const hasRole = (roles: User['role'][]) => {
@@ -111,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, hasRole }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!user && !!token, login, logout, hasRole }}>
       {children}
     </AuthContext.Provider>
   );

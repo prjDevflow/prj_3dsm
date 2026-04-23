@@ -198,7 +198,7 @@ const Profile = () => {
                   Nome
                 </label>
                 <p className="text-sm text-slate-800 bg-slate-50 p-3 rounded-lg">
-                  {user?.name}
+                  {user?.nome}
                 </p>
               </div>
               <div>

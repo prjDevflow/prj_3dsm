@@ -207,11 +207,11 @@ const Header: React.FC<HeaderProps> = ({
               >
                 <div className="w-8 h-8 bg-[#0F3B5E] rounded-lg flex items-center justify-center">
                   <span className="text-white font-medium text-sm">
-                    {user?.name?.charAt(0).toUpperCase()}
+                    {user?.nome?.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-slate-700">{user?.name}</p>
+                  <p className="text-sm font-medium text-slate-700">{user?.nome}</p>
                   <p className="text-xs text-slate-500">{user?.role}</p>
                 </div>
                 <ChevronDown size={16} className="text-slate-400" />

@@ -69,7 +69,7 @@ const Dashboard = () => {
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-slate-800">Dashboard</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Bem-vindo de volta, {user?.name}
+            Bem-vindo de volta, {user?.nome}
           </p>
         </div>
 
