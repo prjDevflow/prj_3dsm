@@ -4,9 +4,9 @@ import { LogAction } from '../../../domain/models/Log';
 
 interface ICreateLeadRequest {
   clienteId: string;
-  atendenteId: string; 
   lojaId: string;
-  origem: string;
+  origemId: string;
+  usuarioLogadoId: string;
 }
 
 export class CreateLeadService {
@@ -18,21 +18,22 @@ export class CreateLeadService {
     this.createLogService = new CreateLogService();
   }
 
-  async execute(data: ICreateLeadRequest) {
-    // 1. Cria o Lead no PostgreSQL sem estado (que agora pertence à Negociação)
+  async execute({ clienteId, lojaId, origemId, usuarioLogadoId }: ICreateLeadRequest) {
+    // 1. Criação do Lead mapeando as propriedades para os nomes exatos do banco de dados (Prisma)
     const lead = await this.leadsRepository.create({
-      clienteId: data.clienteId,
-      atendenteId: data.atendenteId,
-      lojaId: data.lojaId,
-      origem: data.origem
+      id_cliente: clienteId,
+      id_loja: lojaId,
+      id_origem: origemId,
+      id_usuario: usuarioLogadoId // O atendente logado é o responsável
     });
 
-    // 2. Regista a ação na tabela de auditoria (RF07)
+    // 2. Regista a operação na tabela de auditoria (RF07)
+    // Utilizamos lead.id_lead pois é o nome exato da PK no schema.prisma
     await this.createLogService.execute({
       acao: LogAction.CREATE,
       entidade: 'LEAD',
-      entidadeId: lead.id,
-      usuarioResponsavelId: data.atendenteId
+      entidadeId: lead.id_lead,
+      usuarioResponsavelId: usuarioLogadoId
     });
 
     return lead;

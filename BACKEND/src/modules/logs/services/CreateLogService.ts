@@ -1,10 +1,9 @@
-import { LogsRepository } from "../repositories/LogsRepository";
-import { LogAction } from "../../../domain/models/Log";
+import { LogsRepository } from '../repositories/LogsRepository';
 
 interface ICreateLogRequest {
-  acao: LogAction;
+  acao: string;
   entidade: string;
-  entidadeId?: string;
+  entidadeId?: string | null;
   usuarioResponsavelId: string;
 }
 
@@ -15,12 +14,12 @@ export class CreateLogService {
     this.logsRepository = new LogsRepository();
   }
 
-  async execute({ acao, entidade, entidadeId, usuarioResponsavelId }: ICreateLogRequest): Promise<void> {
+  async execute({ acao, entidade, entidadeId, usuarioResponsavelId }: ICreateLogRequest) {
     await this.logsRepository.create({
-      acao,
-      entidade,
-      entidadeId,
-      usuarioResponsavelId
+      id_usuario: usuarioResponsavelId,
+      acao_log: acao,
+      tabela_afetada_log: entidade,
+      id_registro_afetado: entidadeId
     });
   }
 }

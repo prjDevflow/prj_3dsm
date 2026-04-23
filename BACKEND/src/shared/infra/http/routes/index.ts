@@ -9,7 +9,7 @@ import { leadsRoutes } from './leads.routes';
 import { logsRoutes } from './logs.routes';
 import { DashboardController } from '../../../../modules/dashboard/controllers/DashboardController';
 import { authRoutes } from "../../../../modules/auth/infra/http/routes/auth.routes";
-
+import { equipesRoutes } from '../../../../modules/equipes/infra/http/routes/equipes.routes';
 
 const router = Router();
 
@@ -21,8 +21,7 @@ const dashboardController = new DashboardController();
 // Rotas de Clientes (Qualquer funcionário autenticado pode criar um cliente)
 router.post('/clientes', ensureAuthenticated, createClienteController.handle);
 router.use("/sessions", authRoutes);
-// Rotas de Lojas e Origens (Restrito a Administradores - RF02)
-// CORREÇÃO: Usamos UserRole.ADMIN em vez de 'ADMIN'
+router.use('/equipes', equipesRoutes);
 router.post('/lojas', ensureAuthenticated, ensureRole([UserRole.ADMIN]), createLojaController.handle);
 router.post('/origens', ensureAuthenticated, ensureRole([UserRole.ADMIN]), createOrigemController.handle);
 router.use('/leads', leadsRoutes);
