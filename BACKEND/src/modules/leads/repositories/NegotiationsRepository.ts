@@ -1,87 +1,74 @@
 import { PrismaClient } from '@prisma/client';
-import { Negotiation, NegotiationStatus } from '../../../domain/models/Negotiation';
 
 const prisma = new PrismaClient();
 
 export class NegotiationsRepository {
   
-  async findById(id: string): Promise<Negotiation | null> {
-    const neg = await prisma.negociacao.findUnique({
-      where: { id_negociacao: id },
-      include: {
-        status: true,
-        estagio: true,
-        lead: true
+  async findActiveByLeadId(leadId: string) {
+    return prisma.negociacao.findFirst({
+      where: {
+        id_lead: leadId,
+        estado_abertura_negociacao: true
       }
     });
+  }
 
+  async findById(id_negociacao: string) {
+    const neg = await prisma.negociacao.findUnique({
+      where: { id_negociacao }
+    });
+    
     if (!neg) return null;
-
+    
+    // Mapeamos a saída do Prisma para o formato que a sua entidade de domínio espera
     return {
       id: neg.id_negociacao,
       leadId: neg.id_lead,
-      atendenteId: neg.lead.id_usuario,
-      importancia: neg.importancia_negociacao as 'FRIO' | 'MORNO' | 'QUENTE',
-      status: neg.status.nome_status as NegotiationStatus,
-      estagio: neg.estagio.nome_estagio,
-      isAberta: neg.estado_abertura_negociacao,
-      motivoFinalizacao: neg.motivo_finalizacao_negociacao,
-      criadoEm: neg.data_criacao_negociacao,
-      atualizadoEm: new Date() // Fallback temporário caso não rastreie a atualização no banco
+      importancia: neg.importancia_negociacao,
+      status: neg.id_status,
+      estagio: neg.id_estagio,
+      isAberta: neg.estado_abertura_negociacao
     };
   }
 
-  async save(data: Negotiation): Promise<Negotiation> {
-    
-    // Como status e estagio são tabelas separadas, buscamos primeiro os IDs correspondentes
-    // a partir dos nomes string enviados.
-    const statusRecord = await prisma.status.findUnique({
-      where: { nome_status: data.status }
-    });
-
-    const estagioRecord = await prisma.estagio.findUnique({
-      where: { nome_estagio: data.estagio }
-    });
-
-    if (!statusRecord || !estagioRecord) {
-      throw new Error("Status ou Estágio fornecido não existe no banco de dados.");
-    }
-
-    // Mapeamento e atualização no PostgreSQL
-    const updated = await prisma.negociacao.update({
-      where: { id_negociacao: data.id },
+  async create(data: { leadId: string; importancia: string; estagio: string; status: string; isAberta: boolean }) {
+    const neg = await prisma.negociacao.create({
       data: {
-        estado_abertura_negociacao: data.isAberta,
+        id_lead: data.leadId,
         importancia_negociacao: data.importancia,
-        motivo_finalizacao_negociacao: data.motivoFinalizacao, // <-- MAPEMENTO DO RF05
-        id_status: statusRecord.id_status,
-        id_estagio: estagioRecord.id_estagio
+        id_estagio: data.estagio,
+        id_status: data.status,
+        estado_abertura_negociacao: data.isAberta
       }
     });
 
     return {
-      ...data,
-      isAberta: updated.estado_abertura_negociacao,
-      motivoFinalizacao: updated.motivo_finalizacao_negociacao
+      id: neg.id_negociacao,
+      status: neg.id_status,
+      estagio: neg.id_estagio
     };
   }
 
-  async createHistory(data: {
-    negotiationId: string;
-    statusAnterior: string;
-    statusNovo: string;
-    estagioAnterior: string;
-    estagioNovo: string;
-    usuarioId: string;
-  }): Promise<void> {
+  // ✅ CORREÇÃO APLICADA AQUI: Método update que estava em falta
+  async update(id_negociacao: string, data: { id_status: string; id_estagio: string; importancia_negociacao: string }) {
+    const neg = await prisma.negociacao.update({
+      where: { id_negociacao },
+      data
+    });
     
-    const detalhe = `Mudança de Status [${data.statusAnterior} -> ${data.statusNovo}] | Estágio [${data.estagioAnterior} -> ${data.estagioNovo}]`;
+    return {
+      id: neg.id_negociacao,
+      status: neg.id_status,
+      estagio: neg.id_estagio
+    };
+  }
 
-    await prisma.historicoNegociacao.create({
+  async createHistory(data: { negotiationId: string; statusAnterior: string; statusNovo: string; estagioAnterior: string; estagioNovo: string; usuarioId: string }) {
+    return prisma.historicoNegociacao.create({
       data: {
         id_negociacao: data.negotiationId,
         id_usuario: data.usuarioId,
-        detalhe_alteracao_historico: detalhe
+        detalhe_alteracao_historico: `Mudança de Status (${data.statusAnterior} -> ${data.statusNovo}) e Estágio (${data.estagioAnterior} -> ${data.estagioNovo}).`
       }
     });
   }

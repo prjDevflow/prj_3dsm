@@ -1,148 +1,59 @@
-import { PrismaClient } from '@prisma/client';
-import { DateValidator } from '../../../shared/utils/DateValidator';
+import { NegotiationsRepository } from '../repositories/NegotiationsRepository';
+import { CreateLogService } from '../../logs/services/CreateLogService';
+import { LogAction } from '../../../domain/models/Log';
 
-const prisma = new PrismaClient();
-
-interface IDashboardRequest {
-  inicio?: string;
-  fim?: string;
-  role: string;
-  userId: string;
+interface IUpdateNegotiationRequest {
+  negotiationId: string;
+  statusId: string;
+  estagioId: string;
+  importancia: string;
+  usuarioLogadoId: string;
 }
 
-export class DashboardService {
-  async execute({ inicio, fim, role, userId }: IDashboardRequest) {
-    // 1. Validação Temporal (RF06 - Limite de 1 ano validado no backend)
-    const { startDate, endDate } = DateValidator.validate(inicio, fim, role);
+export class UpdateNegotiationService {
+  private negotiationsRepository: NegotiationsRepository;
+  private createLogService: CreateLogService;
 
-    // 2. Controle de Acesso (RBAC - RF02) - Aplicando a Regra de Ouro
-    let leadFiltroBase: any = {
-      data_criacao_lead: { gte: startDate, lte: endDate }
-    };
+  constructor() {
+    this.negotiationsRepository = new NegotiationsRepository();
+    this.createLogService = new CreateLogService();
+  }
 
-    if (role === 'ATENDENTE') {
-      leadFiltroBase.id_usuario = userId;
-    } else if (role === 'GERENTE') {
-      // Busca a equipa do gerente para filtrar os leads APENAS dessa equipa
-      const gerente = await prisma.usuario.findUnique({
-        where: { id_usuario: userId },
-        select: { id_equipe: true }
-      });
-      leadFiltroBase.usuario = { id_equipe: gerente?.id_equipe };
+  async execute(data: IUpdateNegotiationRequest) {
+    const negociacaoAntiga = await this.negotiationsRepository.findById(data.negotiationId);
+    
+    if (!negociacaoAntiga) {
+        const error = new Error("Negociação não encontrada.");
+        (error as any).statusCode = 404;
+        throw error;
     }
-    // GERENTE_GERAL e ADMIN não recebem filtros adicionais, visualizando tudo.
 
-    // ----------------------------------------------------------------------
-    // 3. RF04 - DASHBOARD OPERACIONAL (Métricas Básicas)
-    // ----------------------------------------------------------------------
-    const totalLeads = await prisma.lead.count({ where: leadFiltroBase });
-
-    // Leads por Origem (Mapeia a relação para devolver o nome ao invés do ID)
-    const leadsPorOrigem = await prisma.origem.findMany({
-      select: {
-        nome_origem: true,
-        _count: { select: { leads: { where: leadFiltroBase } } }
-      }
+    // 1. Atualiza a Negociação
+    const negociacaoAtualizada = await this.negotiationsRepository.update(data.negotiationId, {
+      id_status: data.statusId,
+      id_estagio: data.estagioId,
+      importancia_negociacao: data.importancia,
     });
 
-    // Leads por Loja
-    const leadsPorLoja = await prisma.loja.findMany({
-      select: {
-        nome_loja: true,
-        _count: { select: { leads: { where: leadFiltroBase } } }
-      }
+    // 2. Regra de Negócio (RF03): Manter Histórico das mudanças
+    // CORREÇÃO APLICADA AQUI: Utilizamos .status e .estagio conforme o seu domínio
+    await this.negotiationsRepository.createHistory({
+      negotiationId: data.negotiationId,
+      statusAnterior: negociacaoAntiga.status, 
+      statusNovo: data.statusId,
+      estagioAnterior: negociacaoAntiga.estagio, 
+      estagioNovo: data.estagioId,
+      usuarioId: data.usuarioLogadoId
     });
 
-    // ----------------------------------------------------------------------
-    // 4. RF05 - DASHBOARD ANALÍTICO (Métricas baseadas em Negociações)
-    // ----------------------------------------------------------------------
-    // O filtro da negociação herda as regras de RBAC e datas do Lead!
-    const negociacaoFiltroBase = { lead: leadFiltroBase };
-
-    // Leads por Status
-    const leadsPorStatus = await prisma.status.findMany({
-      select: {
-        nome_status: true,
-        _count: { select: { negociacoes: { where: negociacaoFiltroBase } } }
-      }
+    // 3. Auditoria (RF07)
+    await this.createLogService.execute({
+      acao: LogAction.UPDATE,
+      entidade: 'NEGOCIACAO',
+      entidadeId: data.negotiationId,
+      usuarioResponsavelId: data.usuarioLogadoId
     });
 
-    // Distribuição por Importância
-    const leadsPorImportancia = await prisma.negociacao.groupBy({
-      by: ['importancia_negociacao'],
-      _count: { _all: true },
-      where: negociacaoFiltroBase
-    });
-
-    // Leads por Atendente
-    const leadsPorAtendente = await prisma.usuario.findMany({
-      select: {
-        nome_usuario: true,
-        _count: { select: { leads: { where: leadFiltroBase } } }
-      },
-      // Só traz utilizadores que de facto têm leads neste filtro
-      where: { leads: { some: leadFiltroBase } }
-    });
-
-    // Motivos de Finalização
-    const motivosFinalizacao = await prisma.negociacao.groupBy({
-      by: ['motivo_finalizacao_negociacao'],
-      _count: { _all: true },
-      where: {
-        ...negociacaoFiltroBase,
-        estado_abertura_negociacao: false, // Apenas negociações fechadas
-        motivo_finalizacao_negociacao: { not: null }
-      }
-    });
-
-    // Cálculo da Taxa de Conversão
-    const totalGanho = await prisma.negociacao.count({
-      where: { ...negociacaoFiltroBase, status: { nome_status: 'GANHO' } }
-    });
-    const totalPerdido = await prisma.negociacao.count({
-      where: { ...negociacaoFiltroBase, status: { nome_status: 'PERDIDO' } }
-    });
-
-    const totalFinalizados = totalGanho + totalPerdido;
-    const taxaConversao = totalFinalizados > 0 ? ((totalGanho / totalFinalizados) * 100).toFixed(2) : "0.00";
-
-    // ----------------------------------------------------------------------
-    // 5. Formatação da Resposta para o Frontend
-    // ----------------------------------------------------------------------
-    return {
-      periodo: { inicio: startDate, fim: endDate },
-      operacional: {
-        totalLeads,
-        porOrigem: leadsPorOrigem.map(o => ({ 
-          origem: o.nome_origem, 
-          quantidade: o._count?.leads || 0 
-        })),
-        porLoja: leadsPorLoja.map(l => ({ 
-          loja: l.nome_loja, 
-          quantidade: l._count?.leads || 0 
-        })),
-        porStatus: leadsPorStatus.map(s => ({ 
-          status: s.nome_status, 
-          quantidade: s._count?.negociacoes || 0 
-        })),
-        porImportancia: leadsPorImportancia.map(i => ({ 
-          importancia: i.importancia_negociacao, 
-          quantidade: i._count?._all || 0 
-        }))
-      },
-      analitico: {
-        taxaConversao: `${taxaConversao}%`,
-        convertidos: totalGanho,
-        naoConvertidos: totalPerdido,
-        porAtendente: leadsPorAtendente.map(a => ({ 
-          atendente: a.nome_usuario, 
-          quantidade: a._count?.leads || 0 
-        })),
-        motivosFinalizacao: motivosFinalizacao.map(m => ({ 
-          motivo: m.motivo_finalizacao_negociacao || 'Não informado', 
-          quantidade: m._count?._all || 0 
-        }))
-      }
-    };
+    return negociacaoAtualizada;
   }
 }

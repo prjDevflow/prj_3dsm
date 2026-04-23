@@ -2,22 +2,23 @@ import { Request, Response } from 'express';
 import { CreateLeadService } from '../services/CreateLeadService';
 
 export class CreateLeadController {
-  async handle(req: Request, res: Response): Promise<Response> {
-    // Adicionamos 'origemId' para capturar o que vem do teste automatizado
-    const { clienteId, lojaId, origem, origemId } = req.body;
-    
-    // O ID de quem cria é retirado do Token JWT pelo nosso middleware
-    const atendenteId = req.user.id; 
+  async handle(request: Request, response: Response): Promise<Response> {
+    // 1. Extrai apenas os dados comerciais enviados no corpo da requisição
+    const { clienteId, lojaId, origemId } = request.body;
+
+    // 2. Extrai o ID do usuário de forma segura a partir do Token JWT validado
+    const usuarioLogadoId = request.user.id;
 
     const createLeadService = new CreateLeadService();
 
+    // 3. Executa o serviço passando exatamente o que a interface ICreateLeadRequest espera
     const lead = await createLeadService.execute({
       clienteId,
-      atendenteId,
       lojaId,
-      origem: origemId || origem 
+      origemId,
+      usuarioLogadoId
     });
 
-    return res.status(201).json(lead);
+    return response.status(201).json(lead);
   }
 }

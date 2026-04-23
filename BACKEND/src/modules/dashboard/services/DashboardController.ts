@@ -2,39 +2,24 @@ import { Request, Response } from 'express';
 import { DashboardService } from '../services/DashboardService';
 
 export class DashboardController {
-  /**
-   * handle: Responsável por capturar os filtros da requisição e 
-   * os dados do usuário logado para gerar as métricas (RF04/RF05).
-   */
-  async handle(req: Request, res: Response): Promise<Response> {
-    try {
-      // 1. Captura as datas opcionais vindas da Query String (?inicio=YYYY-MM-DD&fim=...)
-      const { inicio, fim } = req.query;
+  async handle(request: Request, response: Response): Promise<Response> {
+    // Recolha de filtros da query string (Data ISO)
+    const inicio = request.query.inicio as string;
+    const fim = request.query.fim as string;
 
-      // 2. Captura os dados do usuário injetados pelo middleware ensureAuthenticated
-      // Extraímos o 'id' e renomeamos para 'userId' para alinhar com o Serviço
-      const { role, id: userId } = req.user;
+    // Recolha segura dos dados do utilizador logado via JWT
+    const { id: userId, role, equipeId } = request.user;
 
-      // 3. Instancia o serviço de Dashboard
-      const dashboardService = new DashboardService();
+    const dashboardService = new DashboardService();
 
-      // 4. Executa a lógica passando todos os parâmetros obrigatórios pela interface
-      const metrics = await dashboardService.execute({
-        inicio: inicio as string | undefined,
-        fim: fim as string | undefined,
-        role,
-        userId // <-- Este era o campo que faltava para sanar o erro TS2345
-      });
+    const metricas = await dashboardService.execute({
+      role,
+      userId,
+      equipeId,
+      inicio,
+      fim
+    });
 
-      // 5. Retorna os dados processados (Total de Leads, Conversão, etc.)
-      return res.json(metrics);
-
-    } catch (error: any) {
-      // Caso o DateValidator lance um erro (ex: intervalo > 1 ano), 
-      // retornamos 400 - Bad Request (RF06)
-      return res.status(400).json({ 
-        error: error.message || "Erro ao processar as métricas do dashboard." 
-      });
-    }
+    return response.status(200).json(metricas);
   }
 }
