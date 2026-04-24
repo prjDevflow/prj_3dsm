@@ -16,9 +16,41 @@ export interface Team {
   name: string;
   description?: string;
   managerId?: string;
+  managerName?: string;
   members: string[];
+  memberCount: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TeamMetrics {
+  teamId: string;
+  teamName: string;
+  totalLeads: number;
+  convertedLeads: number;
+  conversionRate: number;
+  totalRevenue: number;
+  topPerformers: {
+    userId: string;
+    name: string;
+    leads: number;
+    conversions: number;
+  }[];
+}
+
+export interface Log {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  action: 'login' | 'logout' | 'create' | 'update' | 'delete';
+  entityType: 'user' | 'team' | 'lead' | 'negotiation' | 'client';
+  entityId?: string;
+  entityName?: string;
+  details: string;
+  ipAddress: string;
+  userAgent: string;
+  createdAt: string;
 }
 
 export interface LoginCredentials {
@@ -34,6 +66,7 @@ export interface Lead {
   status: 'novo' | 'contatado' | 'qualificado' | 'perdido' | 'ganho';
   importance: 'baixa' | 'media' | 'alta';
   origin: string;
+  store?: string;
   assignedTo?: string;
   teamId?: string;
   createdAt: string;
@@ -77,6 +110,19 @@ export interface DashboardMetrics {
     importance: string;
     count: number;
   }[];
+  byStore: {
+    store: string;
+    count: number;
+  }[];
+  convertedVsNonConverted: {
+    name: string;
+    value: number;
+  }[];
+  byTeam: {
+    team: string;
+    count: number;
+  }[];
+  avgTimeToFirstContact: string;
   evolution: {
     date: string;
     leads: number;

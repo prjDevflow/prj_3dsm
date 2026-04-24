@@ -379,6 +379,16 @@ let mockUsers = [
     createdAt: '2025-01-10T11:00:00Z',
     updatedAt: '2025-01-10T11:00:00Z',
   },
+  {
+    id: '9',
+    name: 'Gerente Geral Teste',
+    email: 'gerente_geral@email.com',
+    role: 'gerente_geral',
+    teamId: undefined,
+    active: true,
+    createdAt: '2025-01-01T08:00:00Z',
+    updatedAt: '2025-01-01T08:00:00Z',
+  },
 ];
 
 // Mock de equipes
