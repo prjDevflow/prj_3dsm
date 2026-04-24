@@ -1,0 +1,572 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API 1000 Valle Multimarcas - ABP FATEC",
+        "description": "Documentação da API para o sistema de gestão de vendas e leads da 1000 Valle Multimarcas. Atende aos requisitos funcionais (RF01 a RF07) e restrições.",
+        "version": "1.0.0",
+        "contact": {
+            "name": "Equipa de Desenvolvimento FATEC"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3333",
+            "description": "Servidor Local de Desenvolvimento"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        },
+        "schemas": {
+            "Usuario": {
+                "type": "object",
+                "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "nome": { "type": "string" },
+                    "email": { "type": "string" },
+                    "role": { "type": "string", "example": "ADMIN" },
+                    "equipeId": { "type": "string", "format": "uuid" }
+                }
+            },
+            "Cliente": {
+                "type": "object",
+                "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "nome": { "type": "string" },
+                    "email": { "type": "string" },
+                    "telefone": { "type": "string" }
+                }
+            },
+            "Loja": {
+                "type": "object",
+                "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "nome": { "type": "string" }
+                }
+            },
+            "Origem": {
+                "type": "object",
+                "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "nome": { "type": "string" }
+                }
+            },
+            "Lead": {
+                "type": "object",
+                "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "clienteId": { "type": "string", "format": "uuid" },
+                    "atendenteId": { "type": "string", "format": "uuid" },
+                    "lojaId": { "type": "string", "format": "uuid" },
+                    "origem": { "type": "string" },
+                    "status": { "type": "string", "example": "NOVO" }
+                }
+            },
+            "Negociacao": {
+                "type": "object",
+                "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "leadId": { "type": "string", "format": "uuid" },
+                    "importancia": { "type": "string", "enum": ["FRIO", "MORNO", "QUENTE"] },
+                    "estagio": { "type": "string", "example": "Contato Inicial" },
+                    "status": { "type": "string", "example": "ABERTA" }
+                }
+            }
+        }
+    },
+    "paths": {
+        "/sessions": {
+            "post": {
+                "tags": ["Autenticação"],
+                "summary": "Realiza o login no sistema (RF01)",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": { "type": "string", "example": "admin@1000valle.com.br" },
+                                    "senha": { "type": "string", "example": "123" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Login realizado com sucesso. Retorna o Token JWT." },
+                    "400": { "description": "E-mail ou palavra-passe incorretos." }
+                }
+            }
+        },
+        "/auth/me/credentials": {
+            "put": {
+                "tags": ["Autenticação"],
+                "summary": "Atualiza e-mail e senha do usuário logado (RF01)",
+                "description": "Permite que qualquer usuário atualize suas próprias credenciais. O ID do usuário é inferido automaticamente de forma segura pelo Token JWT.",
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": { "type": "string", "example": "novoemail@1000valle.com.br" },
+                                    "senha": { "type": "string", "example": "novaSenhaSegura123" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Credenciais atualizadas com sucesso." },
+                    "400": { "description": "Este e-mail já está em uso por outro usuário." },
+                    "401": { "description": "Não autorizado. Token ausente ou inválido." }
+                }
+            }
+        },
+        "/users": {
+            "post": {
+                "tags": ["Utilizadores"],
+                "summary": "Cria um novo utilizador",
+                "description": "Apenas Administradores podem aceder a esta rota (RF02).",
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "nome": { "type": "string", "example": "João Vendedor" },
+                                    "email": { "type": "string", "example": "joao@1000valle.com.br" },
+                                    "senha": { "type": "string", "example": "senha123" },
+                                    "role": { "type": "string", "example": "ATENDENTE" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": { "description": "Utilizador criado com sucesso" }
+                }
+            },
+            "get": {
+                "tags": ["Utilizadores"],
+                "summary": "Lista todos os utilizadores (RF02)",
+                "description": "Acesso restrito a Administradores.",
+                "security": [{ "bearerAuth": [] }],
+                "responses": {
+                    "200": { "description": "Listagem retornada com sucesso." },
+                    "403": { "description": "Acesso negado. Apenas ADMIN." }
+                }
+            }
+        },
+        "/users/{id}": {
+            "put": {
+                "tags": ["Utilizadores"],
+                "summary": "Atualiza dados de um utilizador (RF02)",
+                "description": "Permite ao Admin alterar nome, papel e equipe de um usuário. (Para alterar e-mail e senha, o próprio usuário deve usar a rota /auth/me/credentials).",
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "nome": { "type": "string", "example": "João Vendedor Atualizado" },
+                                    "papelId": { "type": "string", "format": "uuid" },
+                                    "equipeId": { "type": "string", "format": "uuid" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Usuário atualizado com sucesso" },
+                    "403": { "description": "Acesso negado." }
+                }
+            },
+            "delete": {
+                "tags": ["Utilizadores"],
+                "summary": "Deleta um utilizador (RF02)",
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+                ],
+                "responses": {
+                    "204": { "description": "Usuário deletado com sucesso" },
+                    "400": { "description": "Erro de validação (ex: deletar a si mesmo ou usuário com vínculos)" },
+                    "403": { "description": "Acesso negado" }
+                }
+            }
+        },
+        "/equipes": {
+            "post": {
+                "tags": ["Equipes"],
+                "summary": "Cria uma nova Equipe (RF02)",
+                "description": "Acesso restrito: Apenas Administradores podem gerenciar equipes.",
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "nome": { "type": "string", "example": "Equipe de Vendas Matriz" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": { "description": "Equipe criada com sucesso" },
+                    "400": { "description": "Já existe uma equipe com este nome" },
+                    "403": { "description": "Acesso negado. Apenas ADMIN" }
+                }
+            },
+            "get": {
+                "tags": ["Equipes"],
+                "summary": "Lista todas as Equipes",
+                "security": [{ "bearerAuth": [] }],
+                "responses": {
+                    "200": { "description": "Listagem retornada com sucesso." },
+                    "403": { "description": "Acesso negado." }
+                }
+            }
+        },
+        "/equipes/{id}": {
+            "put": {
+                "tags": ["Equipes"],
+                "summary": "Atualiza uma Equipe (RF02)",
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "nome": { "type": "string", "example": "Nova Equipe Vendas" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Equipe atualizada" },
+                    "403": { "description": "Acesso negado" }
+                }
+            },
+            "delete": {
+                "tags": ["Equipes"],
+                "summary": "Deleta uma Equipe (RF02)",
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+                ],
+                "responses": {
+                    "204": { "description": "Equipe deletada com sucesso" },
+                    "400": { "description": "Não é possível excluir uma equipe que possui usuários vinculados" },
+                    "403": { "description": "Acesso negado" }
+                }
+            }
+        },
+        "/clientes": {
+            "post": {
+                "tags": ["Clientes"],
+                "summary": "Cria um novo Cliente",
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "nome": { "type": "string", "example": "Maria Oliveira" },
+                                    "email": { "type": "string", "example": "maria@email.com" },
+                                    "telefone": { "type": "string", "example": "12999999999" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": { "description": "Cliente criado com sucesso" },
+                    "400": { "description": "E-mail já cadastrado" }
+                }
+            }
+        },
+        "/lojas": {
+            "post": {
+                "tags": ["Lojas"],
+                "summary": "Cria uma nova Loja (Requer ADMIN)",
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "nome": { "type": "string", "example": "Filial SP" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": { "description": "Loja criada com sucesso" }
+                }
+            }
+        },
+        "/origens": {
+            "post": {
+                "tags": ["Origens"],
+                "summary": "Cria uma nova Origem (Requer ADMIN)",
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "nome": { "type": "string", "example": "LinkedIn" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": { "description": "Origem criada com sucesso" }
+                }
+            }
+        },
+        "/leads": {
+            "get": {
+                "tags": ["Leads"],
+                "summary": "Lista os leads conforme a permissão (RF02)",
+                "description": "Atendente vê apenas os seus. Gerente vê da equipa. Admin vê todos.",
+                "security": [{ "bearerAuth": [] }],
+                "responses": {
+                    "200": { "description": "Listagem retornada com sucesso." }
+                }
+            },
+            "post": {
+                "tags": ["Leads"],
+                "summary": "Cria um novo Lead associado ao usuário logado",
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "clienteId": { "type": "string", "format": "uuid", "example": "ID_DO_CLIENTE_AQUI" },
+                                    "lojaId": { "type": "string", "format": "uuid", "example": "ID_DA_LOJA_AQUI" },
+                                    "origemId": { "type": "string", "format": "uuid", "example": "ID_DA_ORIGEM_AQUI" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": { "description": "Lead criado com sucesso" }
+                }
+            }
+        },
+        "/leads/{id}": {
+            "put": {
+                "tags": ["Leads"],
+                "summary": "Atualiza os dados de um Lead (RF02)",
+                "description": "Atendentes só atualizam os próprios leads. Gerentes atualizam os da sua equipa. Administradores atualizam todos. Gerentes Gerais não têm acesso.",
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "lojaId": { "type": "string", "format": "uuid" },
+                                    "origemId": { "type": "string", "format": "uuid" },
+                                    "atendenteId": { "type": "string", "format": "uuid", "description": "Para reatribuição de lead" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Lead atualizado com sucesso." },
+                    "403": { "description": "Acesso negado: Lead não pertence à sua responsabilidade/equipa." },
+                    "404": { "description": "Lead não encontrado." }
+                }
+            }
+        },
+        "/leads/negotiations": {
+            "post": {
+                "tags": ["Negociações"],
+                "summary": "Abre uma nova negociação para um Lead (RF03)",
+                "description": "Gera erro se o Lead já possuir uma negociação ativa.",
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "leadId": { "type": "string", "format": "uuid", "example": "ID_DO_LEAD_AQUI" },
+                                    "importancia": { "type": "string", "enum": ["FRIO", "MORNO", "QUENTE"], "example": "MORNO" },
+                                    "estagio": { "type": "string", "example": "Contato Inicial" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": { "description": "Negociação criada com sucesso" },
+                    "400": { "description": "Regra de Negócio Violada: Este Lead já possui uma negociação ativa." }
+                }
+            }
+        },
+        "/leads/negotiations/{id}": {
+            "put": {
+                "tags": ["Negociações"],
+                "summary": "Atualiza uma negociação e gera histórico (RF03)",
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "statusId": { "type": "string", "format": "uuid" },
+                                    "estagioId": { "type": "string", "format": "uuid" },
+                                    "importancia": { "type": "string", "example": "QUENTE" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Negociação atualizada." }
+                }
+            }
+        },
+        "/dashboard": {
+            "get": {
+                "tags": ["Dashboard"],
+                "summary": "Retorna métricas operacionais e analíticas (RF04 e RF05)",
+                "description": "Acesso restrito: Administrador, Gerente Geral e Gerente. O Gerente visualiza apenas os dados da sua equipa. Utiliza os últimos 30 dias como padrão (RF06).",
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    { "name": "inicio", "in": "query", "schema": { "type": "string" }, "description": "Data inicial (YYYY-MM-DD)" },
+                    { "name": "fim", "in": "query", "schema": { "type": "string" }, "description": "Data final (YYYY-MM-DD)" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Métricas calculadas com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "periodo": {
+                                            "type": "object",
+                                            "properties": {
+                                                "inicio": { "type": "string" },
+                                                "fim": { "type": "string" }
+                                            }
+                                        },
+                                        "operacional": {
+                                            "type": "object",
+                                            "properties": {
+                                                "totalLeads": { "type": "integer" },
+                                                "leadsPorOrigem": { "type": "array" },
+                                                "leadsPorLoja": { "type": "array" }
+                                            }
+                                        },
+                                        "analitico": {
+                                            "type": "object",
+                                            "properties": {
+                                                "totalConvertidos": { "type": "integer" },
+                                                "totalNaoConvertidos": { "type": "integer" },
+                                                "taxaConversao": { "type": "string", "example": "25.00%" },
+                                                "distribuicaoImportancia": { "type": "object" },
+                                                "motivosFinalizacao": { "type": "object" },
+                                                "leadsPorAtendente": { "type": "object" }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": { "description": "Acesso negado: Atendentes não têm acesso a dashboards." }
+                }
+            }
+        },
+        "/logs": {
+            "get": {
+                "tags": ["Auditoria"],
+                "summary": "Lista todos os logs do sistema (RF07)",
+                "description": "Retorna o histórico de todas as operações (Login, Criação, Atualização, Deleção). Acesso restrito a Administradores.",
+                "security": [{ "bearerAuth": [] }],
+                "responses": {
+                    "200": {
+                        "description": "Lista de logs retornada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id_log": { "type": "string" },
+                                            "acao_log": { "type": "string", "example": "UPDATE" },
+                                            "tabela_afetada_log": { "type": "string", "example": "LEAD" },
+                                            "data_hora_log": { "type": "string", "format": "date-time" },
+                                            "usuario": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "nome_usuario": { "type": "string" },
+                                                    "email_usuario": { "type": "string" }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": { "description": "Acesso negado: Apenas administradores podem visualizar os logs." }
+                }
+            }
+        }
+    }
+}

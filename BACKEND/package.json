@@ -6,14 +6,10 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules --project tsconfig.json src/shared/infra/http/server.ts",
     "build": "tsc",
-    "start": "node dist/shared/infra/http/server.js",
+    "start": "node dist/src/shared/infra/http/server.js",
     "test": "jest",
     "prisma:migrate": "npx prisma migrate dev",
-    "prisma:generate": "npx prisma generate",
-    "prisma:seed": "ts-node prisma/seed.ts"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "prisma:generate": "npx prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",
