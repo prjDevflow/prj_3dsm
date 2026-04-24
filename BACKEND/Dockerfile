@@ -1,6 +1,9 @@
 # Usa uma imagem base oficial do Node.js (versão LTS Alpine para ser mais leve)
 FROM node:20-alpine
 
+# ADICIONADO: Instala o OpenSSL, requisito fundamental para o Prisma rodar no Alpine
+RUN apk add --no-cache openssl
+
 # Define o diretório de trabalho dentro do contêiner
 WORKDIR /usr/src/app
 
@@ -20,9 +23,8 @@ COPY . .
 # Compila o código TypeScript para JavaScript (gera a pasta dist/)
 RUN npm run build
 
-# Expõe a porta que a API utilizará (Importante para o Swagger e Integração)
-# Confirme a porta definida no seu server.ts ou .env (ex: 3333)
+# Expõe a porta que a API utilizará
 EXPOSE 3333
 
-# Comando para iniciar a aplicação (ajuste conforme o script no seu package.json)
+# Comando para iniciar a aplicação
 CMD ["npm", "run", "start"]
