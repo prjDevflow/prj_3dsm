@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -8,8 +9,16 @@ import LeadDetail from './pages/LeadDetail';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Users from './pages/Users';
+import Teams from './pages/Teams';
+import Logs from './pages/Logs';
+import Clients from './pages/Clients';
+import { loadSettings, applySettings } from './services/settingsService';
 
 function App() {
+  useEffect(() => {
+    applySettings(loadSettings());
+  }, []);
+
   return (
     <BrowserRouter>
       <AuthProvider>
@@ -60,6 +69,30 @@ function App() {
               element={
                 <ProtectedRoute requiredRoles={['admin']}>
                   <Users />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/teams"
+              element={
+                <ProtectedRoute requiredRoles={['admin', 'gerente_geral', 'gerente']}>
+                  <Teams />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/logs"
+              element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <Logs />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/clients"
+              element={
+                <ProtectedRoute requiredRoles={['admin', 'atendente', 'gerente', 'gerente_geral']}>
+                  <Clients />
                 </ProtectedRoute>
               }
             />

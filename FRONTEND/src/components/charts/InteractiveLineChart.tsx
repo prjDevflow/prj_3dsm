@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -93,7 +93,7 @@ const InteractiveLineChart: React.FC<InteractiveLineChartProps> = ({
         <div className="mb-4 flex justify-end">
           <button
             onClick={handleResetZoom}
-            className="text-xs text-[#0F3B5E] hover:text-[#1E5A7A] font-medium"
+            className="text-xs text-[var(--color-primary)] hover:text-[var(--color-primary)] font-medium"
           >
             ↺ Resetar zoom
           </button>

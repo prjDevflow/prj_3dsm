@@ -2,49 +2,150 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --color-primary: #0F3B5E;
-  }
-
-  .compact {
-    --spacing-base: 0.75rem;
-    --spacing-lg: 1rem;
-  }
-
-  body {
-    @apply bg-slate-50 text-slate-800;
-  }
+/* ── Variáveis globais ── */
+:root {
+  --color-primary:    #0F3B5E;
+  --color-primary-5:  rgba(15, 59, 94, 0.05);
+  --color-primary-10: rgba(15, 59, 94, 0.10);
+  --color-primary-20: rgba(15, 59, 94, 0.20);
 }
 
+/* ── Componentes base ── */
 @layer components {
   .card {
     @apply bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-200;
   }
-  
   .badge {
     @apply px-2.5 py-1 text-xs font-medium rounded-full;
   }
-  
   .btn-primary {
-    @apply bg-[#0F3B5E] text-white px-4 py-2 rounded-lg hover:bg-[#1E5A7A] transition-colors duration-200 font-medium text-sm;
+    background-color: var(--color-primary);
+    @apply text-white px-4 py-2 rounded-lg transition-all duration-200 font-medium text-sm;
   }
-  
+  .btn-primary:hover {
+    filter: brightness(1.12);
+  }
   .btn-secondary {
     @apply bg-white text-slate-700 px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors duration-200 font-medium text-sm;
   }
-  
   .input {
-    @apply border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#0F3B5E]/20 focus:border-[#0F3B5E] transition-all;
+    @apply bg-white border border-slate-200 rounded-lg px-4 py-2 focus:outline-none transition-all;
+    --tw-ring-color: var(--color-primary-20);
+  }
+  .input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-20);
   }
 }
+
+/* ══════════════════════════════════════════════════
+   DARK MODE — fora de @layer para sobrescrever utilities
+   ══════════════════════════════════════════════════ */
+
+/* Fundos */
+.dark .bg-slate-50  { background-color: rgb(15 23 42); }
+.dark .bg-white     { background-color: rgb(30 41 59); }
+.dark .bg-slate-100 { background-color: rgb(30 41 59); }
+
+/* Header */
+.dark header {
+  background-color: rgb(15 23 42) !important;
+  border-color: rgb(51 65 85) !important;
+}
+
+/* Texto */
+.dark .text-slate-800 { color: rgb(226 232 240); }
+.dark .text-slate-700 { color: rgb(203 213 225); }
+.dark .text-slate-600 { color: rgb(148 163 184); }
+.dark .text-slate-500 { color: rgb(100 116 139); }
+.dark .text-slate-400 { color: rgb(71 85 105); }
+
+/* Bordas */
+.dark .border-slate-200 { border-color: rgb(51 65 85); }
+.dark .border-slate-100 { border-color: rgb(30 41 59); }
+
+/* Divisores */
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(30 41 59);
+}
+
+/* Hover */
+.dark .hover\:bg-slate-50:hover  { background-color: rgb(30 41 59 / 0.6); }
+.dark .hover\:bg-slate-100:hover { background-color: rgb(51 65 85); }
+
+/* Inputs e selects */
+.dark .input {
+  background-color: rgb(51 65 85);
+  border-color: rgb(71 85 105);
+  color: rgb(226 232 240);
+}
+.dark select,
+.dark input:not([type="color"]):not([type="checkbox"]):not([type="radio"]) {
+  background-color: rgb(51 65 85);
+  border-color: rgb(71 85 105);
+  color: rgb(226 232 240);
+}
+
+/* Botão secundário */
+.dark .btn-secondary {
+  background-color: rgb(51 65 85);
+  border-color: rgb(71 85 105);
+  color: rgb(203 213 225);
+}
+.dark .btn-secondary:hover {
+  background-color: rgb(71 85 105);
+}
+
+/* Thead das tabelas */
+.dark table thead tr {
+  background-color: rgb(30 41 59);
+}
+.dark table th {
+  color: rgb(148 163 184);
+}
+.dark table tbody tr:hover {
+  background-color: rgb(30 41 59 / 0.6);
+}
+
+/* Fundo do body */
+.dark body { background-color: rgb(15 23 42); color: rgb(226 232 240); }
+
+/* ══════════════════════════════════════════════════
+   COMPACT MODE — fora de @layer para sobrescrever utilities
+   ══════════════════════════════════════════════════ */
+
+/* Espaçamentos internos de cards */
+.compact .p-6  { padding: 0.875rem; }
+.compact .p-7  { padding: 1rem;     }
+.compact .p-4  { padding: 0.625rem; }
+
+/* Gaps entre cards */
+.compact .gap-6 { gap: 0.875rem; }
+.compact .gap-4 { gap: 0.625rem; }
+
+/* Margens de seção */
+.compact .mb-8  { margin-bottom: 1.25rem; }
+.compact .mb-6  { margin-bottom: 0.875rem; }
+
+/* Padding do main */
+.compact .py-8  { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+
+/* Tipografia */
+.compact .text-3xl { font-size: 1.5rem;  line-height: 2rem;    }
+.compact .text-2xl { font-size: 1.25rem; line-height: 1.75rem; }
+
+/* Header mais enxuto */
+.compact .h-16 { height: 3rem; }
+
+/* Células da tabela */
+.compact table td,
+.compact table th { padding-top: 0.5rem; padding-bottom: 0.5rem; }
 
 /* Animações */
 @keyframes shrink {
   from { transform: scaleX(1); }
-  to { transform: scaleX(0); }
+  to   { transform: scaleX(0); }
 }
-
 .animate-shrink {
   animation: shrink 5s linear forwards;
 }
