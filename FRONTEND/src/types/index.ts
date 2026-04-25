@@ -73,17 +73,40 @@ export interface Lead {
   updatedAt: string;
 }
 
+export type NegotiationImportance = 'frio' | 'morno' | 'quente';
+export type NegotiationStage =
+  | 'primeiro_contato'
+  | 'qualificacao'
+  | 'proposta_enviada'
+  | 'negociacao'
+  | 'fechamento';
+
 export interface Negotiation {
   id: string;
   leadId: string;
   userId: string;
   content: string;
   type: 'comentário' | 'proposta' | 'contato';
+  importance: NegotiationImportance;
+  stage: NegotiationStage;
   status: 'ativa' | 'encerrada';
   createdAt: string;
   updatedAt?: string;
   closedAt?: string;
   closedReason?: string;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  cpf?: string;
+  leadId?: string;
+  leadName?: string;
+  assignedTo?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface DashboardMetrics {

@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { validateDateRange, DateRange, formatDateRange } from '../utils/dateUtils';
-import { 
-  LayoutDashboard, 
-  Users, 
-  LogOut, 
-  Menu, 
+import {
+  LayoutDashboard,
+  Users,
+  LogOut,
+  Menu,
   X,
   ChevronDown,
   BarChart3,
@@ -17,7 +17,8 @@ import {
   Info,
   Users as UsersIcon,
   Building2,
-  FileText
+  FileText,
+  UserCheck,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -45,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({
   const lastValidationRef = useRef<string>('');
 
   // Verificar se está em página que NÃO deve mostrar filtros
-  const hideFiltersRoutes = ['/profile', '/settings', '/users', '/teams', '/logs'];
+  const hideFiltersRoutes = ['/profile', '/settings', '/users', '/teams', '/logs', '/clients'];
   const shouldHideFilters = hideFiltersRoutes.includes(location.pathname);
 
   const [startDate, setStartDate] = useState(() => {
@@ -240,8 +241,8 @@ const Header: React.FC<HeaderProps> = ({
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <Link to="/dashboard" className="flex items-center space-x-2 ml-2 lg:ml-0">
-              <BarChart3 size={24} className="text-[#0F3B5E]" />
-              <span className="text-lg font-semibold text-slate-800">Analytics<span className="text-[#0F3B5E]">Pro</span></span>
+              <BarChart3 size={24} className="text-[var(--color-primary)]" />
+              <span className="text-lg font-semibold text-slate-800">Analytics<span className="text-[var(--color-primary)]">Pro</span></span>
             </Link>
           </div>
 
@@ -254,7 +255,7 @@ const Header: React.FC<HeaderProps> = ({
                   to={item.href}
                   className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors
                     ${isActive(item.href)
-                      ? 'bg-[#0F3B5E]/10 text-[#0F3B5E]'
+                      ? 'bg-[var(--color-primary-10)] text-[var(--color-primary)]'
                       : 'text-slate-600 hover:bg-slate-100'
                     }`}
                 >
@@ -271,7 +272,7 @@ const Header: React.FC<HeaderProps> = ({
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-100 transition-colors"
               >
-                <div className="w-8 h-8 bg-[#0F3B5E] rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">
                   <span className="text-white font-medium text-sm">
                     {user?.name?.charAt(0).toUpperCase()}
                   </span>
@@ -287,6 +288,9 @@ const Header: React.FC<HeaderProps> = ({
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 border border-slate-200">
                   <Link to="/profile" className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center space-x-2" onClick={() => setUserMenuOpen(false)}>
                     <User size={16} /><span>Meu Perfil</span>
+                  </Link>
+                  <Link to="/clients" className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center space-x-2" onClick={() => setUserMenuOpen(false)}>
+                    <UserCheck size={16} /><span>Clientes</span>
                   </Link>
                   {isAdmin && (
                     <Link to="/settings" className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center space-x-2" onClick={() => setUserMenuOpen(false)}>
@@ -366,10 +370,9 @@ const Header: React.FC<HeaderProps> = ({
                 <option value="loja3">Loja Sul</option>
               </select>
               <select value={team} onChange={handleTeamChange} className="bg-slate-50 border-none rounded-lg px-3 py-1.5 text-sm text-slate-600">
-                <option value="all">Todos os times</option>
-                <option value="vendas">Vendas</option>
-                <option value="suporte">Suporte</option>
-                <option value="qualificacao">Qualificação</option>
+                <option value="all">Todas as equipes</option>
+                <option value="1">Vendas Centro</option>
+                <option value="2">Vendas Norte</option>
               </select>
             </div>
 
@@ -429,12 +432,11 @@ const Header: React.FC<HeaderProps> = ({
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600">Time</label>
+              <label className="text-xs font-medium text-slate-600">Equipe</label>
               <select value={team} onChange={handleTeamChange} className="border border-slate-200 rounded-lg px-4 py-2 w-full">
-                <option value="all">Todos os times</option>
-                <option value="vendas">Vendas</option>
-                <option value="suporte">Suporte</option>
-                <option value="qualificacao">Qualificação</option>
+                <option value="all">Todas as equipes</option>
+                <option value="1">Vendas Centro</option>
+                <option value="2">Vendas Norte</option>
               </select>
             </div>
           </div>
@@ -477,7 +479,7 @@ const Header: React.FC<HeaderProps> = ({
                   onClick={() => setMobileMenuOpen(false)}
                   className={`px-4 py-3 rounded-lg text-sm font-medium flex items-center space-x-3
                     ${isActive(item.href)
-                      ? 'bg-[#0F3B5E]/10 text-[#0F3B5E]'
+                      ? 'bg-[var(--color-primary-10)] text-[var(--color-primary)]'
                       : 'text-slate-600 hover:bg-slate-100'
                     }`}
                 >
@@ -493,6 +495,14 @@ const Header: React.FC<HeaderProps> = ({
             >
               <User size={18} />
               <span>Meu Perfil</span>
+            </Link>
+            <Link
+              to="/clients"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-4 py-3 rounded-lg text-sm font-medium flex items-center space-x-3 text-slate-600 hover:bg-slate-100"
+            >
+              <UserCheck size={18} />
+              <span>Clientes</span>
             </Link>
             {isAdmin && (
               <Link

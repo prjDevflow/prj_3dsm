@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../hooks/useUsers';
@@ -155,7 +155,7 @@ const Users = () => {
           </div>
           <button
             onClick={() => handleOpenModal()}
-            className="bg-[#0F3B5E] text-white px-4 py-2 rounded-lg hover:bg-[#1E5A7A] transition-colors duration-200 font-medium text-sm flex items-center space-x-2"
+            className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-lg hover:bg-[var(--color-primary)] transition-colors duration-200 font-medium text-sm flex items-center space-x-2"
           >
             <Plus size={18} />
             <span>Novo Usuário</span>
@@ -173,7 +173,7 @@ const Users = () => {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  className="border border-slate-200 rounded-lg px-4 py-2 pl-10 w-full focus:outline-none focus:ring-2 focus:ring-[#0F3B5E]/20 focus:border-[#0F3B5E]"
+                  className="border border-slate-200 rounded-lg px-4 py-2 pl-10 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                 />
                 <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
               </div>
@@ -195,7 +195,7 @@ const Users = () => {
                   <select
                     value={roleFilter}
                     onChange={(e) => setRoleFilter(e.target.value)}
-                    className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#0F3B5E]/20 focus:border-[#0F3B5E]"
+                    className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                   >
                     <option value="">Todos</option>
                     <option value="admin">Administrador</option>
@@ -211,7 +211,7 @@ const Users = () => {
                   <select
                     value={teamFilter}
                     onChange={(e) => setTeamFilter(e.target.value)}
-                    className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#0F3B5E]/20 focus:border-[#0F3B5E]"
+                    className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                   >
                     <option value="">Todas</option>
                     {teams?.map((team) => (
@@ -230,7 +230,7 @@ const Users = () => {
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           {isLoading ? (
             <div className="p-12 text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-[#0F3B5E] mx-auto mb-4" />
+              <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)] mx-auto mb-4" />
               <p className="text-sm text-slate-500">Carregando usuários...</p>
             </div>
           ) : error ? (
@@ -256,7 +256,7 @@ const Users = () => {
                       <tr key={user.id} className="hover:bg-slate-50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-[#0F3B5E] rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-medium text-sm">
                                 {user.name.charAt(0).toUpperCase()}
                               </span>
@@ -291,7 +291,7 @@ const Users = () => {
                         <td className="px-6 py-4 text-right space-x-2">
                           <button
                             onClick={() => handleOpenModal(user)}
-                            className="p-1 text-slate-400 hover:text-[#0F3B5E] transition-colors"
+                            className="p-1 text-slate-400 hover:text-[var(--color-primary)] transition-colors"
                             title="Editar"
                           >
                             <Edit2 size={18} />
@@ -390,7 +390,7 @@ const Users = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#0F3B5E]/20 focus:border-[#0F3B5E]"
+                  className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                   placeholder="Nome completo"
                   required
                 />
@@ -404,7 +404,7 @@ const Users = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#0F3B5E]/20 focus:border-[#0F3B5E]"
+                  className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                   placeholder="email@exemplo.com"
                   required
                 />
@@ -419,7 +419,7 @@ const Users = () => {
                     type="password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#0F3B5E]/20 focus:border-[#0F3B5E]"
+                    className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                     placeholder="••••••"
                     required
                   />
@@ -433,7 +433,7 @@ const Users = () => {
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
-                  className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#0F3B5E]/20 focus:border-[#0F3B5E]"
+                  className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                   required
                 >
                   <option value="atendente">Atendente</option>
@@ -450,7 +450,7 @@ const Users = () => {
                 <select
                   value={formData.teamId}
                   onChange={(e) => setFormData({ ...formData, teamId: e.target.value })}
-                  className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#0F3B5E]/20 focus:border-[#0F3B5E]"
+                  className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                 >
                   <option value="">Sem equipe</option>
                   {teams?.map((team) => (
@@ -478,7 +478,7 @@ const Users = () => {
                       onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0F3B5E]"></div>
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
                   </label>
                 </div>
               )}
@@ -487,7 +487,7 @@ const Users = () => {
                 <button
                   type="submit"
                   disabled={createUser.isPending || updateUser.isPending}
-                  className="bg-[#0F3B5E] text-white px-4 py-2 rounded-lg hover:bg-[#1E5A7A] transition-colors duration-200 font-medium text-sm flex-1 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-lg hover:bg-[var(--color-primary)] transition-colors duration-200 font-medium text-sm flex-1 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {(createUser.isPending || updateUser.isPending) ? (
                     <>

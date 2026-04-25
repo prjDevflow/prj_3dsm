@@ -1,465 +1,358 @@
-import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+﻿import { useState } from 'react';
 import Header from '../components/Header';
-import { 
-  Save,
-  Moon,
-  Sun,
-  Bell,
-  BellRing,
-  BellOff,
-  Lock,
-  Key,
-  Globe,
-  Mail,
-  Shield,
-  Eye,
-  EyeOff,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-  ChevronRight
+import {
+  Save, Moon, Sun, Bell, BellRing, Mail,
+  Globe, Loader2, CheckCircle, AlertCircle, ChevronRight,
 } from 'lucide-react';
+import {
+  loadSettings, saveSettings, applySettings, AppSettings,
+} from '../services/settingsService';
+
+const Toggle: React.FC<{
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  disabled?: boolean;
+  size?: 'sm' | 'md';
+}> = ({ checked, onChange, disabled = false, size = 'md' }) => {
+  const track = size === 'sm'
+    ? 'w-9 h-5 after:h-4 after:w-4 after:top-[2px] after:left-[2px]'
+    : 'w-11 h-6 after:h-5 after:w-5 after:top-[2px] after:left-[2px]';
+  return (
+    <label className="relative inline-flex items-center cursor-pointer">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        disabled={disabled}
+        className="sr-only peer"
+      />
+      <div
+        className={`${track} bg-slate-200 rounded-full peer
+          peer-checked:after:translate-x-full
+          after:content-[''] after:absolute after:bg-white after:border-gray-300 after:border after:rounded-full after:transition-all
+          peer-checked:bg-[var(--color-primary)] peer-disabled:opacity-50 peer-disabled:cursor-not-allowed`}
+        style={{ ['--color-primary' as string]: 'var(--color-primary)' }}
+      />
+    </label>
+  );
+};
 
 const Settings = () => {
-  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('general');
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
+  const [saving, setSaving]       = useState(false);
+  const [success, setSuccess]     = useState('');
+  const [error, setError]         = useState('');
 
-  // Configurações de aparência
-  const [theme, setTheme] = useState('light');
-  const [primaryColor, setPrimaryColor] = useState('#0F3B5E');
-  const [compactMode, setCompactMode] = useState(false);
+  const [cfg, setCfg] = useState<AppSettings>(loadSettings);
 
-  // Configurações de notificações
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(false);
-  const [leadCreated, setLeadCreated] = useState(true);
-  const [negotiationUpdated, setNegotiationUpdated] = useState(true);
-  const [dailyDigest, setDailyDigest] = useState(false);
-
-  // Configurações de segurança
-  const [passwordExpiration, setPasswordExpiration] = useState(90);
-  const [twoFactorAuth, setTwoFactorAuth] = useState(false);
-  const [sessionTimeout, setSessionTimeout] = useState(30);
-  const [maxLoginAttempts, setMaxLoginAttempts] = useState(5);
-
-  // Configurações de sistema
-  const [systemName, setSystemName] = useState('AnalyticsPro');
-  const [supportEmail, setSupportEmail] = useState('suporte@analyticspro.com');
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const set = <K extends keyof AppSettings>(key: K, value: AppSettings[K]) =>
+    setCfg(prev => ({ ...prev, [key]: value }));
 
   const tabs = [
-    { id: 'general', name: 'Geral', icon: Globe },
-    { id: 'appearance', name: 'Aparência', icon: Sun },
-    { id: 'notifications', name: 'Notificações', icon: Bell },
-    { id: 'security', name: 'Segurança', icon: Lock },
+    { id: 'general',       name: 'Geral',        icon: Globe },
+    { id: 'appearance',    name: 'Aparência',     icon: Sun   },
+    { id: 'notifications', name: 'Notificações',  icon: Bell  },
   ];
 
   const handleSave = async () => {
     setSaving(true);
     setError('');
-    
-    // Simular salvamento
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setSuccess('Configurações salvas com sucesso!');
-    setTimeout(() => setSuccess(''), 3000);
-    setSaving(false);
+    try {
+      saveSettings(cfg);
+      applySettings(cfg);
+      setSuccess('Configurações salvas com sucesso!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch {
+      setError('Erro ao salvar as configurações. Tente novamente.');
+    } finally {
+      setSaving(false);
+    }
   };
-
-  // Se não for admin, redirecionar (protegido pela rota)
 
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
-      
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-slate-800">Configurações</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Gerencie as configurações do sistema
-          </p>
+          <h1 className="text-3xl font-semibold text-slate-800">Configurações</h1>
+          <p className="text-sm text-slate-500 mt-1">Personalize o sistema conforme sua preferência</p>
         </div>
 
-        {/* Mensagens */}
         {success && (
           <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-center text-emerald-700">
-            <CheckCircle size={20} className="mr-3 flex-shrink-0" />
+            <CheckCircle size={18} className="mr-3 flex-shrink-0" />
             <span className="text-sm">{success}</span>
           </div>
         )}
-
         {error && (
           <div className="mb-6 bg-rose-50 border border-rose-200 rounded-lg p-4 flex items-center text-rose-700">
-            <AlertCircle size={20} className="mr-3 flex-shrink-0" />
+            <AlertCircle size={18} className="mr-3 flex-shrink-0" />
             <span className="text-sm">{error}</span>
           </div>
         )}
 
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Sidebar com abas */}
-          <div className="lg:w-64 flex-shrink-0">
+
+          {/* ── Sidebar ── */}
+          <div className="lg:w-56 flex-shrink-0">
             <div className="card overflow-hidden">
               <nav className="p-2">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm transition-colors mb-1
-                        ${activeTab === tab.id
-                          ? 'bg-[#0F3B5E]/10 text-[#0F3B5E]'
-                          : 'text-slate-600 hover:bg-slate-100'
-                        }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Icon size={18} />
-                        <span>{tab.name}</span>
-                      </div>
-                      <ChevronRight size={16} className={activeTab === tab.id ? 'text-[#0F3B5E]' : 'text-slate-400'} />
-                    </button>
-                  );
-                })}
+                {tabs.map(({ id, name, icon: Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => setActiveTab(id)}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm transition-colors mb-1
+                      ${activeTab === id
+                        ? 'bg-[var(--color-primary-10)] text-[var(--color-primary)] font-medium'
+                        : 'text-slate-600 hover:bg-slate-100'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon size={17} />
+                      <span>{name}</span>
+                    </div>
+                    <ChevronRight size={15} className={activeTab === id ? 'text-[var(--color-primary)]' : 'text-slate-300'} />
+                  </button>
+                ))}
               </nav>
             </div>
           </div>
 
-          {/* Conteúdo da aba */}
+          {/* ── Conteúdo ── */}
           <div className="flex-1">
             <div className="card overflow-hidden">
-              {/* Aba Geral */}
+
+              {/* ── Geral ── */}
               {activeTab === 'general' && (
                 <div>
-                  <div className="px-6 py-5 border-b border-slate-200">
+                  <div className="px-6 py-4 border-b border-slate-100">
                     <h2 className="text-sm font-semibold text-slate-800">Configurações Gerais</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Informações básicas do sistema</p>
                   </div>
-                  <div className="p-6 space-y-6">
+                  <div className="p-6 space-y-5">
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                         Nome do Sistema
                       </label>
                       <input
                         type="text"
-                        value={systemName}
-                        onChange={(e) => setSystemName(e.target.value)}
-                        className="input w-full max-w-md"
+                        value={cfg.systemName}
+                        onChange={(e) => set('systemName', e.target.value)}
+                        className="input w-full max-w-sm"
+                        placeholder="AnalyticsPro"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                         Email de Suporte
                       </label>
-                      <input
-                        type="email"
-                        value={supportEmail}
-                        onChange={(e) => setSupportEmail(e.target.value)}
-                        className="input w-full max-w-md"
-                      />
+                      <div className="relative max-w-sm">
+                        <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="email"
+                          value={cfg.supportEmail}
+                          onChange={(e) => set('supportEmail', e.target.value)}
+                          className="input w-full pl-9"
+                          placeholder="suporte@empresa.com"
+                        />
+                      </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                      <div className="flex items-start space-x-3">
-                        <AlertCircle size={20} className="text-amber-600 mt-0.5" />
+                    <div className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
+                      cfg.maintenanceMode ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'
+                    }`}>
+                      <div className="flex items-start gap-3">
+                        <AlertCircle size={18} className={cfg.maintenanceMode ? 'text-amber-500 mt-0.5' : 'text-slate-400 mt-0.5'} />
                         <div>
                           <p className="text-sm font-medium text-slate-700">Modo de Manutenção</p>
-                          <p className="text-xs text-slate-500">
-                            Quando ativo, apenas administradores podem acessar o sistema
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Apenas administradores conseguem acessar o sistema
                           </p>
                         </div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={maintenanceMode}
-                          onChange={(e) => setMaintenanceMode(e.target.checked)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
-                      </label>
+                      <Toggle
+                        checked={cfg.maintenanceMode}
+                        onChange={(v) => set('maintenanceMode', v)}
+                      />
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Aba Aparência */}
+              {/* ── Aparência ── */}
               {activeTab === 'appearance' && (
                 <div>
-                  <div className="px-6 py-5 border-b border-slate-200">
+                  <div className="px-6 py-4 border-b border-slate-100">
                     <h2 className="text-sm font-semibold text-slate-800">Aparência</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Tema, cores e densidade da interface</p>
                   </div>
                   <div className="p-6 space-y-6">
+
+                    {/* Tema */}
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-3">
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
                         Tema
                       </label>
-                      <div className="flex space-x-4">
-                        <button
-                          onClick={() => setTheme('light')}
-                          className={`flex-1 p-4 rounded-lg border-2 transition-all ${
-                            theme === 'light'
-                              ? 'border-[#0F3B5E] bg-[#0F3B5E]/5'
-                              : 'border-slate-200 hover:border-slate-300'
-                          }`}
-                        >
-                          <Sun size={24} className={theme === 'light' ? 'text-[#0F3B5E]' : 'text-slate-400'} />
-                          <span className="text-sm mt-2 block">Claro</span>
-                        </button>
-                        <button
-                          onClick={() => setTheme('dark')}
-                          className={`flex-1 p-4 rounded-lg border-2 transition-all ${
-                            theme === 'dark'
-                              ? 'border-[#0F3B5E] bg-[#0F3B5E]/5'
-                              : 'border-slate-200 hover:border-slate-300'
-                          }`}
-                        >
-                          <Moon size={24} className={theme === 'dark' ? 'text-[#0F3B5E]' : 'text-slate-400'} />
-                          <span className="text-sm mt-2 block">Escuro</span>
-                        </button>
+                      <div className="grid grid-cols-2 gap-3 max-w-xs">
+                        {([
+                          { value: 'light', label: 'Claro',  Icon: Sun  },
+                          { value: 'dark',  label: 'Escuro', Icon: Moon },
+                        ] as const).map(({ value, label, Icon }) => (
+                          <button
+                            key={value}
+                            onClick={() => set('theme', value)}
+                            className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                              cfg.theme === value
+                                ? 'border-[var(--color-primary)] bg-[var(--color-primary-5)]'
+                                : 'border-slate-200 hover:border-slate-300'
+                            }`}
+                          >
+                            <Icon size={22} className={cfg.theme === value ? 'text-[var(--color-primary)]' : 'text-slate-400'} />
+                            <span className={`text-sm font-medium ${cfg.theme === value ? 'text-[var(--color-primary)]' : 'text-slate-500'}`}>
+                              {label}
+                            </span>
+                          </button>
+                        ))}
                       </div>
                     </div>
 
+                    {/* Cor primária */}
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
                         Cor Primária
                       </label>
-                      <div className="flex items-center space-x-3">
-                        <input
-                          type="color"
-                          value={primaryColor}
-                          onChange={(e) => setPrimaryColor(e.target.value)}
-                          className="w-10 h-10 rounded border border-slate-200 cursor-pointer"
-                        />
+                      <div className="flex items-center gap-3 max-w-xs">
+                        <div className="relative">
+                          <input
+                            type="color"
+                            value={cfg.primaryColor}
+                            onChange={(e) => set('primaryColor', e.target.value)}
+                            className="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer p-0.5"
+                          />
+                        </div>
                         <input
                           type="text"
-                          value={primaryColor}
-                          onChange={(e) => setPrimaryColor(e.target.value)}
-                          className="input flex-1"
+                          value={cfg.primaryColor}
+                          onChange={(e) => set('primaryColor', e.target.value)}
+                          className="input flex-1 font-mono text-sm"
                           placeholder="#0F3B5E"
+                          maxLength={7}
                         />
+                        <button
+                          onClick={() => set('primaryColor', '#0F3B5E')}
+                          className="btn-secondary text-xs px-3 whitespace-nowrap"
+                          title="Restaurar padrão"
+                        >
+                          Padrão
+                        </button>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    {/* Modo compacto */}
+                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
                       <div>
                         <p className="text-sm font-medium text-slate-700">Modo Compacto</p>
-                        <p className="text-xs text-slate-500">Reduzir espaçamentos e densidade</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Reduz espaçamentos para mais densidade</p>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={compactMode}
-                          onChange={(e) => setCompactMode(e.target.checked)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0F3B5E]"></div>
-                      </label>
+                      <Toggle
+                        checked={cfg.compactMode}
+                        onChange={(v) => set('compactMode', v)}
+                      />
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Aba Notificações */}
+              {/* ── Notificações ── */}
               {activeTab === 'notifications' && (
                 <div>
-                  <div className="px-6 py-5 border-b border-slate-200">
+                  <div className="px-6 py-4 border-b border-slate-100">
                     <h2 className="text-sm font-semibold text-slate-800">Notificações</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Controle como e quando você é notificado</p>
                   </div>
                   <div className="p-6 space-y-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <Mail size={18} className="text-slate-400" />
-                          <div>
-                            <p className="text-sm font-medium text-slate-700">Notificações por Email</p>
-                            <p className="text-xs text-slate-500">Receber alertas no email</p>
-                          </div>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={emailNotifications}
-                            onChange={(e) => setEmailNotifications(e.target.checked)}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0F3B5E]"></div>
-                        </label>
-                      </div>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <BellRing size={18} className="text-slate-400" />
-                          <div>
-                            <p className="text-sm font-medium text-slate-700">Notificações Push</p>
-                            <p className="text-xs text-slate-500">Alertas no navegador</p>
-                          </div>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={pushNotifications}
-                            onChange={(e) => setPushNotifications(e.target.checked)}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0F3B5E]"></div>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-slate-200 pt-4">
-                      <p className="text-xs font-medium text-slate-600 mb-3">Alertas específicos</p>
+                    {/* Canais */}
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Canais</p>
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-slate-600">Lead criado</span>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={leadCreated}
-                              onChange={(e) => setLeadCreated(e.target.checked)}
-                              className="sr-only peer"
-                              disabled={!emailNotifications && !pushNotifications}
-                            />
-                            <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0F3B5E] peer-disabled:opacity-50"></div>
-                          </label>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-slate-600">Negociação atualizada</span>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={negotiationUpdated}
-                              onChange={(e) => setNegotiationUpdated(e.target.checked)}
-                              className="sr-only peer"
-                              disabled={!emailNotifications && !pushNotifications}
-                            />
-                            <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0F3B5E] peer-disabled:opacity-50"></div>
-                          </label>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-slate-600">Resumo diário</span>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={dailyDigest}
-                              onChange={(e) => setDailyDigest(e.target.checked)}
-                              className="sr-only peer"
-                              disabled={!emailNotifications}
-                            />
-                            <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0F3B5E] peer-disabled:opacity-50"></div>
-                          </label>
-                        </div>
+                        {([
+                          { key: 'emailNotifications', Icon: Mail,    label: 'Email',    desc: 'Receba alertas no seu email' },
+                          { key: 'pushNotifications',  Icon: BellRing, label: 'Push',    desc: 'Notificações no navegador' },
+                        ] as const).map(({ key, Icon, label, desc }) => (
+                          <div key={key} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-white rounded-lg border border-slate-200">
+                                <Icon size={16} className="text-slate-500" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-slate-700">{label}</p>
+                                <p className="text-xs text-slate-500">{desc}</p>
+                              </div>
+                            </div>
+                            <Toggle checked={cfg[key]} onChange={(v) => set(key, v)} />
+                          </div>
+                        ))}
                       </div>
+                    </div>
+
+                    {/* Eventos */}
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Eventos</p>
+                      <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+                        {([
+                          { key: 'leadCreated',         label: 'Novo lead criado',          desc: 'Quando um lead é adicionado ao sistema' },
+                          { key: 'negotiationUpdated',  label: 'Negociação atualizada',     desc: 'Quando há atividade numa negociação' },
+                          { key: 'dailyDigest',         label: 'Resumo diário',             desc: 'Sumário do dia enviado por email' },
+                        ] as const).map(({ key, label, desc }) => {
+                          const disabled = key === 'dailyDigest'
+                            ? !cfg.emailNotifications
+                            : (!cfg.emailNotifications && !cfg.pushNotifications);
+                          return (
+                            <div key={key} className={`flex items-center justify-between px-4 py-3.5 bg-white ${disabled ? 'opacity-50' : ''}`}>
+                              <div>
+                                <p className="text-sm font-medium text-slate-700">{label}</p>
+                                <p className="text-xs text-slate-500">{desc}</p>
+                              </div>
+                              <Toggle
+                                size="sm"
+                                checked={cfg[key]}
+                                onChange={(v) => set(key, v)}
+                                disabled={disabled}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {(!cfg.emailNotifications && !cfg.pushNotifications) && (
+                        <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                          <AlertCircle size={12} />
+                          Ative ao menos um canal para habilitar os eventos.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Aba Segurança */}
-              {activeTab === 'security' && (
-                <div>
-                  <div className="px-6 py-5 border-b border-slate-200">
-                    <h2 className="text-sm font-semibold text-slate-800">Segurança</h2>
-                  </div>
-                  <div className="p-6 space-y-6">
-                    <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">
-                        Expiração de senha (dias)
-                      </label>
-                      <select
-                        value={passwordExpiration}
-                        onChange={(e) => setPasswordExpiration(Number(e.target.value))}
-                        className="input w-40"
-                      >
-                        <option value={30}>30 dias</option>
-                        <option value={60}>60 dias</option>
-                        <option value={90}>90 dias</option>
-                        <option value={180}>180 dias</option>
-                        <option value={0}>Nunca</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">
-                        Timeout da sessão (minutos)
-                      </label>
-                      <select
-                        value={sessionTimeout}
-                        onChange={(e) => setSessionTimeout(Number(e.target.value))}
-                        className="input w-40"
-                      >
-                        <option value={15}>15 minutos</option>
-                        <option value={30}>30 minutos</option>
-                        <option value={60}>1 hora</option>
-                        <option value={120}>2 horas</option>
-                        <option value={240}>4 horas</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">
-                        Máximo de tentativas de login
-                      </label>
-                      <select
-                        value={maxLoginAttempts}
-                        onChange={(e) => setMaxLoginAttempts(Number(e.target.value))}
-                        className="input w-40"
-                      >
-                        <option value={3}>3 tentativas</option>
-                        <option value={5}>5 tentativas</option>
-                        <option value={10}>10 tentativas</option>
-                        <option value={0}>Ilimitado</option>
-                      </select>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                      <div className="flex items-start space-x-3">
-                        <Shield size={20} className="text-[#0F3B5E] mt-0.5" />
-                        <div>
-                          <p className="text-sm font-medium text-slate-700">Autenticação de dois fatores</p>
-                          <p className="text-xs text-slate-500">
-                            Adiciona uma camada extra de segurança
-                          </p>
-                        </div>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={twoFactorAuth}
-                          onChange={(e) => setTwoFactorAuth(e.target.checked)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0F3B5E]"></div>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Botão Salvar */}
-              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50">
+              {/* ── Botão Salvar ── */}
+              <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+                <p className="text-xs text-slate-400">As alterações são aplicadas imediatamente ao salvar.</p>
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="btn-primary flex items-center space-x-2"
+                  className="btn-primary flex items-center gap-2"
                 >
                   {saving ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      <span>Salvando...</span>
-                    </>
+                    <><Loader2 size={15} className="animate-spin" /><span>Salvando...</span></>
                   ) : (
-                    <>
-                      <Save size={16} />
-                      <span>Salvar configurações</span>
-                    </>
+                    <><Save size={15} /><span>Salvar</span></>
                   )}
                 </button>
               </div>
+
             </div>
           </div>
         </div>

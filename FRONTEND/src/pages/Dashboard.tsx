@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import KpiCard from '../components/KpiCard';
@@ -46,6 +46,14 @@ const Dashboard = () => {
   const isGerente = role === 'gerente';
   const isAdminOuGerenteGeral = role === 'admin' || role === 'gerente_geral';
 
+  const firstName = user?.name?.split(' ')[0] ?? '';
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h >= 5 && h < 12) return 'Bom dia';
+    if (h >= 12 && h < 18) return 'Boa tarde';
+    return 'Boa noite';
+  })();
+
   const handleDateRangeChange = (range: { start: Date; end: Date }) => setDateRange(range);
   const handleStoreChange = (newStore: string) => setStore(newStore);
   const handleTeamChange = (newTeam: string) => setTeam(newTeam);
@@ -62,7 +70,7 @@ const Dashboard = () => {
         />
         <div className="flex items-center justify-center h-[80vh]">
           <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-[#0F3B5E] mx-auto mb-4" />
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)] mx-auto mb-4" />
             <p className="text-slate-600">Carregando dashboard...</p>
           </div>
         </div>
@@ -84,7 +92,7 @@ const Dashboard = () => {
             <p className="text-rose-600">Erro ao carregar dados do dashboard</p>
             <button 
               onClick={() => refetch()} 
-              className="mt-4 px-4 py-2 bg-[#0F3B5E] text-white rounded-lg"
+              className="mt-4 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg"
             >
               Tentar novamente
             </button>
@@ -99,6 +107,7 @@ const Dashboard = () => {
     const bySource = safeArray(metrics.bySource);
     const byStatus = safeArray(metrics.byStatus);
     const byImportance = safeArray(metrics.byImportance);
+    const byStore = safeArray(metrics.byStore);
     const evolution = safeArray(metrics.evolution);
 
     return (
@@ -110,9 +119,9 @@ const Dashboard = () => {
         />
         <main className="max-w-full px-6 md:px-8 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-semibold text-slate-800">Meu Dashboard</h1>
-            <p className="text-base text-slate-500 mt-1">Bem-vindo de volta, {user?.name}</p>
-            <p className="text-sm text-slate-400 mt-1">Visualize suas métricas pessoais</p>
+            <h1 className="text-3xl font-semibold text-slate-800">Meu Painel</h1>
+            <p className="text-base text-slate-500 mt-1">{greeting}, {firstName}.</p>
+            <p className="text-sm text-slate-400 mt-1">Acompanhe sua performance individual</p>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -126,12 +135,12 @@ const Dashboard = () => {
             <div className="mb-4 flex items-center space-x-2">
               <span className="text-xs text-slate-500">Filtros ativos:</span>
               {selectedPeriod && (
-                <button onClick={() => setSelectedPeriod(null)} className="inline-flex items-center px-2 py-1 bg-[#0F3B5E]/10 text-[#0F3B5E] rounded-md text-xs">
+                <button onClick={() => setSelectedPeriod(null)} className="inline-flex items-center px-2 py-1 bg-[var(--color-primary-10)] text-[var(--color-primary)] rounded-md text-xs">
                   Período: {selectedPeriod} <span className="ml-1">×</span>
                 </button>
               )}
               {selectedSource && (
-                <button onClick={() => setSelectedSource(null)} className="inline-flex items-center px-2 py-1 bg-[#0F3B5E]/10 text-[#0F3B5E] rounded-md text-xs">
+                <button onClick={() => setSelectedSource(null)} className="inline-flex items-center px-2 py-1 bg-[var(--color-primary-10)] text-[var(--color-primary)] rounded-md text-xs">
                   Origem: {selectedSource} <span className="ml-1">×</span>
                 </button>
               )}
@@ -152,7 +161,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div className="card p-7">
               <h3 className="text-base font-semibold text-slate-700 mb-4">Meus Leads por Status</h3>
               <InteractiveBarChart data={byStatus.map(item => ({ name: item.status, value: item.count }))} />
@@ -160,6 +169,13 @@ const Dashboard = () => {
             <div className="card p-7">
               <h3 className="text-base font-semibold text-slate-700 mb-4">Minha Importância</h3>
               <InteractivePieChart data={byImportance.map(item => ({ name: item.importance, value: item.count }))} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="card p-7">
+              <h3 className="text-base font-semibold text-slate-700 mb-4">Meus Leads por Loja</h3>
+              <InteractiveBarChart data={byStore.map(item => ({ name: item.store, value: item.count }))} />
             </div>
           </div>
 
@@ -189,9 +205,9 @@ const Dashboard = () => {
         />
         <main className="max-w-full px-6 md:px-8 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-semibold text-slate-800">Dashboard da Equipe</h1>
-            <p className="text-base text-slate-500 mt-1">Bem-vindo, {user?.name}</p>
-            <p className="text-sm text-slate-400 mt-1">Visualize as métricas da sua equipe</p>
+            <h1 className="text-3xl font-semibold text-slate-800">Painel da Equipe</h1>
+            <p className="text-base text-slate-500 mt-1">{greeting}, {firstName}.</p>
+            <p className="text-sm text-slate-400 mt-1">Acompanhe a performance da sua equipe</p>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -205,17 +221,17 @@ const Dashboard = () => {
             <div className="mb-4 flex items-center space-x-2 flex-wrap gap-2">
               <span className="text-xs text-slate-500">Filtros ativos:</span>
               {selectedPeriod && (
-                <button onClick={() => setSelectedPeriod(null)} className="inline-flex items-center px-2 py-1 bg-[#0F3B5E]/10 text-[#0F3B5E] rounded-md text-xs">
+                <button onClick={() => setSelectedPeriod(null)} className="inline-flex items-center px-2 py-1 bg-[var(--color-primary-10)] text-[var(--color-primary)] rounded-md text-xs">
                   Período: {selectedPeriod} <span className="ml-1">×</span>
                 </button>
               )}
               {selectedSource && (
-                <button onClick={() => setSelectedSource(null)} className="inline-flex items-center px-2 py-1 bg-[#0F3B5E]/10 text-[#0F3B5E] rounded-md text-xs">
+                <button onClick={() => setSelectedSource(null)} className="inline-flex items-center px-2 py-1 bg-[var(--color-primary-10)] text-[var(--color-primary)] rounded-md text-xs">
                   Origem: {selectedSource} <span className="ml-1">×</span>
                 </button>
               )}
               {selectedAgent && (
-                <button onClick={() => setSelectedAgent(null)} className="inline-flex items-center px-2 py-1 bg-[#0F3B5E]/10 text-[#0F3B5E] rounded-md text-xs">
+                <button onClick={() => setSelectedAgent(null)} className="inline-flex items-center px-2 py-1 bg-[var(--color-primary-10)] text-[var(--color-primary)] rounded-md text-xs">
                   Atendente: {selectedAgent} <span className="ml-1">×</span>
                 </button>
               )}
@@ -263,7 +279,7 @@ const Dashboard = () => {
                     <span className="text-sm font-medium text-slate-700 w-24">{agent.agent}</span>
                     <div className="flex-1 mx-4">
                       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#0F3B5E] rounded-full" style={{ width: `${(agent.conversions / agent.leads) * 100}%` }} />
+                        <div className="h-full bg-[var(--color-primary)] rounded-full" style={{ width: `${(agent.conversions / agent.leads) * 100}%` }} />
                       </div>
                     </div>
                     <span className="text-sm font-semibold text-slate-800">{((agent.conversions / agent.leads) * 100).toFixed(1)}%</span>
@@ -328,10 +344,12 @@ const Dashboard = () => {
         />
         <main className="max-w-full px-6 md:px-8 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-semibold text-slate-800">Dashboard Consolidado</h1>
-            <p className="text-base text-slate-500 mt-1">Bem-vindo, {user?.name}</p>
+            <h1 className="text-3xl font-semibold text-slate-800">
+              {role === 'admin' ? 'Painel Executivo' : 'Painel Gerencial'}
+            </h1>
+            <p className="text-base text-slate-500 mt-1">{greeting}, {firstName}.</p>
             <p className="text-sm text-slate-400 mt-1">
-              {role === 'admin' ? 'Visualização administrativa completa' : 'Visualização consolidada de todas as equipes'}
+              {role === 'admin' ? 'Visão geral completa da operação' : 'Visão consolidada de todas as equipes'}
             </p>
           </div>
 
@@ -346,12 +364,12 @@ const Dashboard = () => {
             <div className="mb-4 flex items-center space-x-2">
               <span className="text-xs text-slate-500">Filtros ativos:</span>
               {selectedPeriod && (
-                <button onClick={() => setSelectedPeriod(null)} className="inline-flex items-center px-2 py-1 bg-[#0F3B5E]/10 text-[#0F3B5E] rounded-md text-xs">
+                <button onClick={() => setSelectedPeriod(null)} className="inline-flex items-center px-2 py-1 bg-[var(--color-primary-10)] text-[var(--color-primary)] rounded-md text-xs">
                   Período: {selectedPeriod} <span className="ml-1">×</span>
                 </button>
               )}
               {selectedSource && (
-                <button onClick={() => setSelectedSource(null)} className="inline-flex items-center px-2 py-1 bg-[#0F3B5E]/10 text-[#0F3B5E] rounded-md text-xs">
+                <button onClick={() => setSelectedSource(null)} className="inline-flex items-center px-2 py-1 bg-[var(--color-primary-10)] text-[var(--color-primary)] rounded-md text-xs">
                   Origem: {selectedSource} <span className="ml-1">×</span>
                 </button>
               )}
@@ -423,7 +441,7 @@ const Dashboard = () => {
                   <span className="text-sm text-slate-600 w-20">{agent.agent}</span>
                   <div className="flex-1 mx-4">
                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-[#0F3B5E] rounded-full" style={{ width: `${(agent.conversions / agent.leads) * 100}%` }} />
+                      <div className="h-full bg-[var(--color-primary)] rounded-full" style={{ width: `${(agent.conversions / agent.leads) * 100}%` }} />
                     </div>
                   </div>
                   <span className="text-sm text-slate-600">{agent.conversions}/{agent.leads}</span>

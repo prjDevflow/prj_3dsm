@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import { userService } from '../services/userService';
@@ -186,7 +186,7 @@ const Profile = () => {
         <div className="card overflow-hidden mb-6">
           <div className="px-6 py-5 border-b border-slate-200 bg-slate-50">
             <div className="flex items-center">
-              <User size={20} className="text-[#0F3B5E] mr-2" />
+              <User size={20} className="text-[var(--color-primary)] mr-2" />
               <h2 className="text-sm font-semibold text-slate-800">Informações Básicas</h2>
             </div>
           </div>
@@ -224,13 +224,13 @@ const Profile = () => {
           <div className="px-6 py-5 border-b border-slate-200 bg-slate-50">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Mail size={20} className="text-[#0F3B5E] mr-2" />
+                <Mail size={20} className="text-[var(--color-primary)] mr-2" />
                 <h2 className="text-sm font-semibold text-slate-800">E-mail</h2>
               </div>
               {!isEditingEmail && (
                 <button
                   onClick={() => setIsEditingEmail(true)}
-                  className="text-xs text-[#0F3B5E] hover:text-[#1E5A7A] font-medium"
+                  className="text-xs text-[var(--color-primary)] hover:text-[var(--color-primary)] font-medium"
                 >
                   Alterar e-mail
                 </button>
@@ -320,13 +320,13 @@ const Profile = () => {
           <div className="px-6 py-5 border-b border-slate-200 bg-slate-50">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Lock size={20} className="text-[#0F3B5E] mr-2" />
+                <Lock size={20} className="text-[var(--color-primary)] mr-2" />
                 <h2 className="text-sm font-semibold text-slate-800">Senha</h2>
               </div>
               {!isEditingPassword && (
                 <button
                   onClick={() => setIsEditingPassword(true)}
-                  className="text-xs text-[#0F3B5E] hover:text-[#1E5A7A] font-medium"
+                  className="text-xs text-[var(--color-primary)] hover:text-[var(--color-primary)] font-medium"
                 >
                   Alterar senha
                 </button>

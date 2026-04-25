@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
 import { Lead, Negotiation } from '../types';
 
@@ -8,6 +8,9 @@ interface FetchLeadsParams {
   search?: string;
   status?: string;
   importance?: string;
+  dateRange?: { start: Date; end: Date };
+  store?: string;
+  team?: string;
 }
 
 interface LeadsResponse {
@@ -19,7 +22,17 @@ interface LeadsResponse {
 }
 
 const fetchLeads = async (params: FetchLeadsParams): Promise<LeadsResponse> => {
-  const { data } = await api.get<LeadsResponse>('/leads', { params });
+  const { dateRange, store, team, ...rest } = params;
+  const queryParams: Record<string, unknown> = { ...rest };
+
+  if (dateRange) {
+    queryParams.startDate = dateRange.start.toISOString();
+    queryParams.endDate   = dateRange.end.toISOString();
+  }
+  if (store && store !== 'all') queryParams.store = store;
+  if (team  && team  !== 'all') queryParams.team  = team;
+
+  const { data } = await api.get<LeadsResponse>('/leads', { params: queryParams });
   return data;
 };
 
@@ -38,6 +51,34 @@ export const useLeads = (params: FetchLeadsParams) => {
     queryKey: ['leads', params],
     queryFn: () => fetchLeads(params),
     placeholderData: (previousData) => previousData,
+  });
+};
+
+export const useCreateLead = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Partial<Lead>) => api.post<Lead>('/leads', body).then(r => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['leads'] }),
+  });
+};
+
+export const useUpdateLead = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: Partial<Lead> & { id: string }) =>
+      api.put<Lead>(`/leads/${id}`, body).then(r => r.data),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['leads'] });
+      qc.invalidateQueries({ queryKey: ['lead', vars.id] });
+    },
+  });
+};
+
+export const useDeleteLead = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/leads/${id}`).then(r => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['leads'] }),
   });
 };
 
