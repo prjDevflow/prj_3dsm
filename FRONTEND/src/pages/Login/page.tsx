@@ -1,13 +1,13 @@
-import { LoginService } from '../../services/implementations/LoginService';
+import { AuthService } from '../../services/implementations/AuthService';
 import { useLoginModel } from './login.model';
 import { LoginView } from './login.view';
 
 const Login = () => {
-  const loginUserService = new LoginService();
+  const authService = new AuthService();
   const methods = useLoginModel({
-    loginUserService,
+    authService,
   });
   return <LoginView {...methods} />;
 };
-
+  
 export default Login;

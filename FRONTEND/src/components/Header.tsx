@@ -27,7 +27,7 @@ interface HeaderProps {
   onTeamChange?: (team: string) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ 
+export const Header: React.FC<HeaderProps> = ({ 
   onDateRangeChange, 
   onStoreChange, 
   onTeamChange 
@@ -560,5 +560,3 @@ const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
-
-export default Header;

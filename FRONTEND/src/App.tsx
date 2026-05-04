@@ -3,15 +3,15 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login/page';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard/page';
 import Leads from './pages/Leads/page';
 import LeadDetail from './pages/LeadDetail';
-import Profile from './pages/Profile';
+import Profile from './pages/Profile/page';
 import Settings from './pages/Settings';
 import Users from './pages/Users';
 import Teams from './pages/Teams';
 import Logs from './pages/Logs';
-import Clients from './pages/Clients';
+import Clients from './pages/Clients/page';
 import { loadSettings, applySettings } from './services/settingsService';
 
 function App() {

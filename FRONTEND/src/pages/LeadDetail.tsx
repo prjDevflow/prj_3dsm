@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLead, useNegotiations, useUpdateLead } from '../hooks/useLeads';
-import Header from '../components/Header';
+import {Header} from '../components/Header';
 import {
   ArrowLeft, Send, MessageSquare, DollarSign, Phone,
   Calendar, User, Mail, Smartphone, Tag, Loader2,

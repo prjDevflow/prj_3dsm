@@ -5,7 +5,7 @@ export interface User {
   nome: string;
   email: string;
   role: UserRole;
-  // teamId?: string;
+  teamId?: string;
   // active: boolean;
   // createdAt: string;
   // updatedAt: string;

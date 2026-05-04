@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import { useQuery } from '@tanstack/react-query';
-import api from '../services/instanceApi';
-=======
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '../services/api';
->>>>>>> 65dcb48a (feat: adiciona página Clients, hooks useClients/useLogs, service settings)
+import api from '../services/instanceApi';
 import { Lead, Negotiation } from '../types';
 
 interface FetchLeadsParams {

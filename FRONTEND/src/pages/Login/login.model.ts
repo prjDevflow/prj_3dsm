@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { ILoginService } from "../../services/IUsersService";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
+import { IAuthService } from "../../services/IAuthService";
 
 type LoginModelProps = {
-  loginUserService: ILoginService;
+  authService: IAuthService;
 };
 
-export const useLoginModel = ({ loginUserService }: LoginModelProps) => {
+export const useLoginModel = ({ authService }: LoginModelProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,7 +23,7 @@ export const useLoginModel = ({ loginUserService }: LoginModelProps) => {
       setError("");
       setLoading(true);
 
-      const { user, token } = await loginUserService.exec(email, password); // envia dados para servico
+      const { user, token } = await authService.login({email, password}); // envia dados para servico
 
       login({ user, token }); // dados enviados para contexto
 
