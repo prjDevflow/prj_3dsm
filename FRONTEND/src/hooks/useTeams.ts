@@ -1,5 +1,13 @@
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+import { useQuery } from '@tanstack/react-query';
+import api from '../services/instanceApi';
+=======
+>>>>>>> d3836c10a068944615be15024727bd750a71bbeb
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
+>>>>>>> 65dcb48a (feat: adiciona página Clients, hooks useClients/useLogs, service settings)
 import { Team } from '../types';
 
 const fetchTeams = async (): Promise<Team[]> => {

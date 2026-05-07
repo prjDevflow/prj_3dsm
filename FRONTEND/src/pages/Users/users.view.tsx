@@ -1,149 +1,51 @@
-﻿import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import Header from '../components/Header';
-import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../hooks/useUsers';
-import { useTeams } from '../hooks/useTeams';
-import { User, UserRole } from '../types';
-import {
-  Plus,
-  Search,
-  Filter,
-  Edit2,
-  Trash2,
-  X,
-  Check,
-  AlertCircle,
-  Loader2,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
+import { AlertCircle, Check, ChevronLeft, ChevronRight, Edit2, Filter, Loader2, Plus, Search, Trash2, X } from 'lucide-react';
+import { Header } from "../../components/Header";
+import { useUsersModel } from "./users.model";
 
-const Users = () => {
-  const { user: currentUser } = useAuth();
-  
-  // Estados de listagem
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('');
-  const [teamFilter, setTeamFilter] = useState<string>('');
-  const [showFilters, setShowFilters] = useState(false);
-  const limit = 10;
+type UsersViewProps = ReturnType<typeof useUsersModel>;
 
-  // Estados do modal
-  const [showModal, setShowModal] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    role: 'atendente' as UserRole,
-    teamId: '',
-    password: '',
-    active: true,
-  });
-
-  const { data, isLoading, error } = useUsers({
+export const UsersView = (props: UsersViewProps) => {
+  const {
+    currentUser,
     page,
-    limit,
+    setPage,
     search,
-    role: roleFilter || undefined,
-    teamId: teamFilter || undefined,
-  });
-
-  const { data: teams } = useTeams();
-  const createUser = useCreateUser();
-  const updateUser = useUpdateUser();
-  const deleteUser = useDeleteUser();
-
-  const handleSearch = () => {
-    setPage(1);
-  };
-
-  const handleOpenModal = (user?: User) => {
-    if (user) {
-      setEditingUser(user);
-      setFormData({
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        teamId: user.teamId || '',
-        password: '',
-        active: user.active,
-      });
-    } else {
-      setEditingUser(null);
-      setFormData({
-        name: '',
-        email: '',
-        role: 'atendente',
-        teamId: '',
-        password: '',
-        active: true,
-      });
-    }
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setEditingUser(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      if (editingUser) {
-        await updateUser.mutateAsync({
-          id: editingUser.id,
-          ...formData,
-        });
-      } else {
-        await createUser.mutateAsync(formData);
-      }
-      handleCloseModal();
-    } catch (error) {
-      console.error('Erro ao salvar usuário:', error);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteUser.mutateAsync(id);
-      setDeleteConfirm(null);
-    } catch (error) {
-      console.error('Erro ao excluir usuário:', error);
-    }
-  };
-
-  const roleColors = {
-    admin: 'bg-purple-100 text-purple-700',
-    gerente_geral: 'bg-indigo-100 text-indigo-700',
-    gerente: 'bg-blue-100 text-blue-700',
-    atendente: 'bg-slate-100 text-slate-700',
-  };
-
-  const roleLabels = {
-    admin: 'Administrador',
-    gerente_geral: 'Gerente Geral',
-    gerente: 'Gerente',
-    atendente: 'Atendente',
-  };
-
-  const startItem = (page - 1) * limit + 1;
-  const endItem = Math.min(page * limit, data?.total || 0);
-
-  // Se não for admin, não renderiza (protegido pela rota, mas segurança extra)
-  if (currentUser?.role !== 'admin') {
+    setSearch,
+    roleFilter,
+    setRoleFilter,
+    teamFilter,
+    setTeamFilter,
+    showFilters,
+    setShowFilters,
+    showModal,
+    editingUser,
+    deleteConfirm,
+    formData,
+    data,
+    isLoading,
+    error,
+    teams,
+    createUser,
+    updateUser,
+    handleSearch,
+    handleOpenModal,
+    handleCloseModal,
+    handleSubmit,
+    handleDelete,
+    roleColors,
+    roleLabels,
+    startItem,
+    endItem,
+  } = props;
+  
+  if (currentUser?.role !== "admin") {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -172,10 +74,13 @@ const Users = () => {
                   placeholder="Buscar por nome ou email..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   className="border border-slate-200 rounded-lg px-4 py-2 pl-10 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                 />
-                <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
+                <Search
+                  className="absolute left-3 top-2.5 text-slate-400"
+                  size={18}
+                />
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -244,16 +149,29 @@ const Users = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-slate-50 border-y border-slate-200">
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Usuário</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Papel</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Equipe</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Status</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-slate-600 uppercase">Ações</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">
+                        Usuário
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">
+                        Papel
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">
+                        Equipe
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-slate-600 uppercase">
+                        Ações
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
                     {data?.data.map((user) => (
-                      <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                      <tr
+                        key={user.id}
+                        className="hover:bg-slate-50 transition-colors"
+                      >
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center flex-shrink-0">
@@ -262,18 +180,25 @@ const Users = () => {
                               </span>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-slate-800">{user.name}</p>
-                              <p className="text-xs text-slate-500">{user.email}</p>
+                              <p className="text-sm font-medium text-slate-800">
+                                {user.name}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {user.email}
+                              </p>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${roleColors[user.role]}`}>
+                          <span
+                            className={`px-2.5 py-1 text-xs font-medium rounded-full ${roleColors[user.role]}`}
+                          >
                             {roleLabels[user.role]}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-slate-600">
-                          {teams?.find(t => t.id === user.teamId)?.name || '-'}
+                          {teams?.find((t) => t.id === user.teamId)?.name ||
+                            "-"}
                         </td>
                         <td className="px-6 py-4">
                           {user.active ? (
@@ -371,7 +296,7 @@ const Users = () => {
           <div className="bg-white rounded-xl max-w-md w-full">
             <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-slate-800">
-                {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
+                {editingUser ? "Editar Usuário" : "Novo Usuário"}
               </h3>
               <button
                 onClick={handleCloseModal}
@@ -389,7 +314,9 @@ const Users = () => {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                   placeholder="Nome completo"
                   required
@@ -403,7 +330,9 @@ const Users = () => {
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                   placeholder="email@exemplo.com"
                   required
@@ -418,7 +347,9 @@ const Users = () => {
                   <input
                     type="password"
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
                     className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                     placeholder="••••••"
                     required
@@ -432,7 +363,12 @@ const Users = () => {
                 </label>
                 <select
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      role: e.target.value as UserRole,
+                    })
+                  }
                   className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                   required
                 >
@@ -449,7 +385,9 @@ const Users = () => {
                 </label>
                 <select
                   value={formData.teamId}
-                  onChange={(e) => setFormData({ ...formData, teamId: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, teamId: e.target.value })
+                  }
                   className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
                 >
                   <option value="">Sem equipe</option>
@@ -464,18 +402,22 @@ const Users = () => {
               {editingUser && (
                 <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                   <div>
-                    <p className="text-sm font-medium text-slate-700">Usuário ativo</p>
+                    <p className="text-sm font-medium text-slate-700">
+                      Usuário ativo
+                    </p>
                     <p className="text-xs text-slate-500">
-                      {formData.active 
-                        ? 'Usuário pode acessar o sistema' 
-                        : 'Usuário não pode acessar o sistema'}
+                      {formData.active
+                        ? "Usuário pode acessar o sistema"
+                        : "Usuário não pode acessar o sistema"}
                     </p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.active}
-                      onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, active: e.target.checked })
+                      }
                       className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
@@ -489,7 +431,7 @@ const Users = () => {
                   disabled={createUser.isPending || updateUser.isPending}
                   className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-lg hover:bg-[var(--color-primary)] transition-colors duration-200 font-medium text-sm flex-1 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {(createUser.isPending || updateUser.isPending) ? (
+                  {createUser.isPending || updateUser.isPending ? (
                     <>
                       <Loader2 size={16} className="animate-spin" />
                       <span>Salvando...</span>
@@ -516,5 +458,3 @@ const Users = () => {
     </div>
   );
 };
-
-export default Users;

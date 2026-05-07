@@ -2,16 +2,16 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Leads from './pages/Leads';
-import LeadDetail from './pages/LeadDetail';
-import Profile from './pages/Profile';
-import Settings from './pages/Settings';
-import Users from './pages/Users';
-import Teams from './pages/Teams';
-import Logs from './pages/Logs';
-import Clients from './pages/Clients';
+import Login from './pages/Login/page';
+import Dashboard from './pages/Dashboard/page';
+import Leads from './pages/Leads/page';
+import LeadDetails from './pages/LeadDetails/page';
+import Profile from './pages/Profile/page';
+import Settings from './pages/Settings/page';
+import Clients from './pages/Clients/page';
+import Users from './pages/Users/page';
+import Teams from './pages/Teams/page';
+import Logs from './pages/Logs/page';
 import { loadSettings, applySettings } from './services/settingsService';
 
 function App() {
@@ -44,7 +44,7 @@ function App() {
               path="/leads/:id"
               element={
                 <ProtectedRoute>
-                  <LeadDetail />
+                  <LeadDetails />
                 </ProtectedRoute>
               }
             />

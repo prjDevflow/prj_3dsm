@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import api from '../services/api';
+import api from '../services/instanceApi';
 import { DashboardMetrics } from '../types';
 import { DateRange, validateDateRange } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';

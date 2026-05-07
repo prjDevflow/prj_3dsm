@@ -3,10 +3,18 @@ import 'express-async-errors'; // Importante para capturar erros do Prisma
 import swaggerUi from 'swagger-ui-express';
 import { router } from './routes'; // Verifique se o caminho está correto
 import swaggerFile from '../../../docs/swagger.json';
+import cors from "cors";
 
 const app = express();
 
 app.use(express.json());
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 
 // Documentação
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
