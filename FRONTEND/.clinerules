@@ -1,0 +1,68 @@
+CONTEXTO RESTRITO (OBRIGATÓRIO):
+Você só pode acessar os seguintes arquivos:
+- @/prj_3dsm/BACKEND/src/docs/swagger.json
+- @/prj_3dsm/FRONTEND/src/services
+- @/prj_3dsm/FRONTEND/src/pages/{teams}/{teams}.model.ts
+
+É PROIBIDO acessar ou modificar qualquer outro arquivo.
+
+OBJETIVO:
+Criar a integração completa da teams "{teams}" no frontend.
+
+Isso inclui:
+1. Criar I{teams}Service.ts
+2. Criar {teams}Service.ts
+3. Ajustar {teams}.model.ts para consumir o service
+
+LEITURA DO SWAGGER:
+- Identifique TODOS os endpoints relacionados à seção "{teams}"
+- Para cada endpoint, extraia:
+  - método HTTP
+  - rota
+  - parâmetros
+  - resposta
+
+- Cada endpoint deve virar UM método no service
+
+PADRÃO DO SERVICE:
+
+- Arquivos:
+  - I{teams}Service.ts
+  - {teams}Service.ts
+
+- Cada método deve:
+  - representar 1 endpoint da teams do swagger
+  - usar InstanceApi
+  - usar async/await
+  - retornar apenas data
+
+- Tipagem:
+  - Criar interfaces para request e response quando necessário
+
+INTEGRAÇÃO COM MODEL:
+
+- O {teams}.model.ts deve:
+  - importar o {teams}Service
+  - instanciar o service
+  - chamar os métodos criados
+  - armazenar os dados retornados corretamente
+
+- NÃO alterar estrutura do model
+- Apenas conectar o service às funções existentes
+
+ANTES DE IMPLEMENTAR:
+
+1. Liste:
+  - endpoints encontrados
+  - métodos que serão criados
+  - arquivos e caminhos completos
+
+2. Aguarde confirmação antes de criar qualquer arquivo
+
+RESTRIÇÕES:
+
+- NÃO modificar o swagger
+- NÃO modificar arquivos fora dos citados
+- NÃO adicionar lógica de negócio
+- NÃO criar código desnecessário
+- NÃO assumir endpoints que não existem no swagger

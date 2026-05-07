@@ -10,7 +10,7 @@ import Profile from './pages/Profile/page';
 import Settings from './pages/Settings/page';
 import Clients from './pages/Clients/page';
 // import Users from './pages/Users';
-// import Teams from './pages/Teams';
+import Teams from './pages/Teams/page';
 // import Logs from './pages/Logs/page';
 import { loadSettings, applySettings } from './services/settingsService';
 
@@ -71,7 +71,7 @@ function App() {
                   <Users />
                 </ProtectedRoute>
               }
-            />
+            /> */}
             <Route
               path="/teams"
               element={
@@ -80,7 +80,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
+            {/* <Route
               path="/logs"
               element={
                 <ProtectedRoute requiredRoles={['admin']}>
