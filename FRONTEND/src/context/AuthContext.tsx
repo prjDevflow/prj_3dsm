@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { User, LoginCredentials } from '../types';
+import axios from 'axios';
+import { User, LoginCredentials, UserRole } from '../types';
 
 interface AuthContextType {
   user: User | null;
@@ -23,65 +24,16 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Mock de usuários com TODOS os campos da interface User
-const MOCK_USERS: User[] = [
-  {
-    id: '1',
-    name: 'Atendente Teste',
-    email: 'atendente@email.com',
-    role: 'atendente',
-    active: true,
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    id: '2',
-    name: 'Gerente Teste',
-    email: 'gerente@email.com',
-    role: 'gerente',
-    active: true,
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    id: '3',
-    name: 'Admin Teste',
-    email: 'admin@email.com',
-    role: 'admin',
-    active: true,
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    id: '7',
-    name: 'João Silva',
-    email: 'joao.silva@email.com',
-    role: 'atendente',
-    teamId: '1',
-    active: true,
-    createdAt: '2025-01-15T10:00:00Z',
-    updatedAt: '2025-01-15T10:00:00Z',
-  },
-  {
-    id: '8',
-    name: 'Maria Santos',
-    email: 'maria.santos@email.com',
-    role: 'atendente',
-    teamId: '1',
-    active: true,
-    createdAt: '2025-01-20T14:30:00Z',
-    updatedAt: '2025-01-20T14:30:00Z',
-  },
-  {
-    id: '9',
-    name: 'Gerente Geral Teste',
-    email: 'gerente_geral@email.com',
-    role: 'gerente_geral',
-    active: true,
-    createdAt: '2025-01-01T08:00:00Z',
-    updatedAt: '2025-01-01T08:00:00Z',
-  },
-];
+// Mapeia o role vindo do backend (MAIÚSCULAS) para o formato do frontend (minúsculas)
+function mapRole(backendRole: string): UserRole {
+  const map: Record<string, UserRole> = {
+    ADMIN: 'admin',
+    GERENTE_GERAL: 'gerente_geral',
+    GERENTE: 'gerente',
+    ATENDENTE: 'atendente',
+  };
+  return map[backendRole] ?? (backendRole.toLowerCase() as UserRole);
+}
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
@@ -90,28 +42,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   });
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Buscar usuário pelo email e senha
-        const foundUser = MOCK_USERS.find(
-          (u) => u.email === credentials.email
-        );
+    try {
+      const response = await axios.post('/api/sessions', {
+        email: credentials.email,
+        senha: credentials.password,
+      });
 
-        // Aceitar qualquer senha 123456 para mock
-        if (foundUser && credentials.password === '123456') {
-          setUser(foundUser);
-          localStorage.setItem('@dashboard:user', JSON.stringify(foundUser));
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      }, 500);
-    });
+      const { user: backendUser, token } = response.data;
+
+      const mappedUser: User = {
+        id: backendUser.id,
+        name: backendUser.name ?? backendUser.nome,
+        email: backendUser.email,
+        role: mapRole(backendUser.role),
+        teamId: backendUser.teamId ?? backendUser.equipeId ?? undefined,
+        active: true,
+        createdAt: backendUser.createdAt ?? new Date().toISOString(),
+        updatedAt: backendUser.updatedAt ?? new Date().toISOString(),
+      };
+
+      setUser(mappedUser);
+      localStorage.setItem('@dashboard:user', JSON.stringify(mappedUser));
+      localStorage.setItem('@dashboard:token', token);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('@dashboard:user');
+    localStorage.removeItem('@dashboard:token');
   };
 
   const hasRole = (roles: User['role'][]) => {

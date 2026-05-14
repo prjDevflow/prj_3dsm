@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ListLeadsController = void 0;
-const ListLeadsService_1 = require("../services/ListLeadsService");
+exports.GetLeadByIdController = void 0;
+const client_1 = require("@prisma/client");
+const prisma = new client_1.PrismaClient();
 function mapLeadToDTO(lead) {
-    const negociacoes = lead.negociacoes ?? [];
-    const activeNeg = negociacoes.find((n) => n.estado_abertura_negociacao === true);
-    const lastNeg = negociacoes[0];
+    const activeNeg = lead.negociacoes?.find((n) => n.estado_abertura_negociacao === true);
+    const lastNeg = lead.negociacoes?.[0];
     const neg = activeNeg ?? lastNeg;
-    const status = (() => {
+    const statusFromNeg = (() => {
         if (!neg)
             return 'novo';
         const s = neg.status?.nome_status?.toUpperCase() ?? '';
@@ -20,7 +20,7 @@ function mapLeadToDTO(lead) {
             return 'contatado';
         return 'qualificado';
     })();
-    const importance = (() => {
+    const importanceFromNeg = (() => {
         if (!neg)
             return 'media';
         const i = neg.importancia_negociacao?.toUpperCase() ?? '';
@@ -35,8 +35,8 @@ function mapLeadToDTO(lead) {
         name: lead.cliente?.nome_cliente ?? '',
         email: lead.cliente?.email_cliente ?? '',
         phone: lead.cliente?.telefone_cliente ?? '',
-        status,
-        importance,
+        status: statusFromNeg,
+        importance: importanceFromNeg,
         origin: lead.origem?.nome_origem ?? '',
         store: lead.loja?.nome_loja ?? '',
         assignedTo: lead.usuario?.nome_usuario ?? '',
@@ -45,25 +45,26 @@ function mapLeadToDTO(lead) {
         updatedAt: lead.data_criacao_lead?.toISOString() ?? new Date().toISOString(),
     };
 }
-class ListLeadsController {
+class GetLeadByIdController {
     async handle(req, res) {
-        const { id: userId, role } = req.user;
-        const inicio = (req.query.inicio ?? req.query.startDate);
-        const fim = (req.query.fim ?? req.query.endDate);
-        const page = Math.max(1, parseInt(req.query.page ?? '1', 10));
-        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit ?? '20', 10)));
-        const listLeadsService = new ListLeadsService_1.ListLeadsService();
-        const allLeads = await listLeadsService.execute({ userId, role, inicio, fim });
-        const total = allLeads.length;
-        const totalPages = Math.ceil(total / limit);
-        const paged = allLeads.slice((page - 1) * limit, page * limit);
-        return res.json({
-            data: paged.map(mapLeadToDTO),
-            total,
-            page,
-            limit,
-            totalPages,
+        const { id } = req.params;
+        const lead = await prisma.lead.findUnique({
+            where: { id_lead: id },
+            include: {
+                cliente: true,
+                usuario: true,
+                loja: true,
+                origem: true,
+                negociacoes: {
+                    include: { status: true, estagio: true },
+                    orderBy: { data_criacao_negociacao: 'desc' },
+                },
+            },
         });
+        if (!lead) {
+            return res.status(404).json({ error: 'Lead não encontrado.' });
+        }
+        return res.json(mapLeadToDTO(lead));
     }
 }
-exports.ListLeadsController = ListLeadsController;
+exports.GetLeadByIdController = GetLeadByIdController;

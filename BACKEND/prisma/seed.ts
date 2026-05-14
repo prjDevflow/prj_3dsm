@@ -15,15 +15,21 @@ async function main() {
   }
   console.log(' Papéis criados.');
 
-  // 2. Status Iniciais (Leads e Negociações)
-  const statusData = ['NOVO', 'EM_ATENDIMENTO', 'FINALIZADO', 'ABERTA', 'GANHA', 'PERDIDA'];
+  // 2. Status das Negociações (nomes em maiúsculas, usados como referência no código)
+  const statusData = ['ABERTA', 'GANHA', 'PERDIDA', 'CANCELADA'];
   for (const s of statusData) {
     await prisma.status.upsert({ where: { nome_status: s }, update: {}, create: { nome_status: s } });
   }
   console.log(' Status padronizados criados.');
 
-  // 3. Estágios Iniciais (O QUE FALTAVA! )
-  const estagiosData = ['Contato Inicial', 'Apresentação', 'Proposta', 'Fechamento'];
+  // 3. Estágios — nomes batem com os valores enviados pelo frontend
+  const estagiosData = [
+    'primeiro_contato',
+    'qualificacao',
+    'proposta_enviada',
+    'negociacao',
+    'fechamento',
+  ];
   for (const e of estagiosData) {
     await prisma.estagio.upsert({ where: { nome_estagio: e }, update: {}, create: { nome_estagio: e } });
   }

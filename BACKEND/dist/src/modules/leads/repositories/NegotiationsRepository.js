@@ -29,31 +29,71 @@ class NegotiationsRepository {
         };
     }
     async create(data) {
+        // Resolve UUID do status pelo nome (ex: 'ABERTA' → UUID)
+        const statusRecord = await prisma.status.findFirst({
+            where: { nome_status: { equals: data.status, mode: 'insensitive' } },
+        });
+        if (!statusRecord) {
+            throw new Error(`Status '${data.status}' não encontrado na base de dados. Execute o seed.`);
+        }
+        // Resolve UUID do estágio pelo nome ou pelo próprio UUID (fallback)
+        const estagioRecord = await prisma.estagio.findFirst({
+            where: {
+                OR: [
+                    { nome_estagio: { equals: data.estagio, mode: 'insensitive' } },
+                    { id_estagio: data.estagio },
+                ],
+            },
+        });
+        if (!estagioRecord) {
+            throw new Error(`Estágio '${data.estagio}' não encontrado na base de dados. Execute o seed.`);
+        }
         const neg = await prisma.negociacao.create({
             data: {
                 id_lead: data.leadId,
-                importancia_negociacao: data.importancia,
-                id_estagio: data.estagio,
-                id_status: data.status,
-                estado_abertura_negociacao: data.isAberta
-            }
+                importancia_negociacao: data.importancia.toUpperCase(),
+                id_estagio: estagioRecord.id_estagio,
+                id_status: statusRecord.id_status,
+                estado_abertura_negociacao: data.isAberta,
+            },
         });
         return {
             id: neg.id_negociacao,
-            status: neg.id_status,
-            estagio: neg.id_estagio
+            status: statusRecord.nome_status,
+            estagio: estagioRecord.nome_estagio,
         };
     }
-    // ✅ CORREÇÃO APLICADA AQUI: Método update que estava em falta
     async update(id_negociacao, data) {
+        // Tenta resolver IDs por nome caso não sejam UUIDs
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        let statusId = data.id_status;
+        if (!isUuid.test(data.id_status)) {
+            const s = await prisma.status.findFirst({
+                where: { nome_status: { equals: data.id_status, mode: 'insensitive' } },
+            });
+            if (s)
+                statusId = s.id_status;
+        }
+        let estagioId = data.id_estagio;
+        if (!isUuid.test(data.id_estagio)) {
+            const e = await prisma.estagio.findFirst({
+                where: { nome_estagio: { equals: data.id_estagio, mode: 'insensitive' } },
+            });
+            if (e)
+                estagioId = e.id_estagio;
+        }
         const neg = await prisma.negociacao.update({
             where: { id_negociacao },
-            data
+            data: {
+                id_status: statusId,
+                id_estagio: estagioId,
+                importancia_negociacao: data.importancia_negociacao.toUpperCase(),
+            },
         });
         return {
             id: neg.id_negociacao,
             status: neg.id_status,
-            estagio: neg.id_estagio
+            estagio: neg.id_estagio,
         };
     }
     async createHistory(data) {

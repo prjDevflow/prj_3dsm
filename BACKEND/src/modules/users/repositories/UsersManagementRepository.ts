@@ -4,16 +4,16 @@ const prisma = new PrismaClient();
 
 export class UsersManagementRepository {
   async findAll() {
-    // Retornamos os dados omitindo a senha por segurança
     return prisma.usuario.findMany({
       select: {
-        id_usuario: true,
-        nome_usuario: true,
-        email_usuario: true,
+        id_usuario:          true,
+        nome_usuario:        true,
+        email_usuario:       true,
+        id_equipe:           true,
         data_criacao_usuario: true,
-        papel: { select: { nome_papel: true } },
-        equipe: { select: { nome_equipe: true } }
-      }
+        papel:  { select: { nome_papel:  true } },
+        equipe: { select: { id_equipe: true, nome_equipe: true } },
+      },
     });
   }
 
@@ -28,11 +28,14 @@ export class UsersManagementRepository {
       where: { id_usuario },
       data,
       select: {
-        id_usuario: true,
-        nome_usuario: true,
-        email_usuario: true,
-        papel: { select: { nome_papel: true } }
-      }
+        id_usuario:          true,
+        nome_usuario:        true,
+        email_usuario:       true,
+        id_equipe:           true,
+        data_criacao_usuario: true,
+        papel:  { select: { nome_papel: true } },
+        equipe: { select: { id_equipe: true, nome_equipe: true } },
+      },
     });
   }
 

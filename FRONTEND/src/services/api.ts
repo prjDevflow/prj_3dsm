@@ -4,11 +4,9 @@ const api = axios.create({
   baseURL: '/api',
 });
 
-// Request interceptor para adicionar token
 api.interceptors.request.use((config) => {
-  const user = localStorage.getItem('@dashboard:user');
-  if (user) {
-    const token = 'fake-jwt-token'; // Mock token
+  const token = localStorage.getItem('@dashboard:token');
+  if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;

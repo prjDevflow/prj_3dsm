@@ -44,10 +44,12 @@ class AuthService {
         return {
             user: {
                 id: user.id,
-                nome: user.nome,
+                name: user.nome, // inglês para o frontend
+                nome: user.nome, // português mantido por compatibilidade
                 email: user.email,
                 role: user.role,
-                equipeId: user.equipeId
+                teamId: user.equipeId, // inglês para o frontend
+                equipeId: user.equipeId,
             },
             token
         };

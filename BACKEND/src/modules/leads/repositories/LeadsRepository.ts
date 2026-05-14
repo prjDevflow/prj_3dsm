@@ -1,4 +1,4 @@
-import { PrismaClient, Lead } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -7,69 +7,52 @@ export class LeadsRepository {
   // MÉTODOS DE CRIAÇÃO E LISTAGEM
   // ---------------------------------------------------------
 
-  async create(data: { id_cliente: string; id_usuario: string; id_loja: string; id_origem: string }): Promise<Lead> {
+  async create(data: { id_cliente: string; id_usuario: string; id_loja: string; id_origem: string }) {
     return prisma.lead.create({
       data
     });
   }
 
+  private readonly includeRelations = {
+    cliente: true,
+    usuario: true,
+    loja:    true,
+    origem:  true,
+    negociacoes: {
+      include: { status: true, estagio: true },
+      orderBy: { data_criacao_negociacao: 'desc' as const },
+    },
+  };
+
   // Lista todos (Administrador e Gerente Geral)
-  async findAll(startDate?: Date, endDate?: Date): Promise<Lead[]> {
+  async findAll(startDate?: Date, endDate?: Date) {
     return prisma.lead.findMany({
-      where: {
-        data_criacao_lead: {
-          gte: startDate,
-          lte: endDate
-        }
-      },
-      include: {
-        cliente: true,
-        usuario: true,
-        loja: true,
-        origem: true
-      }
+      where: { data_criacao_lead: { gte: startDate, lte: endDate } },
+      include: this.includeRelations,
     });
   }
 
   // Lista apenas os leads dos Atendentes da equipa do Gerente
-  async findByEquipeDoGerente(gerenteId: string, startDate?: Date, endDate?: Date): Promise<Lead[]> {
+  async findByEquipeDoGerente(gerenteId: string, startDate?: Date, endDate?: Date) {
     const gerente = await prisma.usuario.findUnique({ where: { id_usuario: gerenteId } });
-    
+
     return prisma.lead.findMany({
       where: {
-        usuario: {
-          id_equipe: gerente?.id_equipe // Filtra pela mesma equipa do gerente
-        },
-        data_criacao_lead: {
-          gte: startDate,
-          lte: endDate
-        }
+        usuario: { id_equipe: gerente?.id_equipe },
+        data_criacao_lead: { gte: startDate, lte: endDate },
       },
-      include: {
-        cliente: true,
-        usuario: true,
-        loja: true,
-        origem: true
-      }
+      include: this.includeRelations,
     });
   }
 
   // Lista apenas os leads do próprio Atendente
-  async findByAtendente(atendenteId: string, startDate?: Date, endDate?: Date): Promise<Lead[]> {
+  async findByAtendente(atendenteId: string, startDate?: Date, endDate?: Date) {
     return prisma.lead.findMany({
       where: {
         id_usuario: atendenteId,
-        data_criacao_lead: {
-          gte: startDate,
-          lte: endDate
-        }
+        data_criacao_lead: { gte: startDate, lte: endDate },
       },
-      include: {
-        cliente: true,
-        usuario: true,
-        loja: true,
-        origem: true
-      }
+      include: this.includeRelations,
     });
   }
 

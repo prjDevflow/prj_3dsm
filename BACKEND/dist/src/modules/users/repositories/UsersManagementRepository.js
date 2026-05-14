@@ -5,16 +5,16 @@ const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 class UsersManagementRepository {
     async findAll() {
-        // Retornamos os dados omitindo a senha por segurança
         return prisma.usuario.findMany({
             select: {
                 id_usuario: true,
                 nome_usuario: true,
                 email_usuario: true,
+                id_equipe: true,
                 data_criacao_usuario: true,
                 papel: { select: { nome_papel: true } },
-                equipe: { select: { nome_equipe: true } }
-            }
+                equipe: { select: { id_equipe: true, nome_equipe: true } },
+            },
         });
     }
     async findById(id_usuario) {
@@ -30,8 +30,11 @@ class UsersManagementRepository {
                 id_usuario: true,
                 nome_usuario: true,
                 email_usuario: true,
-                papel: { select: { nome_papel: true } }
-            }
+                id_equipe: true,
+                data_criacao_usuario: true,
+                papel: { select: { nome_papel: true } },
+                equipe: { select: { id_equipe: true, nome_equipe: true } },
+            },
         });
     }
     async delete(id_usuario) {

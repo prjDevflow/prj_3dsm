@@ -4,8 +4,10 @@ exports.DashboardController = void 0;
 const DashboardService_1 = require("../services/DashboardService");
 class DashboardController {
     async handle(req, res) {
-        const { inicio, fim } = req.query;
-        const { role, id: userId } = req.user; // Pega o ID do utilizador logado
+        // aceita tanto inicio/fim (padrão interno) quanto startDate/endDate (frontend)
+        const inicio = (req.query.inicio ?? req.query.startDate);
+        const fim = (req.query.fim ?? req.query.endDate);
+        const { role, id: userId } = req.user;
         const dashboardService = new DashboardService_1.DashboardService();
         try {
             const metrics = await dashboardService.execute({

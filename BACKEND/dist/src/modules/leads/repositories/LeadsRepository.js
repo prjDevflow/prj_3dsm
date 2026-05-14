@@ -12,21 +12,21 @@ class LeadsRepository {
             data
         });
     }
+    includeRelations = {
+        cliente: true,
+        usuario: true,
+        loja: true,
+        origem: true,
+        negociacoes: {
+            include: { status: true, estagio: true },
+            orderBy: { data_criacao_negociacao: 'desc' },
+        },
+    };
     // Lista todos (Administrador e Gerente Geral)
     async findAll(startDate, endDate) {
         return prisma.lead.findMany({
-            where: {
-                data_criacao_lead: {
-                    gte: startDate,
-                    lte: endDate
-                }
-            },
-            include: {
-                cliente: true,
-                usuario: true,
-                loja: true,
-                origem: true
-            }
+            where: { data_criacao_lead: { gte: startDate, lte: endDate } },
+            include: this.includeRelations,
         });
     }
     // Lista apenas os leads dos Atendentes da equipa do Gerente
@@ -34,20 +34,10 @@ class LeadsRepository {
         const gerente = await prisma.usuario.findUnique({ where: { id_usuario: gerenteId } });
         return prisma.lead.findMany({
             where: {
-                usuario: {
-                    id_equipe: gerente?.id_equipe // Filtra pela mesma equipa do gerente
-                },
-                data_criacao_lead: {
-                    gte: startDate,
-                    lte: endDate
-                }
+                usuario: { id_equipe: gerente?.id_equipe },
+                data_criacao_lead: { gte: startDate, lte: endDate },
             },
-            include: {
-                cliente: true,
-                usuario: true,
-                loja: true,
-                origem: true
-            }
+            include: this.includeRelations,
         });
     }
     // Lista apenas os leads do próprio Atendente
@@ -55,17 +45,9 @@ class LeadsRepository {
         return prisma.lead.findMany({
             where: {
                 id_usuario: atendenteId,
-                data_criacao_lead: {
-                    gte: startDate,
-                    lte: endDate
-                }
+                data_criacao_lead: { gte: startDate, lte: endDate },
             },
-            include: {
-                cliente: true,
-                usuario: true,
-                loja: true,
-                origem: true
-            }
+            include: this.includeRelations,
         });
     }
     // ---------------------------------------------------------

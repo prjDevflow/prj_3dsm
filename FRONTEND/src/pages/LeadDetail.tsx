@@ -83,11 +83,16 @@ const LeadDetail = () => {
     if (sending) return;
     setSending(true); setNegError('');
     try {
-      await api.post(`/leads/${id}/negotiations`, { content, type: negType, importance: negImp, stage: negStage });
+      // Backend: POST /leads/negotiations com leadId no body
+      await api.post('/leads/negotiations', {
+        leadId:     id,
+        importancia: negImp,    // frio | morno | quente
+        estagio:     negStage,  // primeiro_contato | qualificacao | ...
+      });
       setContent(''); setNegType('comentário'); setNegImp('frio'); setNegStage('primeiro_contato');
       await queryClient.invalidateQueries({ queryKey: ['negotiations', id] });
     } catch (err: any) {
-      setNegError(err.response?.data?.message || 'Erro ao adicionar negociação.');
+      setNegError(err.response?.data?.error || err.response?.data?.message || 'Erro ao adicionar negociação.');
     } finally {
       setSending(false);
     }
@@ -97,11 +102,12 @@ const LeadDetail = () => {
     if (!selectedNegotiation || !closeReason.trim()) return;
     setClosingId(selectedNegotiation); setNegError('');
     try {
-      await api.put(`/negotiations/${selectedNegotiation}/close`, { reason: closeReason });
+      // Backend: PUT /leads/negotiations/:id/close
+      await api.put(`/leads/negotiations/${selectedNegotiation}/close`, { reason: closeReason });
       await queryClient.invalidateQueries({ queryKey: ['negotiations', id] });
       setShowCloseModal(false); setCloseReason(''); setSelectedNeg(null);
     } catch (err: any) {
-      setNegError(err.response?.data?.message || 'Erro ao encerrar negociação.');
+      setNegError(err.response?.data?.error || err.response?.data?.message || 'Erro ao encerrar negociação.');
     } finally {
       setClosingId(null);
     }

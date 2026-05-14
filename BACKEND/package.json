@@ -9,7 +9,11 @@
     "start": "node dist/src/shared/infra/http/server.js",
     "test": "jest",
     "prisma:migrate": "npx prisma migrate dev",
-    "prisma:generate": "npx prisma generate"
+    "prisma:generate": "npx prisma generate",
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "node_modules/.bin/ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",

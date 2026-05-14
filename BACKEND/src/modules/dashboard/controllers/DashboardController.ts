@@ -3,8 +3,10 @@ import { DashboardService } from '../services/DashboardService';
 
 export class DashboardController {
   async handle(req: Request, res: Response): Promise<Response> {
-    const { inicio, fim } = req.query;
-    const { role, id: userId } = req.user; // Pega o ID do utilizador logado
+    // aceita tanto inicio/fim (padrão interno) quanto startDate/endDate (frontend)
+    const inicio = (req.query.inicio ?? req.query.startDate) as string | undefined;
+    const fim    = (req.query.fim   ?? req.query.endDate)   as string | undefined;
+    const { role, id: userId } = req.user;
 
     const dashboardService = new DashboardService();
 
