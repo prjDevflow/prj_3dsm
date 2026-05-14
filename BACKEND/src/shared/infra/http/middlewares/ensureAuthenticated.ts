@@ -5,6 +5,7 @@ import { AppError } from "../../../errors/AppError";
 interface IPayload {
   sub: string;
   role: string;
+  equipeId?: string | null;
 }
 
 export async function ensureAuthenticated(
@@ -26,10 +27,10 @@ export async function ensureAuthenticated(
     
     const decoded = verify(token, secret) as IPayload;
 
-    // Injeta os dados do usuário na requisição
     request.user = {
       id: decoded.sub,
       role: decoded.role,
+      equipeId: decoded.equipeId ?? null,
     };
 
     return next();

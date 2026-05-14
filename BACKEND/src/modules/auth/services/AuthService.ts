@@ -38,11 +38,11 @@ export class AuthService {
     const secret = process.env.JWT_SECRET || 'chave_super_secreta_padrao_desenvolvimento';
     
     const token = sign(
-      { role: user.role }, // Payload: Papel (role) injetado para o Middleware RBAC
+      { role: user.role, equipeId: user.equipeId ?? null },
       secret,
       {
-        subject: user.id,    // Identificador do utilizador
-        expiresIn: '1d'      // Tempo de expiração
+        subject: user.id,
+        expiresIn: '1d'
       }
     );
 

@@ -11,8 +11,8 @@ function mapLeadToDTO(lead: any) {
   const statusFromNeg = (() => {
     if (!neg) return 'novo';
     const s = neg.status?.nome_status?.toUpperCase() ?? '';
-    if (s === 'GANHO' || s === 'CONVERTIDO') return 'ganho';
-    if (s === 'PERDIDO' || s === 'CANCELADO') return 'perdido';
+    if (s === 'GANHA' || s === 'GANHO' || s === 'CONVERTIDO') return 'ganho';
+    if (s === 'PERDIDA' || s === 'PERDIDO' || s === 'CANCELADA' || s === 'CANCELADO') return 'perdido';
     const e = neg.estagio?.nome_estagio?.toUpperCase() ?? '';
     if (e === 'PRIMEIRO_CONTATO') return 'contatado';
     return 'qualificado';

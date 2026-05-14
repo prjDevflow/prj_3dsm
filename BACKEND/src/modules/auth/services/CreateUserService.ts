@@ -32,9 +32,9 @@ export class CreateUserService {
       throw new Error("Já existe um utilizador registado com este e-mail.");
     }
 
-    // 2. Procura o ID do Papel baseado na string enviada (ex: 'ATENDENTE')
-    const papel = await prisma.papel.findUnique({
-      where: { nome_papel: role }
+    // 2. Procura o ID do Papel (case-insensitive: aceita 'atendente' ou 'ATENDENTE')
+    const papel = await prisma.papel.findFirst({
+      where: { nome_papel: { equals: role, mode: 'insensitive' } }
     });
 
     if (!papel) {
