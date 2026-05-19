@@ -1,11 +1,11 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import axios from 'axios';
-import { User, LoginCredentials, UserRole } from '../types';
+import { User } from '../types';
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
-  login: (credentials: LoginCredentials) => Promise<boolean>;
+  login: (data: { user: User; token: string }) => void;
   logout: () => void;
   hasRole: (roles: User['role'][]) => boolean;
 }
@@ -24,54 +24,26 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Mapeia o role vindo do backend (MAIÚSCULAS) para o formato do frontend (minúsculas)
-function mapRole(backendRole: string): UserRole {
-  const map: Record<string, UserRole> = {
-    ADMIN: 'admin',
-    GERENTE_GERAL: 'gerente_geral',
-    GERENTE: 'gerente',
-    ATENDENTE: 'atendente',
-  };
-  return map[backendRole] ?? (backendRole.toLowerCase() as UserRole);
-}
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem('@dashboard:user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    const saved = localStorage.getItem('@dashboard:user');
+    return saved ? JSON.parse(saved) : null;
   });
 
-  const login = async (credentials: LoginCredentials): Promise<boolean> => {
-    try {
-      const response = await axios.post('/api/sessions', {
-        email: credentials.email,
-        senha: credentials.password,
-      });
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem('@dashboard:token');
+  });
 
-      const { user: backendUser, token } = response.data;
-
-      const mappedUser: User = {
-        id: backendUser.id,
-        name: backendUser.name ?? backendUser.nome,
-        email: backendUser.email,
-        role: mapRole(backendUser.role),
-        teamId: backendUser.teamId ?? backendUser.equipeId ?? undefined,
-        active: true,
-        createdAt: backendUser.createdAt ?? new Date().toISOString(),
-        updatedAt: backendUser.updatedAt ?? new Date().toISOString(),
-      };
-
-      setUser(mappedUser);
-      localStorage.setItem('@dashboard:user', JSON.stringify(mappedUser));
-      localStorage.setItem('@dashboard:token', token);
-      return true;
-    } catch {
-      return false;
-    }
+  const login = ({ user, token }: { user: User; token: string }) => {
+    setUser(user);
+    setToken(token);
+    localStorage.setItem('@dashboard:user', JSON.stringify(user));
+    localStorage.setItem('@dashboard:token', token);
   };
 
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem('@dashboard:user');
     localStorage.removeItem('@dashboard:token');
   };
@@ -82,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, hasRole }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!user && !!token, login, logout, hasRole }}>
       {children}
     </AuthContext.Provider>
   );

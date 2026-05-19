@@ -23,14 +23,14 @@ export class AuthService {
     const user = await this.usersRepository.findByEmail(email);
 
     if (!user) {
-      throw new Error("E-mail ou palavra-passe incorretos.");
+      throw new Error("E-mail incorreto.");
     }
 
     // 2. Compara a palavra-passe informada com o hash armazenado no banco (RNF02)
     const passwordMatch = await compare(senha, user.senha);
 
     if (!passwordMatch) {
-      throw new Error("E-mail ou palavra-passe incorretos.");
+      throw new Error("Senha incorreta.");
     }
 
     // 3. Gera o Token JWT (RF01)

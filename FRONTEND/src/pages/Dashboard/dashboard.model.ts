@@ -1,0 +1,106 @@
+import { useState, useEffect, useMemo } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { IDashboardService } from "../../services/IDashboardService";
+import { DashboardViewModel, mapToViewModel } from "./dashboard.type";
+
+type DashModelProps = {
+  dashboardService: IDashboardService;
+};
+
+export const useDashboardModel = ({ dashboardService }: DashModelProps) => {
+  const { user } = useAuth();
+
+  const [dateRange, setDateRange] = useState<{ start: Date; end: Date }>(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - 30);
+    return { start, end };
+  });
+  const [store, setStore] = useState<string>("all");
+  const [team, setTeam] = useState<string>("all");
+  const [metrics, setMetrics] = useState<DashboardViewModel | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchMetrics = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const startFormatted = dateRange.start.toISOString().split("T")[0];
+      const endFormatted = dateRange.end.toISOString().split("T")[0];
+      const data = await dashboardService.getMetrics({
+        start: startFormatted,
+        end: endFormatted,
+      });
+      setMetrics(mapToViewModel(data));
+    } catch (err) {
+      console.error("Error fetching dashboard metrics:", err);
+      setError("Failed to load dashboard metrics.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMetrics();
+  }, [dateRange, store, team]); // Refetch when dateRange, store, or team changes
+
+  const refetch = () => {
+    // Expose refetch function
+    fetchMetrics();
+  };
+
+  const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null);
+  const [selectedSource, setSelectedSource] = useState<string | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
+
+  const role = user?.role;
+  const isAtendente = role === "atendente";
+  const isGerente = role === "gerente";
+  const isAdminOuGerenteGeral = role === "admin" || role === "gerente_geral";
+
+  const firstName = user?.nome?.split(" ")[0] ?? "";
+  const greeting = useMemo(() => {
+    const h = new Date().getHours();
+    if (h >= 5 && h < 12) return "Bom dia";
+    if (h >= 12 && h < 18) return "Boa tarde";
+    return "Boa noite";
+  }, []);
+
+  const handleDateRangeChange = (range: { start: Date; end: Date }) =>
+    setDateRange(range);
+  const handleStoreChange = (newStore: string) => setStore(newStore);
+  const handleTeamChange = (newTeam: string) => setTeam(newTeam);
+
+  const safeArray = (arr: any[] | undefined) => (Array.isArray(arr) ? arr : []);
+
+  return {
+    user,
+    dateRange,
+    setDateRange,
+    store,
+    setStore,
+    team,
+    setTeam,
+    metrics,
+    isLoading,
+    error,
+    refetch,
+    selectedPeriod,
+    setSelectedPeriod,
+    selectedSource,
+    setSelectedSource,
+    selectedAgent,
+    setSelectedAgent,
+    role,
+    isAtendente,
+    isGerente,
+    isAdminOuGerenteGeral,
+    firstName,
+    greeting,
+    handleDateRangeChange,
+    handleStoreChange,
+    handleTeamChange,
+    safeArray,
+  };
+};
