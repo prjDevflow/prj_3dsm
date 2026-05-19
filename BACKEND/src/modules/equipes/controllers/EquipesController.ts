@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
 import { CreateEquipeService } from '../services/CreateEquipeService';
-import { ListEquipesService } from '../services/ListEquipesService';
 import { UpdateEquipeService } from '../services/UpdateEquipeService';
 import { DeleteEquipeService } from '../services/DeleteEquipeService';
+
+const prisma = new PrismaClient();
 
 export class EquipesController {
   async create(request: Request, response: Response): Promise<Response> {
@@ -16,10 +18,26 @@ export class EquipesController {
   }
 
   async list(request: Request, response: Response): Promise<Response> {
-    const listEquipesService = new ListEquipesService();
-    const equipes = await listEquipesService.execute();
+    const equipes = await prisma.equipe.findMany({
+      include: { usuarios: { select: { id_usuario: true, nome_usuario: true, papel_usuario: true } } },
+    });
 
-    return response.status(200).json(equipes);
+    const data = equipes.map(e => {
+      const manager = e.usuarios.find(u => u.papel_usuario === 'GERENTE' || u.papel_usuario === 'GERENTE_GERAL');
+      return {
+        id:          e.id_equipe,
+        name:        e.nome_equipe,
+        description: '',
+        managerId:   manager?.id_usuario ?? null,
+        managerName: manager?.nome_usuario ?? null,
+        members:     e.usuarios.map(u => u.id_usuario),
+        memberCount: e.usuarios.length,
+        createdAt:   new Date().toISOString(),
+        updatedAt:   new Date().toISOString(),
+      };
+    });
+
+    return response.status(200).json(data);
   }
 
   async update(request: Request, response: Response): Promise<Response> {

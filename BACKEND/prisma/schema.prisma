@@ -50,11 +50,13 @@ model Usuario {
 }
 
 model Cliente {
-  id_cliente       String @id @default(uuid()) @db.Uuid
-  nome_cliente     String @db.VarChar(150)
-  telefone_cliente String @db.VarChar(20)
-  email_cliente    String @unique @db.VarChar(150)
-  leads            Lead[]
+  id_cliente        String  @id @default(uuid()) @db.Uuid
+  nome_cliente      String  @db.VarChar(150)
+  telefone_cliente  String  @db.VarChar(20)
+  email_cliente     String  @unique @db.VarChar(150)
+  id_lead_principal String? @db.Uuid
+  id_consultor      String? @db.Uuid
+  leads             Lead[]
 
   @@map("clientes")
 }

@@ -22,25 +22,43 @@ export class ListClientesController {
       : {};
 
     const [clientes, total] = await Promise.all([
-      prisma.cliente.findMany({ where, skip, take: limitNum, orderBy: { nome_cliente: 'asc' } }),
+      prisma.cliente.findMany({
+        where,
+        skip,
+        take: limitNum,
+        orderBy: { nome_cliente: 'asc' },
+      }),
       prisma.cliente.count({ where }),
     ]);
 
+    // Busca nomes dos consultores em lote
+    const consultorIds = clientes
+      .map(c => c.id_consultor)
+      .filter((id): id is string => !!id);
+
+    const consultores = consultorIds.length
+      ? await prisma.usuario.findMany({
+          where: { id_usuario: { in: consultorIds } },
+          select: { id_usuario: true, nome_usuario: true },
+        })
+      : [];
+
+    const consultorMap = Object.fromEntries(
+      consultores.map(u => [u.id_usuario, u.nome_usuario])
+    );
+
     const data = clientes.map((c) => ({
-      id:        c.id_cliente,
-      name:      c.nome_cliente,
-      email:     c.email_cliente,
-      phone:     c.telefone_cliente,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      id:          c.id_cliente,
+      name:        c.nome_cliente,
+      email:       c.email_cliente,
+      phone:       c.telefone_cliente,
+      leadId:      c.id_lead_principal ?? null,
+      consultorId: c.id_consultor ?? null,
+      assignedTo:  c.id_consultor ? (consultorMap[c.id_consultor] ?? null) : null,
+      createdAt:   new Date().toISOString(),
+      updatedAt:   new Date().toISOString(),
     }));
 
-    return res.json({
-      data,
-      total,
-      page:       pageNum,
-      limit:      limitNum,
-      totalPages: Math.ceil(total / limitNum),
-    });
+    return res.json({ data, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) });
   }
 }

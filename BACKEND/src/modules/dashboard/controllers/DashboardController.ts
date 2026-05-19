@@ -6,7 +6,7 @@ export class DashboardController {
     // aceita tanto inicio/fim (padrão interno) quanto startDate/endDate (frontend)
     const inicio = (req.query.inicio ?? req.query.startDate) as string | undefined;
     const fim    = (req.query.fim   ?? req.query.endDate)   as string | undefined;
-    const { role, id: userId } = req.user;
+    const { role, id: userId, equipeId } = req.user;
 
     const dashboardService = new DashboardService();
 
@@ -15,7 +15,8 @@ export class DashboardController {
         inicio: inicio as string,
         fim: fim as string,
         role,
-        userId // <-- Agora passa o userId sem erro de tipagem
+        userId,
+        equipeId
       });
 
       return res.json(metrics);

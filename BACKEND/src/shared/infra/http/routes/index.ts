@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { CreateClienteController } from '../../../../modules/clientes/controllers/CreateClienteController';
 import { ListClientesController } from '../../../../modules/clientes/controllers/ListClientesController';
+import { UpdateClienteController } from '../../../../modules/clientes/controllers/UpdateClienteController';
+import { DeleteClienteController } from '../../../../modules/clientes/controllers/DeleteClienteController';
+import { ListConsultoresController } from '../../../../modules/clientes/controllers/ListConsultoresController';
 import { CreateLojaController } from '../../../../modules/lojas/controllers/CreateLojaController';
 import { CreateOrigemController } from '../../../../modules/origens/controllers/CreateOrigemController';
 import { ensureAuthenticated } from '../middlewares/ensureAuthenticated';
@@ -18,6 +21,9 @@ const router = Router();
 
 const createClienteController = new CreateClienteController();
 const listClientesController  = new ListClientesController();
+const updateClienteController    = new UpdateClienteController();
+const deleteClienteController    = new DeleteClienteController();
+const listConsultoresController  = new ListConsultoresController();
 const createLojaController    = new CreateLojaController();
 const createOrigemController  = new CreateOrigemController();
 const dashboardController     = new DashboardController();
@@ -44,11 +50,18 @@ router.use('/teams',   equipesRoutes);
 router.post('/users',  ensureAuthenticated, ensureRole([UserRole.ADMIN]), createUserController.handle);
 router.use('/users',   usersRoutes);
 
+// Consultores (lista de usuários para o select de clientes — acessível a todos)
+router.get('/consultores', ensureAuthenticated, listConsultoresController.handle);
+
 // Clientes — exposto em /clientes e /clients (alias para o frontend)
-router.get('/clientes',  ensureAuthenticated, listClientesController.handle);
-router.post('/clientes', ensureAuthenticated, createClienteController.handle);
-router.get('/clients',   ensureAuthenticated, listClientesController.handle);
-router.post('/clients',  ensureAuthenticated, createClienteController.handle);
+router.get('/clientes',         ensureAuthenticated, listClientesController.handle);
+router.post('/clientes',        ensureAuthenticated, createClienteController.handle);
+router.put('/clientes/:id',     ensureAuthenticated, updateClienteController.handle);
+router.delete('/clientes/:id',  ensureAuthenticated, deleteClienteController.handle);
+router.get('/clients',          ensureAuthenticated, listClientesController.handle);
+router.post('/clients',         ensureAuthenticated, createClienteController.handle);
+router.put('/clients/:id',      ensureAuthenticated, updateClienteController.handle);
+router.delete('/clients/:id',   ensureAuthenticated, deleteClienteController.handle);
 
 // Lojas e Origens
 router.post('/lojas',   ensureAuthenticated, ensureRole([UserRole.ADMIN]), createLojaController.handle);

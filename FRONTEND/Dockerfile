@@ -14,7 +14,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # Expõe a porta padrão do Vite (ajusta se a tua configuração do Vite for diferente)
-EXPOSE 5173
+EXPOSE 3000
 
 # Inicia o servidor de desenvolvimento do frontend
 CMD ["npm", "run", "dev", "--", "--host"]

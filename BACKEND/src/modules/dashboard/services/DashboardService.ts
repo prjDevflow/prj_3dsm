@@ -13,98 +13,163 @@ interface IDashboardRequest {
 
 export class DashboardService {
   async execute({ role, userId, equipeId, inicio, fim }: IDashboardRequest) {
-    // 1. Validação Temporal (RF06) - Padrão 30 dias, limite 1 ano para não-admins
     const { startDate, endDate } = DateValidator.validate(inicio, fim, role);
 
-    // 2. Filtro de Segurança Baseado em Papel (RF02)
+    const normalizedRole = role.toUpperCase();
+
     const baseWhere: any = {
       data_criacao_lead: { gte: startDate, lte: endDate }
     };
 
-    if (role === 'GERENTE') {
+    if (normalizedRole === 'ATENDENTE') {
+      baseWhere.id_usuario = userId;
+    } else if (normalizedRole === 'GERENTE') {
       if (!equipeId) throw new Error("Gerente sem equipa vinculada.");
-      // O Gerente só vê os leads dos utilizadores que pertencem à sua equipa
       baseWhere.usuario = { id_equipe: equipeId };
     }
 
-    // 3. Recolha de Dados (Dashboard Operacional - RF04)
-    const totalLeads = await prisma.lead.count({ where: baseWhere });
-
-    // Agrupamentos Operacionais
-    const leadsPorOrigem = await prisma.lead.groupBy({
-      by: ['id_origem'],
+    // Leads com relações necessárias
+    const leads = await prisma.lead.findMany({
       where: baseWhere,
-      _count: { id_lead: true }
-    });
-
-    const leadsPorLoja = await prisma.lead.groupBy({
-      by: ['id_loja'],
-      where: baseWhere,
-      _count: { id_lead: true }
-    });
-
-    // 4. Recolha de Dados (Dashboard Analítico - RF05)
-    // Para métricas de negociação, fazemos join partindo das negociações dos leads filtrados
-    const negociacoes = await prisma.negociacao.findMany({
-      where: {
-        lead: baseWhere
-      },
       include: {
-        status: true,
-        estagio: true,
-        lead: {
-          include: { usuario: true }
+        origem: true,
+        loja: true,
+        usuario: { include: { equipe: true } },
+        negociacoes: {
+          include: { status: true, estagio: true }
         }
       }
     });
 
-    let convertidos = 0;
-    let finalizados = 0;
-    const distribuicaoImportancia: Record<string, number> = { FRIO: 0, MORNO: 0, QUENTE: 0 };
-    const motivosFinalizacao: Record<string, number> = {};
-    const leadsPorAtendente: Record<string, number> = {};
+    const totalLeads = leads.length;
 
-    negociacoes.forEach(neg => {
-      // Importância
-      if (distribuicaoImportancia[neg.importancia_negociacao] !== undefined) {
-        distribuicaoImportancia[neg.importancia_negociacao]++;
-      }
+    // KPIs
+    let convertedLeads = 0;
+    leads.forEach(lead => {
+      const ganhou = lead.negociacoes.some(
+        n => n.status.nome_status.toUpperCase() === 'GANHA'
+      );
+      if (ganhou) convertedLeads++;
+    });
+    const conversionRate = totalLeads > 0
+      ? parseFloat(((convertedLeads / totalLeads) * 100).toFixed(2))
+      : 0;
 
-      // Atendente
-      const nomeAtendente = neg.lead.usuario.nome_usuario;
-      leadsPorAtendente[nomeAtendente] = (leadsPorAtendente[nomeAtendente] || 0) + 1;
+    // bySource
+    const sourceMap: Record<string, number> = {};
+    leads.forEach(l => {
+      const src = l.origem.nome_origem;
+      sourceMap[src] = (sourceMap[src] || 0) + 1;
+    });
+    const bySource = Object.entries(sourceMap).map(([source, count]) => ({ source, count }));
 
-      // Conversão e Finalização (Assumimos que o status nome_status define se está finalizado/convertido)
-      const nomeStatus = neg.status.nome_status.toUpperCase();
-      if (nomeStatus === 'CONVERTIDO' || nomeStatus === 'GANHO') {
-        convertidos++;
-        finalizados++;
-      } else if (nomeStatus === 'PERDIDO' || nomeStatus === 'CANCELADO') {
-        finalizados++;
-        if (neg.motivo_finalizacao_negociacao) {
-          motivosFinalizacao[neg.motivo_finalizacao_negociacao] = (motivosFinalizacao[neg.motivo_finalizacao_negociacao] || 0) + 1;
-        }
+    // byStore
+    const storeMap: Record<string, number> = {};
+    leads.forEach(l => {
+      const st = l.loja.nome_loja;
+      storeMap[st] = (storeMap[st] || 0) + 1;
+    });
+    const byStore = Object.entries(storeMap).map(([store, count]) => ({ store, count }));
+
+    // byTeam
+    const teamMap: Record<string, number> = {};
+    leads.forEach(l => {
+      const team = l.usuario.equipe?.nome_equipe ?? 'Sem equipe';
+      teamMap[team] = (teamMap[team] || 0) + 1;
+    });
+    const byTeam = Object.entries(teamMap).map(([team, count]) => ({ team, count }));
+
+    // Todas as negociações dos leads filtrados
+    const allNegs = leads.flatMap(l => l.negociacoes);
+
+    // byStatus
+    const statusMap: Record<string, number> = {};
+    allNegs.forEach(n => {
+      const s = n.status.nome_status;
+      statusMap[s] = (statusMap[s] || 0) + 1;
+    });
+    const byStatus = Object.entries(statusMap).map(([status, count]) => ({ status, count }));
+
+    // byImportance
+    const impMap: Record<string, number> = {};
+    allNegs.forEach(n => {
+      const imp = n.importancia_negociacao;
+      impMap[imp] = (impMap[imp] || 0) + 1;
+    });
+    const byImportance = Object.entries(impMap).map(([importance, count]) => ({ importance, count }));
+
+    // funnel (por estágio)
+    const funnelMap: Record<string, number> = {};
+    allNegs.forEach(n => {
+      const stage = n.estagio.nome_estagio;
+      funnelMap[stage] = (funnelMap[stage] || 0) + 1;
+    });
+    const funnel = Object.entries(funnelMap).map(([stage, count]) => ({ stage, count }));
+
+    // convertedVsNonConverted
+    const convertedVsNonConverted = [
+      { name: 'Convertidos', value: convertedLeads },
+      { name: 'Não Convertidos', value: totalLeads - convertedLeads }
+    ];
+
+    // lossReasons
+    const lossMap: Record<string, number> = {};
+    allNegs.forEach(n => {
+      const st = n.status.nome_status.toUpperCase();
+      if ((st === 'PERDIDA' || st === 'CANCELADA') && n.motivo_finalizacao_negociacao) {
+        const r = n.motivo_finalizacao_negociacao;
+        lossMap[r] = (lossMap[r] || 0) + 1;
       }
     });
+    const lossReasons = Object.entries(lossMap).map(([reason, count]) => ({ reason, count }));
 
-    const taxaConversao = finalizados > 0 ? ((convertidos / finalizados) * 100).toFixed(2) + '%' : '0%';
+    // performance (por atendente)
+    const perfMap: Record<string, { leads: number; conversions: number }> = {};
+    leads.forEach(l => {
+      const agent = l.usuario.nome_usuario;
+      if (!perfMap[agent]) perfMap[agent] = { leads: 0, conversions: 0 };
+      perfMap[agent].leads++;
+      const ganhou = l.negociacoes.some(
+        n => n.status.nome_status.toUpperCase() === 'GANHA'
+      );
+      if (ganhou) perfMap[agent].conversions++;
+    });
+    const performance = Object.entries(perfMap).map(([agent, v]) => ({ agent, ...v }));
 
-    // 5. Retorno Consolidado
+    // evolution (leads e conversões agrupados por dia)
+    const evoMap: Record<string, { leads: number; conversions: number }> = {};
+    leads.forEach(l => {
+      const day = l.data_criacao_lead.toISOString().slice(0, 10);
+      if (!evoMap[day]) evoMap[day] = { leads: 0, conversions: 0 };
+      evoMap[day].leads++;
+      const ganhou = l.negociacoes.some(
+        n => n.status.nome_status.toUpperCase() === 'GANHA'
+      );
+      if (ganhou) evoMap[day].conversions++;
+    });
+    const evolution = Object.entries(evoMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, v]) => ({ date, ...v }));
+
     return {
-      periodo: { inicio: startDate, fim: endDate },
-      operacional: {
+      kpis: {
         totalLeads,
-        leadsPorOrigem,
-        leadsPorLoja
+        convertedLeads,
+        conversionRate,
+        avgDealValue: 0,
+        totalRevenue: 0
       },
-      analitico: {
-        totalConvertidos: convertidos,
-        totalNaoConvertidos: finalizados - convertidos,
-        taxaConversao,
-        distribuicaoImportancia,
-        motivosFinalizacao,
-        leadsPorAtendente
-      }
+      funnel,
+      bySource,
+      byStatus,
+      byImportance,
+      byStore,
+      convertedVsNonConverted,
+      byTeam,
+      avgTimeToFirstContact: 'N/A',
+      evolution,
+      performance,
+      lossReasons
     };
   }
 }

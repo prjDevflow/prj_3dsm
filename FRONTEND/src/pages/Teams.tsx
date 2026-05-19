@@ -45,7 +45,7 @@ const Teams = () => {
   const visibleTeams = isGerente
     ? teams.filter(t => t.managerId === user?.id)
     : teams.filter(t =>
-        t.name.toLowerCase().includes(search.toLowerCase()) ||
+        (t.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
         (t.description ?? '').toLowerCase().includes(search.toLowerCase())
       );
 
@@ -186,7 +186,7 @@ const Teams = () => {
                   <div className="p-5 flex flex-col sm:flex-row sm:items-center gap-4">
                     {/* Avatar + info */}
                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${avatarColor(team.name)}`}>
+                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${avatarColor(team.name ?? '?')}`}>
                         <Building2 size={20} className="text-white" />
                       </div>
                       <div className="min-w-0">

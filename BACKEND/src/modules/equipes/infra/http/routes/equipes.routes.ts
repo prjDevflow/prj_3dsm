@@ -7,14 +7,12 @@ import { UserRole } from '../../../../../domain/models/UserRole';
 const equipesRoutes = Router();
 const equipesController = new EquipesController();
 
-// Todas as rotas de equipes exigem autenticação
 equipesRoutes.use(ensureAuthenticated);
 
-// A regra de Ouro do RF02: Apenas ADMIN pode gerenciar equipes [cite: 107, 110, 116]
-equipesRoutes.use(ensureRole([UserRole.ADMIN]));
-
-equipesRoutes.post('/', equipesController.create);
 equipesRoutes.get('/', equipesController.list);
+
+equipesRoutes.use(ensureRole([UserRole.ADMIN]));
+equipesRoutes.post('/', equipesController.create);
 equipesRoutes.put('/:id', equipesController.update);
 equipesRoutes.delete('/:id', equipesController.delete);
 

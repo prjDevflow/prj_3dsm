@@ -2,11 +2,11 @@ import { useState } from 'react';
 import Header from '../components/Header';
 import { useAuth } from '../context/AuthContext';
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient } from '../hooks/useClients';
-import { useLeads } from '../hooks/useLeads';
+import { useConsultores } from '../hooks/useConsultores';
 import { Client } from '../types';
 import {
   Plus, Edit2, Trash2, Search, X, Loader2,
-  CheckCircle, AlertCircle, UserCheck, ChevronLeft, ChevronRight, ArrowUpRight,
+  CheckCircle, AlertCircle, UserCheck, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -15,7 +15,7 @@ const avatarColors = ['bg-blue-500','bg-purple-500','bg-emerald-500','bg-amber-5
 const avatarColor  = (name: string) => avatarColors[name.charCodeAt(0) % avatarColors.length];
 
 const emptyForm = (): Partial<Client> => ({
-  name: '', email: '', phone: '', cpf: '', leadId: '',
+  name: '', email: '', phone: '', cpf: '', consultorId: '',
 });
 
 const Clients = () => {
@@ -35,9 +35,9 @@ const Clients = () => {
 
   const assignedTo = isAdmin ? undefined : user?.id;
 
-  const { data, isLoading }  = useClients({ page, limit, search, assignedTo });
-  const { data: leadsData }  = useLeads({ limit: 100 });
-  const leads                = leadsData?.data ?? [];
+  const { data, isLoading }      = useClients({ page, limit, search, assignedTo });
+  const { data: consultoresData } = useConsultores();
+  const consultores               = consultoresData ?? [];
 
   const createClient = useCreateClient();
   const updateClient = useUpdateClient();
@@ -50,13 +50,13 @@ const Clients = () => {
   const endItem    = Math.min(page * limit, total);
 
   const openCreate = () => {
-    setFormData({ ...emptyForm(), assignedTo: user?.id ?? '' });
+    setFormData({ ...emptyForm() });
     setEditingClient(null); setFormError('');
     setShowModal(true);
   };
 
   const openEdit = (client: Client) => {
-    setFormData({ name: client.name, email: client.email, phone: client.phone, cpf: client.cpf, leadId: client.leadId });
+    setFormData({ name: client.name, email: client.email, phone: client.phone, cpf: client.cpf, consultorId: (client as any).consultorId ?? '' });
     setEditingClient(client); setFormError('');
     setShowModal(true);
   };
@@ -68,7 +68,7 @@ const Clients = () => {
         await updateClient.mutateAsync({ id: editingClient.id, ...formData });
         showFeedback('Cliente atualizado com sucesso!');
       } else {
-        await createClient.mutateAsync({ ...formData, assignedTo: user?.id });
+        await createClient.mutateAsync({ ...formData });
         showFeedback('Cliente criado com sucesso!');
       }
       setShowModal(false);
@@ -142,7 +142,7 @@ const Clients = () => {
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Cliente</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Contato</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">CPF</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Lead Vinculado</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Consultor Responsável</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Criado em</th>
                   <th className="px-6 py-3" />
                 </tr>
@@ -176,10 +176,13 @@ const Clients = () => {
                       {client.cpf || <span className="text-slate-300">—</span>}
                     </td>
                     <td className="px-6 py-4">
-                      {client.leadId ? (
-                        <a href={`/leads/${client.leadId}`} className="inline-flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline font-medium">
-                          {client.leadName || client.leadId} <ArrowUpRight size={11} />
-                        </a>
+                      {client.assignedTo ? (
+                        <div className="flex items-center gap-2">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${avatarColor(client.assignedTo)}`}>
+                            <span className="text-white text-xs font-semibold">{client.assignedTo.charAt(0).toUpperCase()}</span>
+                          </div>
+                          <span className="text-sm text-slate-700">{client.assignedTo}</span>
+                        </div>
                       ) : <span className="text-slate-300 text-sm">—</span>}
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-500">
@@ -283,10 +286,16 @@ const Clients = () => {
                   className="input w-full" placeholder="000.000.000-00" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Lead Vinculado</label>
-                <select value={formData.leadId ?? ''} onChange={e => setFormData(p => ({ ...p, leadId: e.target.value }))} className="input w-full">
-                  <option value="">Selecionar lead...</option>
-                  {leads.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Consultor Responsável</label>
+                <select
+                  value={(formData as any).consultorId ?? ''}
+                  onChange={e => setFormData(p => ({ ...p, consultorId: e.target.value }))}
+                  className="input w-full"
+                >
+                  <option value="">Selecionar consultor...</option>
+                  {consultores.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
                 </select>
               </div>
             </div>

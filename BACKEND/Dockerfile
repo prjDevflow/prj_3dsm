@@ -23,8 +23,12 @@ COPY . .
 # Compila o código TypeScript para JavaScript (gera a pasta dist/)
 RUN npm run build
 
+# Copia e prepara o entrypoint
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+
 # Expõe a porta que a API utilizará
 EXPOSE 3333
 
-# Comando para iniciar a aplicação
-CMD ["npm", "run", "start"]
+# Roda migrations + seed e inicia o servidor
+ENTRYPOINT ["./entrypoint.sh"]
