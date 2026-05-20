@@ -233,3 +233,29 @@ A plataforma integra dados de diferentes canais de captação:
 ### Burndown Chart
 
 <img height="500" alt="Burndown" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/burndown_sprint1.png" />
+
+## Sprint 2 — Planejamento (Poker Planning)
+
+### Estimativa de Tarefas e Story Points
+
+| #  | Item                                                                                         | Pontos | Status |
+|----|----------------------------------------------------------------------------------------------|--------|--------|
+| 1  | Remover limitação/barreira de espaço                                                         | 5      | ✅ Concluído |
+| 2  | Ampliar fontes para melhor visualização                                                      | 3      | ✅ Concluído |
+| 3  | Ajustar responsividade para diferentes dispositivos                                          | 5      | ✅ Concluído |
+| 4  | Aplicar filtros padrão (7, 15, 30 e 60 dias)                                                 | 3      | ✅ Concluído |
+| 5  | Melhorar visibilidade geral da interface                                                     | 5      | ✅ Concluído |
+| 6  | Criar Dockerfile para backend                                                                | 8      | ✅ Concluído |
+| 7  | Criar docker-compose.yml com serviços: postgres, backend e frontend                          | 5      | ✅ Concluído |
+| 8  | Criar seletor de período (última semana, mês, ano e personalizado)                           | 5      | ✅ Concluído |
+| 9  | Implementar Date Picker para período customizado                                             | 3      | ✅ Concluído |
+| 10 | Atualizar gráficos dinamicamente                                                             | 5      | ✅ Concluído |
+| 11 | Salvar preferência de filtros no LocalStorage                                                | 3      | ✅ Concluído |
+| 12 | Adicionar tooltips e informações detalhadas nos gráficos                                     | 5      | ✅ Concluído |
+|    | **Total**                                                                                    | **55** |        |
+
+---
+
+## Burndown Chart
+
+  <img height="500" alt="Burndown Sprint 2" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/burndown_sprint2.png" />
