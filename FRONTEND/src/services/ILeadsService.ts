@@ -15,16 +15,19 @@ export interface ILead {
 }
 
 export interface ICreateLeadRequest {
-  clienteId: string;
-  lojaId: string;
-  origemId: string;
+  name: string;
+  email: string;
+  phone?: string;
+  store: string;
+  origin: string;
+  assignedTo?: string;
 }
 
 export interface IUpdateLeadRequest {
   id: string;
-  lojaId?: string;
-  origemId?: string;
-  atendenteId?: string;
+  store?: string;
+  origin?: string;
+  assignedTo?: string;
 }
 
 export type FetchLeadsParams = {

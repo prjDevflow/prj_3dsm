@@ -85,7 +85,7 @@ const InteractivePieChart: React.FC<InteractivePieChartProps> = ({
     setActiveIndex(undefined);
   };
 
-  const onPieClick = (data: any, index: number) => {
+  const onPieClick = (data: any, _index: number) => {
     if (onSliceClick) {
       onSliceClick(data);
     }

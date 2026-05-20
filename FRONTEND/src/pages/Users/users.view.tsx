@@ -1,6 +1,7 @@
 import { AlertCircle, Check, ChevronLeft, ChevronRight, Edit2, Filter, Loader2, Plus, Search, Trash2, X } from 'lucide-react';
 import { Header } from "../../components/Header";
 import { useUsersModel } from "./users.model";
+import { UserRole } from "../../types";
 
 type UsersViewProps = ReturnType<typeof useUsersModel>;
 
@@ -20,7 +21,9 @@ export const UsersView = (props: UsersViewProps) => {
     showModal,
     editingUser,
     deleteConfirm,
+    setDeleteConfirm,
     formData,
+    setFormData,
     data,
     isLoading,
     error,
@@ -191,9 +194,9 @@ export const UsersView = (props: UsersViewProps) => {
                         </td>
                         <td className="px-6 py-4">
                           <span
-                            className={`px-2.5 py-1 text-xs font-medium rounded-full ${roleColors[user.role]}`}
+                            className={`px-2.5 py-1 text-xs font-medium rounded-full ${roleColors[user.role as keyof typeof roleColors] ?? ''}`}
                           >
-                            {roleLabels[user.role]}
+                            {roleLabels[user.role as keyof typeof roleLabels] ?? user.role}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-slate-600">
@@ -201,7 +204,7 @@ export const UsersView = (props: UsersViewProps) => {
                             "-"}
                         </td>
                         <td className="px-6 py-4">
-                          {user.active ? (
+                          {user.active !== false ? (
                             <span className="inline-flex items-center text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
                               <Check size={12} className="mr-1" />
                               Ativo
@@ -215,7 +218,7 @@ export const UsersView = (props: UsersViewProps) => {
                         </td>
                         <td className="px-6 py-4 text-right space-x-2">
                           <button
-                            onClick={() => handleOpenModal(user)}
+                            onClick={() => handleOpenModal({ ...user, role: user.role as UserRole })}
                             className="p-1 text-slate-400 hover:text-[var(--color-primary)] transition-colors"
                             title="Editar"
                           >

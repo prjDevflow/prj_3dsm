@@ -163,21 +163,21 @@ export const ClientsView = (props: ClientsViewProps) => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${avatarColor(client.nome)}`}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${avatarColor(client.name)}`}
                           >
                             <span className="text-white text-xs font-semibold">
-                              {client.nome.charAt(0).toUpperCase()}
+                              {client.name.charAt(0).toUpperCase()}
                             </span>
                           </div>
                           <span className="text-sm font-medium text-slate-800">
-                            {client.nome}
+                            {client.name}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-sm text-slate-700">{client.email}</p>
                         <p className="text-xs text-slate-400 mt-0.5">
-                          {client.telefone}
+                          {client.phone}
                         </p>
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-600">
@@ -191,7 +191,7 @@ export const ClientsView = (props: ClientsViewProps) => {
                             href={`/leads/${client.leadId}`}
                             className="inline-flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline font-medium"
                           >
-                            {client.leadName || client.leadId}{" "}
+                            {client.leadId}{" "}
                             <ArrowUpRight size={11} />
                           </a>
                         ) : (
@@ -334,9 +334,9 @@ export const ClientsView = (props: ClientsViewProps) => {
                 </label>
                 <input
                   type="text"
-                  value={formData.nome ?? ""}
+                  value={formData.name ?? ""}
                   onChange={(e) =>
-                    handleFormChange("nome", e.target.value)
+                    handleFormChange("name", e.target.value)
                   }
                   className="input w-full"
                   placeholder="Nome completo"
@@ -363,9 +363,9 @@ export const ClientsView = (props: ClientsViewProps) => {
                   </label>
                   <input
                     type="text"
-                    value={formData.telefone ?? ""}
+                    value={formData.phone ?? ""}
                     onChange={(e) =>
-                      handleFormChange("telefone", e.target.value)
+                      handleFormChange("phone", e.target.value)
                     }
                     className="input w-full"
                     placeholder="(00) 00000-0000"

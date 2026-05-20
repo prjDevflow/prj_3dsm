@@ -8,20 +8,16 @@ export type DashboardViewModel = {
     totalRevenue: number;
     avgDealValue?: number;
   };
-
-  funnel: any[];
-  evolution: any[];
-
-  bySource: any[];
-  byStatus: any[];
-  byImportance: any[];
-  byStore: any[];
-
-  convertedVsNonConverted: any[];
-  byTeam: any[];
-  performance: any[];
-  lossReasons: any[];
-
+  funnel: { stage: string; count: number }[];
+  evolution: { date: string; leads: number; conversions: number }[];
+  bySource: { source: string; count: number }[];
+  byStatus: { status: string; count: number }[];
+  byImportance: { importance: string; count: number }[];
+  byStore: { store: string; count: number }[];
+  convertedVsNonConverted: { name: string; value: number }[];
+  byTeam: { team: string; count: number }[];
+  performance: { agent: string; leads: number; conversions: number }[];
+  lossReasons: { reason: string; count: number }[];
   avgTimeToFirstContact: string;
 };
 
@@ -30,27 +26,22 @@ export const mapToViewModel = (
 ): DashboardViewModel => {
   return {
     kpis: {
-      totalLeads: data.operational?.totalLeads ?? 0,
-      convertedLeads: data.analytical?.totalConverted ?? 0,
-      conversionRate: data.analytical?.conversionRate ?? "0",
-      totalRevenue: 0,
-      avgDealValue: data.analytical?.avgDealValue ?? undefined,
+      totalLeads:     data.kpis?.totalLeads     ?? 0,
+      convertedLeads: data.kpis?.convertedLeads ?? 0,
+      conversionRate: String(data.kpis?.conversionRate ?? 0),
+      totalRevenue:   data.kpis?.totalRevenue   ?? 0,
+      avgDealValue:   data.kpis?.avgDealValue   ?? 0,
     },
-
-    bySource: data.operational?.leadsBySource ?? [],
-    byStore: data.operational?.leadsByStore ?? [],
-
-    byImportance: data.analytical?.importanceDistribution ?? [],
-    byStatus: data.analytical?.completionReasons ?? [],
-
-    // ❗ não existem no backend → fallback
-    funnel: [],
-    evolution: [],
-    convertedVsNonConverted: [],
-    byTeam: [],
-    performance: [],
-    lossReasons: [],
-
-    avgTimeToFirstContact: "0 dias",
+    funnel:                  data.funnel                  ?? [],
+    evolution:               data.evolution               ?? [],
+    bySource:                data.bySource                ?? [],
+    byStatus:                data.byStatus                ?? [],
+    byImportance:            data.byImportance            ?? [],
+    byStore:                 data.byStore                 ?? [],
+    convertedVsNonConverted: data.convertedVsNonConverted ?? [],
+    byTeam:                  data.byTeam                  ?? [],
+    performance:             data.performance             ?? [],
+    lossReasons:             data.lossReasons             ?? [],
+    avgTimeToFirstContact:   data.avgTimeToFirstContact   ?? "N/A",
   };
 };

@@ -3,10 +3,10 @@ import { IDashboardService, IDashboardMetricsRequest, IDashboardMetricsResponse 
 
 export class DashboardService implements IDashboardService {
   async getMetrics(params?: IDashboardMetricsRequest): Promise<IDashboardMetricsResponse> {
-    const response = await InstanceApi.get("/dashboard", {
+    const response = await InstanceApi.get("/dashboard/metrics", {
       params: {
-        inicio: params?.start,
-        fim: params?.end,
+        startDate: params?.start,
+        endDate: params?.end,
       },
     });
     return response.data;

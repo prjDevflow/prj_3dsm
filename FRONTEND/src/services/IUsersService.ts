@@ -4,6 +4,7 @@ export interface IUser {
   email: string;
   role: string;
   teamId?: string;
+  active?: boolean;
 }
 
 export interface IGetUsersParams {
@@ -27,12 +28,14 @@ export interface ICreateUserRequest {
   email: string;
   password: string;
   role: string;
+  teamId?: string;
 }
 
 export interface IUpdateUserRequest {
   name?: string;
   role?: string;
   teamId?: string;
+  active?: boolean;
 }
 
 export interface IUsersService {
@@ -45,10 +48,11 @@ export interface IUsersService {
 
 export interface IApiUser {
   id: string;
-  nome: string;
+  name: string;
   email: string;
   role: string;
-  equipeId?: string;
+  teamId?: string;
+  active?: boolean;
 }
 
 export interface IApiGetUsersResponse {

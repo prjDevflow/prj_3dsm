@@ -15,11 +15,12 @@ export class UsersService implements IUsersService {
 
   private mapApiUserToUser(user: IApiUser): IUser {
     return {
-      id: user.id,
-      name: user.nome,
-      email: user.email,
-      role: user.role,
-      teamId: user.equipeId,
+      id:     user.id,
+      name:   user.name,
+      email:  user.email,
+      role:   user.role,
+      teamId: user.teamId,
+      active: user.active ?? true,
     };
   }
 
@@ -52,14 +53,16 @@ export class UsersService implements IUsersService {
       email: data.email,
       senha: data.password,
       role: data.role,
+      equipeId: data.teamId || undefined,
     });
   }
 
   async updateUser(id: string, data: IUpdateUserRequest): Promise<void> {
     await this.api.put(`/users/${id}`, {
-      ...(data.name !== undefined ? { nome: data.name } : {}),
+      ...(data.name !== undefined ? { name: data.name } : {}),
       ...(data.role !== undefined ? { role: data.role } : {}),
-      ...(data.teamId !== undefined ? { equipeId: data.teamId } : {}),
+      ...(data.teamId !== undefined ? { teamId: data.teamId } : {}),
+      ...(data.active !== undefined ? { active: data.active } : {}),
     });
   }
 

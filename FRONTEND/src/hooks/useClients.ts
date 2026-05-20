@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '../services/api';
+import InstanceApi from '../services/instanceApi';
 import { Client } from '../types';
 
 interface FetchClientsParams {
@@ -18,7 +18,7 @@ interface ClientsResponse {
 }
 
 const fetchClients = async (params: FetchClientsParams): Promise<ClientsResponse> => {
-  const { data } = await api.get<ClientsResponse>('/clients', { params });
+  const { data } = await InstanceApi.get<ClientsResponse>('/clientes', { params });
   return data;
 };
 
@@ -33,7 +33,7 @@ export const useClients = (params: FetchClientsParams) => {
 export const useCreateClient = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: Partial<Client>) => api.post<Client>('/clients', body).then(r => r.data),
+    mutationFn: (body: Partial<Client>) => InstanceApi.post<Client>('/clientes', body).then(r => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['clients'] }),
   });
 };
@@ -42,7 +42,7 @@ export const useUpdateClient = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...body }: Partial<Client> & { id: string }) =>
-      api.put<Client>(`/clients/${id}`, body).then(r => r.data),
+      InstanceApi.put<Client>(`/clientes/${id}`, body).then(r => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['clients'] }),
   });
 };
@@ -50,7 +50,7 @@ export const useUpdateClient = () => {
 export const useDeleteClient = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => api.delete(`/clients/${id}`).then(r => r.data),
+    mutationFn: (id: string) => InstanceApi.delete(`/clientes/${id}`).then(r => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['clients'] }),
   });
 };

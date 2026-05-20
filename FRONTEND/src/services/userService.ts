@@ -25,7 +25,7 @@ export const userService = {
   },
 
   // Validar senha atual (mock)
-  validatePassword: async (password: string) => {
+  validatePassword: async (_password: string) => {
     // Mock: sempre true por enquanto
     return true;
   }

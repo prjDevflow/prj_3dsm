@@ -11,6 +11,7 @@ interface IAdminUpdateUserRequest {
   nome?: string;
   papelId?: string;
   equipeId?: string | null;
+  ativo?: boolean;
   usuarioLogadoId: string;
 }
 
@@ -23,7 +24,7 @@ export class AdminUpdateUserService {
     this.createLogService = new CreateLogService();
   }
 
-  async execute({ id, nome, papelId, equipeId, usuarioLogadoId }: IAdminUpdateUserRequest) {
+  async execute({ id, nome, papelId, equipeId, ativo, usuarioLogadoId }: IAdminUpdateUserRequest) {
     const user = await this.usersRepository.findById(id);
 
     if (!user) {
@@ -49,7 +50,8 @@ export class AdminUpdateUserService {
     const updatedUser = await this.usersRepository.update(id, {
       nome_usuario: nome,
       id_papel: resolvedPapelId,
-      id_equipe: equipeId
+      id_equipe: equipeId,
+      ...(ativo !== undefined ? { ativo_usuario: ativo } : {}),
     });
 
     // Auditoria (RF07)

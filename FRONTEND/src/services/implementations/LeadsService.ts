@@ -31,12 +31,23 @@ export class LeadsService implements ILeadsService {
   }
 
   async createLead(data: ICreateLeadRequest): Promise<ILead> {
-    const response = await InstanceApi.post("/leads", data);
+    const response = await InstanceApi.post("/leads", {
+      name:       data.name,
+      email:      data.email,
+      phone:      data.phone,
+      store:      data.store,
+      origin:     data.origin,
+      assignedTo: data.assignedTo || undefined,
+    });
     return response.data;
   }
 
   async updateLead(id: string, data: Partial<IUpdateLeadRequest>): Promise<ILead> {
-    const response = await InstanceApi.put(`/leads/${id}`, data);
+    const response = await InstanceApi.put(`/leads/${id}`, {
+      store:      data.store,
+      origin:     data.origin,
+      assignedTo: data.assignedTo,
+    });
     return response.data;
   }
 

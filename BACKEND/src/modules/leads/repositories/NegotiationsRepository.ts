@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
+const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export class NegotiationsRepository {
   
@@ -41,14 +42,11 @@ export class NegotiationsRepository {
     }
 
     // Resolve UUID do estágio pelo nome ou pelo próprio UUID (fallback)
-    const estagioRecord = await prisma.estagio.findFirst({
-      where: {
-        OR: [
-          { nome_estagio: { equals: data.estagio, mode: 'insensitive' } },
-          { id_estagio: data.estagio },
-        ],
-      },
-    });
+    const estagioWhere = isUuid.test(data.estagio)
+      ? { OR: [{ nome_estagio: { equals: data.estagio, mode: 'insensitive' as const } }, { id_estagio: data.estagio }] }
+      : { nome_estagio: { equals: data.estagio, mode: 'insensitive' as const } };
+
+    const estagioRecord = await prisma.estagio.findFirst({ where: estagioWhere });
     if (!estagioRecord) {
       throw new Error(`Estágio '${data.estagio}' não encontrado na base de dados. Execute o seed.`);
     }
@@ -72,7 +70,6 @@ export class NegotiationsRepository {
 
   async update(id_negociacao: string, data: { id_status: string; id_estagio: string; importancia_negociacao: string }) {
     // Tenta resolver IDs por nome caso não sejam UUIDs
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
     let statusId = data.id_status;
     if (!isUuid.test(data.id_status)) {
@@ -93,9 +90,11 @@ export class NegotiationsRepository {
     const neg = await prisma.negociacao.update({
       where: { id_negociacao },
       data: {
-        id_status:              statusId,
-        id_estagio:             estagioId,
-        importancia_negociacao: data.importancia_negociacao.toUpperCase(),
+        id_status:  statusId,
+        id_estagio: estagioId,
+        ...(data.importancia_negociacao
+          ? { importancia_negociacao: data.importancia_negociacao.toUpperCase() }
+          : {}),
       },
     });
 

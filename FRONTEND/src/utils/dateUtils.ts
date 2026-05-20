@@ -1,4 +1,4 @@
-import { differenceInDays, parseISO, isAfter, isBefore } from 'date-fns';
+import { differenceInDays, isBefore } from 'date-fns';
 
 export const MAX_DAYS_NON_ADMIN = 365; // 1 ano
 export const MAX_DAYS_ADMIN = Infinity; // Sem limite

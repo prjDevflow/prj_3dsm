@@ -7,7 +7,6 @@ import { ILeadsService } from "../../services/ILeadsService";
 import {
   INegotiationService,
   ICreateNegotiationRequest,
-  IUpdateNegotiationRequest,
 } from "../../services/INegotiationsService";
 
 const ORIGINS = [
@@ -53,7 +52,7 @@ type LeadDetailsModelProps = {
 };
 
 export const useLeadDetailsModel = ({
-  leadsService,
+  leadsService: _leadsService,
   negotiationService,
 }: LeadDetailsModelProps) => {
   const { id } = useParams<{ id: string }>();
@@ -144,19 +143,7 @@ export const useLeadDetailsModel = ({
     setClosingId(selectedNegotiation);
     setNegError("");
     try {
-      const updateRequest: IUpdateNegotiationRequest = {
-        // Assuming 'closeReason' maps to 'statusId' or a new status value
-        // The swagger only shows 'statusId', 'estagioId', 'importancia'
-        // For now, we'll assume a new status might be derived from `closeReason` or that `closeReason` is just for internal logic
-        // As per the swagger, the PUT request for /leads/negotiations/{id} expects statusId, estagioId, importancia
-        // We will need to clarify how 'close' status is handled with the existing API
-        // For now, I will use a placeholder for statusId, as the swagger doesn't directly map 'closeReason' to a statusId.
-        statusId: "some-status-id-for-closed", // TODO: Get actual statusId for 'closed' from backend or clarification
-      };
-      await negotiationService.updateNegotiation(
-        selectedNegotiation,
-        updateRequest,
-      );
+      await negotiationService.closeNegotiation(selectedNegotiation, closeReason);
       await queryClient.invalidateQueries({ queryKey: ["negotiations", id] });
       setShowCloseModal(false);
       setCloseReason("");

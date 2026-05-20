@@ -114,7 +114,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             onMouseLeave={handleMouseLeave}
             cursor="pointer"
           >
-            {data.map((entry, index) => {
+            {data.map((_entry, index) => {
               const color = BAR_COLORS[index % BAR_COLORS.length];
               return (
                 <Cell

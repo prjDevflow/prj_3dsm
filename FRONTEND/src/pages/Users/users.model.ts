@@ -112,6 +112,7 @@ export const useUsersModel = ({ usersService }: UsersModelProps) => {
           name: formData.name,
           role: formData.role,
           teamId: formData.teamId,
+          active: formData.active,
         });
       } else {
         setIsCreating(true);
@@ -120,6 +121,7 @@ export const useUsersModel = ({ usersService }: UsersModelProps) => {
           email: formData.email,
           password: formData.password,
           role: formData.role,
+          teamId: formData.teamId || undefined,
         });
       }
 

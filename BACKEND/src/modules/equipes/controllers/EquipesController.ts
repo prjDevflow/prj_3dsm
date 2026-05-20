@@ -19,11 +19,13 @@ export class EquipesController {
 
   async list(request: Request, response: Response): Promise<Response> {
     const equipes = await prisma.equipe.findMany({
-      include: { usuarios: { select: { id_usuario: true, nome_usuario: true, papel_usuario: true } } },
+      include: { usuarios: { include: { papel: true } } },
     });
 
     const data = equipes.map(e => {
-      const manager = e.usuarios.find(u => u.papel_usuario === 'GERENTE' || u.papel_usuario === 'GERENTE_GERAL');
+      const manager = e.usuarios.find(u =>
+        u.papel.nome_papel === 'GERENTE' || u.papel.nome_papel === 'GERENTE_GERAL'
+      );
       return {
         id:          e.id_equipe,
         name:        e.nome_equipe,

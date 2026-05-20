@@ -32,13 +32,7 @@ export class DeleteUserService {
       throw error;
     }
 
-    try {
-      await this.usersRepository.delete(id);
-    } catch (err) {
-      const error = new Error("Não é possível excluir este usuário pois ele possui vínculos (Leads/Históricos).");
-      (error as any).statusCode = 400;
-      throw error;
-    }
+    await this.usersRepository.softDelete(id);
 
     // Auditoria (RF07)
     await this.createLogService.execute({

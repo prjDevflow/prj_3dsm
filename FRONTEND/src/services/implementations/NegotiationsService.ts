@@ -9,4 +9,8 @@ export class NegotiationService implements INegotiationService {
   async updateNegotiation(id: string, data: IUpdateNegotiationRequest): Promise<void> {
     await InstanceApi.put(`/leads/negotiations/${id}`, data);
   }
+
+  async closeNegotiation(id: string, reason: string): Promise<void> {
+    await InstanceApi.put(`/leads/negotiations/${id}/close`, { reason });
+  }
 }

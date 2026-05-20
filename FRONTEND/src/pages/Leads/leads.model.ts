@@ -27,7 +27,7 @@ const emptyForm = (): LeadFormData => ({
   status: "novo",
   importance: "media",
   origin: "Site",
-  store: "loja1",
+  store: "Matriz Jacareí",
   assignedTo: "",
 });
 
@@ -109,7 +109,7 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
       status: lead.status,
       importance: lead.importance,
       origin: lead.origin,
-      store: lead.store ?? "loja1",
+      store: lead.store ?? "Matriz Jacareí",
       assignedTo: lead.assignedTo ?? "",
     });
     setEditingLead(lead);
@@ -141,16 +141,19 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
     try {
       if (editingLead) {
         await leadsService.updateLead(editingLead.id, {
-          lojaId: formData.store,
-          origemId: formData.origin, // Assuming origin maps to origemId
-          atendenteId: formData.assignedTo,
+          store:      formData.store,
+          origin:     formData.origin,
+          assignedTo: formData.assignedTo || undefined,
         });
         showFeedback("Lead atualizado com sucesso!");
       } else {
         await leadsService.createLead({
-          clienteId: "some-client-id", // This needs to be provided or fetched
-          lojaId: formData.store,
-          origemId: formData.origin, // Assuming origin maps to origemId
+          name:       formData.name,
+          email:      formData.email,
+          phone:      formData.phone,
+          store:      formData.store,
+          origin:     formData.origin,
+          assignedTo: formData.assignedTo || undefined,
         });
         showFeedback("Lead criado com sucesso!");
       }

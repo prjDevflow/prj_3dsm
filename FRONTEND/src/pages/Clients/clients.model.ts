@@ -9,17 +9,17 @@ type ClientsModelProps = {
 };
 
 type ClientFormData = {
-  nome: string;
+  name: string;
   email: string;
-  telefone: string;
+  phone: string;
   cpf?: string;
   leadId?: string;
 };
 
 const emptyForm = (): ClientFormData => ({
-  nome: "",
+  name: "",
   email: "",
-  telefone: "",
+  phone: "",
   cpf: "",
   leadId: "",
 });
@@ -86,9 +86,9 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
 
   const openEdit = (client: IClient) => {
     setFormData({
-      nome: client.nome,
+      name: client.name,
       email: client.email,
-      telefone: client.telefone,
+      phone: client.phone,
       cpf: client.cpf,
       leadId: client.leadId,
     });
@@ -113,17 +113,17 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
   };
 
   const handleSave = async () => {
-    if (!formData.nome.trim()) {
+    if (!formData.name.trim()) {
       setFormError("Nome é obrigatório.");
       return;
     }
     if (!formData.email.trim()) {
-        setFormError("Email é obrigatório.");
-        return;
+      setFormError("Email é obrigatório.");
+      return;
     }
-    if (!formData.telefone?.trim()) {
-        setFormError("Telefone é obrigatório.");
-        return;
+    if (!formData.phone?.trim()) {
+      setFormError("Telefone é obrigatório.");
+      return;
     }
 
     try {

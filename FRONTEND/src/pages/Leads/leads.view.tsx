@@ -13,21 +13,17 @@ import { useLeadsModel } from "./leads.model";
 
 const ORIGINS = [
   "Site",
-  "Google Ads",
-  "Facebook",
-  "LinkedIn",
-  "Instagram",
   "WhatsApp",
+  "Instagram",
+  "Facebook",
   "Indicação",
-  "Evento",
-  "Telefone",
-  "Visita Presencial",
-  "Outros",
+  "Loja Física",
+  "Mercado Livre",
 ];
 const STORES = [
-  { value: "loja1", label: "Loja Centro" },
-  { value: "loja2", label: "Loja Norte" },
-  { value: "loja3", label: "Loja Sul" },
+  { value: "Matriz Jacareí",           label: "Matriz Jacareí" },
+  { value: "Filial São José dos Campos", label: "Filial São José dos Campos" },
+  { value: "Loja Padrão CSV",           label: "Loja Padrão CSV" },
 ];
 
 type LeadsViewProps = ReturnType<typeof useLeadsModel>;
@@ -281,7 +277,7 @@ export const LeadsView = (props: LeadsViewProps) => {
                       <option value="">Selecionar atendente...</option>
                       {atendentes.map((a) => (
                         <option key={a.id} value={a.id}>
-                          {a.nome}
+                          {a.name}
                         </option>
                       ))}
                     </select>

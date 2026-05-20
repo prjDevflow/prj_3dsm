@@ -10,7 +10,7 @@ function mapUserToDTO(u: any) {
     email:     u.email_usuario,
     role:      u.papel?.nome_papel?.toLowerCase() ?? u.role ?? '',
     teamId:    u.id_equipe ?? u.equipe?.id_equipe ?? null,
-    active:    true,
+    active:    u.ativo_usuario ?? true,
     createdAt: u.data_criacao_usuario?.toISOString() ?? new Date().toISOString(),
     updatedAt: u.data_criacao_usuario?.toISOString() ?? new Date().toISOString(),
   };
@@ -40,7 +40,7 @@ export class UsersManagementController {
   async update(request: Request, response: Response): Promise<Response> {
     const { id } = request.params;
     // aceita inglês (name, role, teamId) ou português (nome, papelId, equipeId)
-    const { name, nome, role, papelId, teamId, equipeId } = request.body;
+    const { name, nome, role, papelId, teamId, equipeId, active } = request.body;
     const usuarioLogadoId = request.user.id;
 
     const adminUpdateUserService = new AdminUpdateUserService();
@@ -49,6 +49,7 @@ export class UsersManagementController {
       nome:     name ?? nome,
       papelId:  role ?? papelId,
       equipeId: teamId ?? equipeId,
+      ativo:    active,
       usuarioLogadoId,
     });
 

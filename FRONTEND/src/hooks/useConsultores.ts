@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import api from '../services/api';
+import InstanceApi from '../services/instanceApi';
 
 export interface Consultor {
   id:   string;
@@ -8,7 +8,7 @@ export interface Consultor {
 }
 
 const fetchConsultores = async (): Promise<Consultor[]> => {
-  const { data } = await api.get<Consultor[]>('/consultores');
+  const { data } = await InstanceApi.get<Consultor[]>('/consultores');
   return data;
 };
 

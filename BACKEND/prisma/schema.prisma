@@ -38,6 +38,7 @@ model Usuario {
   senha_hash_usuario   String   @db.VarChar(255)
   id_papel             String   @db.Uuid
   id_equipe            String?  @db.Uuid
+  ativo_usuario        Boolean  @default(true)
   data_criacao_usuario DateTime @default(now()) @db.Timestamp()
 
   papel                Papel                  @relation(fields: [id_papel], references: [id_papel])

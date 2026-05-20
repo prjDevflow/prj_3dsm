@@ -1,32 +1,33 @@
 export interface IClient {
   id: string;
-  nome: string;
+  name: string;
   email: string;
-  telefone: string;
+  phone: string;
   cpf?: string;
   leadId?: string;
-  leadName?: string;
+  consultorId?: string;
   assignedTo?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface ICreateClientRequest {
-  nome: string;
+  name: string;
   email: string;
-  telefone: string;
+  phone: string;
   cpf?: string;
   leadId?: string;
-  assignedTo?: string;
+  consultorId?: string;
 }
 
 export interface IUpdateClientRequest {
   id: string;
-  nome?: string;
+  name?: string;
   email?: string;
-  telefone?: string;
+  phone?: string;
   cpf?: string;
   leadId?: string;
+  consultorId?: string;
 }
 
 export type FetchClientsParams = {

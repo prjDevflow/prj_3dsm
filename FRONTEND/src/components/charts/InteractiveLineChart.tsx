@@ -12,7 +12,6 @@ import {
   ReferenceLine,
   Label
 } from 'recharts';
-import { format } from 'date-fns';
 
 interface DataPoint {
   date: string;
