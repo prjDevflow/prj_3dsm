@@ -6,13 +6,38 @@ import { DeleteEquipeService } from '../services/DeleteEquipeService';
 
 const prisma = new PrismaClient();
 
+function mapEquipe(e: any) {
+  const manager = e.usuarios?.find((u: any) =>
+    u.papel?.nome_papel === 'GERENTE' || u.papel?.nome_papel === 'GERENTE_GERAL'
+  );
+  return {
+    id:          e.id_equipe,
+    name:        e.nome_equipe,
+    description: '',
+    managerId:   manager?.id_usuario ?? null,
+    managerName: manager?.nome_usuario ?? null,
+    members:     (e.usuarios ?? []).map((u: any) => u.id_usuario),
+    memberCount: (e.usuarios ?? []).length,
+    createdAt:   new Date().toISOString(),
+    updatedAt:   new Date().toISOString(),
+  };
+}
+
 export class EquipesController {
   async create(request: Request, response: Response): Promise<Response> {
-    const { nome } = request.body;
+    const { name, nome, members } = request.body;
     const usuarioLogadoId = request.user.id;
 
     const createEquipeService = new CreateEquipeService();
-    const equipe = await createEquipeService.execute({ nome, usuarioLogadoId });
+    const equipe = await createEquipeService.execute({ nome: name ?? nome, usuarioLogadoId });
+
+    // Assign selected members to the new team
+    if (Array.isArray(members) && members.length > 0) {
+      await prisma.usuario.updateMany({
+        where: { id_usuario: { in: members } },
+        data:  { id_equipe: equipe.id_equipe },
+      });
+    }
 
     return response.status(201).json(equipe);
   }
@@ -21,41 +46,51 @@ export class EquipesController {
     const equipes = await prisma.equipe.findMany({
       include: { usuarios: { include: { papel: true } } },
     });
-
-    const data = equipes.map(e => {
-      const manager = e.usuarios.find(u =>
-        u.papel.nome_papel === 'GERENTE' || u.papel.nome_papel === 'GERENTE_GERAL'
-      );
-      return {
-        id:          e.id_equipe,
-        name:        e.nome_equipe,
-        description: '',
-        managerId:   manager?.id_usuario ?? null,
-        managerName: manager?.nome_usuario ?? null,
-        members:     e.usuarios.map(u => u.id_usuario),
-        memberCount: e.usuarios.length,
-        createdAt:   new Date().toISOString(),
-        updatedAt:   new Date().toISOString(),
-      };
-    });
-
-    return response.status(200).json(data);
+    return response.status(200).json(equipes.map(mapEquipe));
   }
 
   async update(request: Request, response: Response): Promise<Response> {
     const { id } = request.params;
-    const { nome } = request.body;
+    const { name, nome, members } = request.body;
     const usuarioLogadoId = request.user.id;
 
     const updateEquipeService = new UpdateEquipeService();
-    const equipe = await updateEquipeService.execute({ id, nome, usuarioLogadoId });
+    await updateEquipeService.execute({ id, nome: name ?? nome, usuarioLogadoId });
 
-    return response.status(200).json(equipe);
+    // Update member assignments: set id_equipe for selected users, clear for removed ones
+    if (Array.isArray(members)) {
+      // Detach all current members of this team
+      await prisma.usuario.updateMany({
+        where: { id_equipe: id },
+        data:  { id_equipe: null },
+      });
+      // Attach selected members
+      if (members.length > 0) {
+        await prisma.usuario.updateMany({
+          where: { id_usuario: { in: members } },
+          data:  { id_equipe: id },
+        });
+      }
+    }
+
+    // Return updated team with fresh data
+    const equipe = await prisma.equipe.findUnique({
+      where: { id_equipe: id },
+      include: { usuarios: { include: { papel: true } } },
+    });
+
+    return response.status(200).json(mapEquipe(equipe));
   }
 
   async delete(request: Request, response: Response): Promise<Response> {
     const { id } = request.params;
     const usuarioLogadoId = request.user.id;
+
+    // Detach all members before deleting so FK constraint doesn't block
+    await prisma.usuario.updateMany({
+      where: { id_equipe: id },
+      data:  { id_equipe: null },
+    });
 
     const deleteEquipeService = new DeleteEquipeService();
     await deleteEquipeService.execute({ id, usuarioLogadoId });

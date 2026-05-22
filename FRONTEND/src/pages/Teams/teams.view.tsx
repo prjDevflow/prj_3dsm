@@ -169,7 +169,7 @@ export const TeamsView = (props: TeamsViewProps) => {
                       {manager && (
                         <div className="hidden sm:flex items-center gap-1.5">
                           <UserPlus size={14} />
-                          <span>{manager.nome}</span>
+                          <span>{manager.name ?? manager.nome}</span>
                         </div>
                       )}
                       <span className="hidden md:block text-xs text-slate-400">
@@ -226,26 +226,29 @@ export const TeamsView = (props: TeamsViewProps) => {
                         </p>
                       ) : (
                         <div className="flex flex-wrap gap-2">
-                          {memberUsers.map((u) => (
+                          {memberUsers.map((u) => {
+                            const displayName = u.name ?? u.nome ?? "?";
+                            return (
                             <div
                               key={u.id}
                               className="flex items-center gap-2 bg-white border border-slate-200 rounded-full px-3 py-1.5"
                             >
                               <div
-                                className={`w-5 h-5 rounded-full flex items-center justify-center ${avatarColor(u.nome)}`}
+                                className={`w-5 h-5 rounded-full flex items-center justify-center ${avatarColor(displayName)}`}
                               >
                                 <span className="text-white text-[10px] font-bold">
-                                  {u.nome.charAt(0)}
+                                  {displayName.charAt(0)}
                                 </span>
                               </div>
                               <span className="text-xs font-medium text-slate-700">
-                                {u.nome}
+                                {displayName}
                               </span>
                               <span className="text-[10px] text-slate-400 capitalize">
                                 {u.role}
                               </span>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </div>
@@ -347,7 +350,7 @@ export const TeamsView = (props: TeamsViewProps) => {
                   <option value="">Selecionar gerente...</option>
                   {gerentes.map((g) => (
                     <option key={g.id} value={g.id}>
-                      {g.nome}
+                      {g.name ?? g.nome}
                     </option>
                   ))}
                 </select>
@@ -363,7 +366,9 @@ export const TeamsView = (props: TeamsViewProps) => {
                       Nenhum atendente disponível.
                     </p>
                   ) : (
-                    atendentes.map((a) => (
+                    atendentes.map((a) => {
+                      const aName = a.name ?? a.nome ?? "?";
+                      return (
                       <label
                         key={a.id}
                         className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 cursor-pointer"
@@ -375,15 +380,16 @@ export const TeamsView = (props: TeamsViewProps) => {
                           className="w-4 h-4 accent-[var(--color-primary)]"
                         />
                         <div
-                          className={`w-6 h-6 rounded-full flex items-center justify-center ${avatarColor(a.nome)}`}
+                          className={`w-6 h-6 rounded-full flex items-center justify-center ${avatarColor(aName)}`}
                         >
                           <span className="text-white text-[10px] font-bold">
-                            {a.nome.charAt(0)}
+                            {aName.charAt(0)}
                           </span>
                         </div>
-                        <span className="text-sm text-slate-700">{a.nome}</span>
+                        <span className="text-sm text-slate-700">{aName}</span>
                       </label>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>
