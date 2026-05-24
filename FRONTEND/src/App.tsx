@@ -12,6 +12,7 @@ import Clients from './pages/Clients/page';
 import Users from './pages/Users/page';
 import Teams from './pages/Teams/page';
 import Logs from './pages/Logs/page';
+import AdminPage from './pages/Admin/page';
 import { loadSettings, applySettings } from './services/settingsService';
 
 function App() {
@@ -93,6 +94,14 @@ function App() {
               element={
                 <ProtectedRoute requiredRoles={['admin', 'atendente', 'gerente', 'gerente_geral']}>
                   <Clients />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <AdminPage />
                 </ProtectedRoute>
               }
             />

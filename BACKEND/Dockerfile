@@ -23,9 +23,9 @@ COPY . .
 # Compila o código TypeScript para JavaScript (gera a pasta dist/)
 RUN npm run build
 
-# Copia e prepara o entrypoint
+# Copia e prepara o entrypoint (sed remove \r de line endings Windows)
 COPY entrypoint.sh ./entrypoint.sh
-RUN chmod +x ./entrypoint.sh
+RUN sed -i 's/\r//' ./entrypoint.sh && chmod +x ./entrypoint.sh
 
 # Expõe a porta que a API utilizará
 EXPOSE 3333

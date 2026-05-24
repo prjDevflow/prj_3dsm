@@ -3,8 +3,26 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export class UsersManagementRepository {
-  async findAll() {
+  async findAll(filters?: { search?: string; role?: string; equipeId?: string }) {
+    const where: any = {};
+
+    if (filters?.search) {
+      where.OR = [
+        { nome_usuario:  { contains: filters.search, mode: 'insensitive' } },
+        { email_usuario: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (filters?.role) {
+      where.papel = { nome_papel: { equals: filters.role.toUpperCase(), mode: 'insensitive' } };
+    }
+
+    if (filters?.equipeId) {
+      where.id_equipe = filters.equipeId;
+    }
+
     return prisma.usuario.findMany({
+      where,
       select: {
         id_usuario:           true,
         nome_usuario:         true,

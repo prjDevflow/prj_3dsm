@@ -21,6 +21,7 @@ export interface IDashboardMetricsResponse {
   avgTimeToFirstContact: string;
   evolution: { date: string; leads: number; conversions: number }[];
   performance: { agent: string; leads: number; conversions: number }[];
+  performanceByTeam: { team: string; leads: number; conversions: number }[];
   lossReasons: { reason: string; count: number }[];
 }
 

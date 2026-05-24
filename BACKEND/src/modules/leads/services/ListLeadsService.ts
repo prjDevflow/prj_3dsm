@@ -4,8 +4,10 @@ import { DateValidator } from '../../../shared/utils/DateValidator';
 interface IListLeadsRequest {
   role: string;
   userId: string;
-  inicio?: string; // String que vem da query
-  fim?: string;    // String que vem da query
+  inicio?: string;
+  fim?: string;
+  store?: string;
+  team?: string;
 }
 
 export class ListLeadsService {
@@ -15,20 +17,20 @@ export class ListLeadsService {
     this.leadsRepository = new LeadsRepository();
   }
 
-  async execute({ role, userId, inicio, fim }: IListLeadsRequest) {
-    // 1. Valida as datas e aplica o limite temporal (RF06)
+  async execute({ role, userId, inicio, fim, store, team }: IListLeadsRequest) {
     const { startDate, endDate } = DateValidator.validate(inicio, fim, role);
 
-    // 2. Aplica a lógica de permissões (RF02) passando as datas validadas para o banco
+    const lojaName  = store && store !== 'all' ? store : undefined;
+    const equipeName = team  && team  !== 'all' ? team  : undefined;
+
     if (role === 'ADMIN' || role === 'GERENTE_GERAL') {
-      return this.leadsRepository.findAll(startDate, endDate);
+      return this.leadsRepository.findAll(startDate, endDate, lojaName, equipeName);
     }
 
     if (role === 'GERENTE') {
-      return this.leadsRepository.findByEquipeDoGerente(userId, startDate, endDate);
+      return this.leadsRepository.findByEquipeDoGerente(userId, startDate, endDate, lojaName);
     }
 
-    // Padrão: Atendente vê apenas os seus leads dentro do período
-    return this.leadsRepository.findByAtendente(userId, startDate, endDate);
+    return this.leadsRepository.findByAtendente(userId, startDate, endDate, lojaName);
   }
 }

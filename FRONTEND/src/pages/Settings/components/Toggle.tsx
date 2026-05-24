@@ -17,11 +17,10 @@ export const Toggle: React.FC<{
         className="sr-only peer"
       />
       <div
-        className={`${track} bg-slate-200 rounded-full peer
+        className={`relative ${track} bg-slate-200 rounded-full peer
           peer-checked:after:translate-x-full
           after:content-[''] after:absolute after:bg-white after:border-gray-300 after:border after:rounded-full after:transition-all
           peer-checked:bg-[var(--color-primary)] peer-disabled:opacity-50 peer-disabled:cursor-not-allowed`}
-        style={{ ['--color-primary' as string]: 'var(--color-primary)' }}
       />
     </label>
   );

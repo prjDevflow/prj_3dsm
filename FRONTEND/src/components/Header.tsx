@@ -19,19 +19,14 @@ import {
   Building2,
   FileText,
   UserCheck,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface HeaderProps {
   onDateRangeChange?: (range: DateRange) => void;
-  onStoreChange?: (store: string) => void;
-  onTeamChange?: (team: string) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ 
-  onDateRangeChange, 
-  onStoreChange, 
-  onTeamChange 
-}) => {
+export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,8 +54,6 @@ export const Header: React.FC<HeaderProps> = ({
     return new Date().toISOString().split('T')[0];
   });
   
-  const [store, setStore] = useState('all');
-  const [team, setTeam] = useState('all');
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -208,16 +201,6 @@ export const Header: React.FC<HeaderProps> = ({
     return () => clearErrorTimeout();
   }, []);
 
-  const handleStoreChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setStore(e.target.value);
-    onStoreChange?.(e.target.value);
-  };
-
-  const handleTeamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setTeam(e.target.value);
-    onTeamChange?.(e.target.value);
-  };
-
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -302,6 +285,11 @@ export const Header: React.FC<HeaderProps> = ({
                       <UsersIcon size={16} /><span>Usuários</span>
                     </Link>
                   )}
+                  {isSuperAdmin && (
+                    <Link to="/admin" className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center space-x-2" onClick={() => setUserMenuOpen(false)}>
+                      <ShieldCheck size={16} /><span>Painel Admin</span>
+                    </Link>
+                  )}
                   {(isSuperAdmin || isGerente) && (
                     <Link to="/teams" className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center space-x-2" onClick={() => setUserMenuOpen(false)}>
                       <Building2 size={16} /><span>Equipes</span>
@@ -362,18 +350,6 @@ export const Header: React.FC<HeaderProps> = ({
                 <input type="date" value={endDate} onChange={handleEndDateChange} className="bg-transparent border-none focus:ring-0 text-slate-600 w-28" min={startDate} />
               </div>
 
-              {/* Filtros de loja e time */}
-              <select value={store} onChange={handleStoreChange} className="bg-slate-50 border-none rounded-lg px-3 py-1.5 text-sm text-slate-600">
-                <option value="all">Todas as lojas</option>
-                <option value="loja1">Loja Centro</option>
-                <option value="loja2">Loja Norte</option>
-                <option value="loja3">Loja Sul</option>
-              </select>
-              <select value={team} onChange={handleTeamChange} className="bg-slate-50 border-none rounded-lg px-3 py-1.5 text-sm text-slate-600">
-                <option value="all">Todas as equipes</option>
-                <option value="1">Vendas Centro</option>
-                <option value="2">Vendas Norte</option>
-              </select>
             </div>
 
             {/* Mensagem de erro de período */}
@@ -421,23 +397,6 @@ export const Header: React.FC<HeaderProps> = ({
               <button onClick={() => setCustomRange(30)} className="w-full text-xs px-3 py-1.5 bg-slate-100 rounded-lg">Últimos 30 dias</button>
               <button onClick={setCurrentMonth} className="w-full text-xs px-3 py-1.5 bg-slate-100 rounded-lg">Este mês</button>
               <button onClick={setCurrentYear} className="w-full text-xs px-3 py-1.5 bg-slate-100 rounded-lg">Este ano</button>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-slate-600">Loja</label>
-              <select value={store} onChange={handleStoreChange} className="border border-slate-200 rounded-lg px-4 py-2 w-full">
-                <option value="all">Todas as lojas</option>
-                <option value="loja1">Loja Centro</option>
-                <option value="loja2">Loja Norte</option>
-                <option value="loja3">Loja Sul</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-slate-600">Equipe</label>
-              <select value={team} onChange={handleTeamChange} className="border border-slate-200 rounded-lg px-4 py-2 w-full">
-                <option value="all">Todas as equipes</option>
-                <option value="1">Vendas Centro</option>
-                <option value="2">Vendas Norte</option>
-              </select>
             </div>
           </div>
         )}
@@ -522,6 +481,16 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <UsersIcon size={18} />
                 <span>Usuários</span>
+              </Link>
+            )}
+            {isSuperAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3 rounded-lg text-sm font-medium flex items-center space-x-3 text-slate-600 hover:bg-slate-100"
+              >
+                <ShieldCheck size={18} />
+                <span>Painel Admin</span>
               </Link>
             )}
             {(isSuperAdmin || isGerente) && (

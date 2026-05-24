@@ -1,3 +1,4 @@
+import React from "react";
 import { Header } from "../../components/Header";
 import LeadsTable from "../../components/LeadsTable";
 import { Lead } from "../../types";
@@ -8,22 +9,34 @@ import {
   CheckCircle,
   Loader2,
   Users,
+  Clock,
+  TrendingUp,
+  CheckSquare,
 } from "lucide-react";
-import { useLeadsModel } from "./leads.model";
+import { useLeadsModel, LeadTab } from "./leads.model";
+
+const STORES = [
+  { value: "all",                          label: "Todas as lojas" },
+  { value: "Matriz Jacareí",               label: "Matriz Jacareí" },
+  { value: "Filial São José dos Campos",   label: "Filial SJC" },
+  { value: "Loja Padrão CSV",              label: "Loja Padrão CSV" },
+];
+
+const TEAMS = [
+  { value: "all",           label: "Todas as equipes" },
+  { value: "Equipe Alpha",  label: "Equipe Alpha" },
+  { value: "Equipe Beta",   label: "Equipe Beta" },
+];
 
 const ORIGINS = [
-  "Site",
-  "WhatsApp",
-  "Instagram",
-  "Facebook",
-  "Indicação",
-  "Loja Física",
-  "Mercado Livre",
+  "Site", "WhatsApp", "Instagram", "Facebook",
+  "Indicação", "Loja Física", "Mercado Livre",
 ];
-const STORES = [
-  { value: "Matriz Jacareí",           label: "Matriz Jacareí" },
-  { value: "Filial São José dos Campos", label: "Filial São José dos Campos" },
-  { value: "Loja Padrão CSV",           label: "Loja Padrão CSV" },
+
+const TABS: { key: LeadTab; label: string; icon: React.ElementType; color: string }[] = [
+  { key: "novos",       label: "Novos",        icon: Plus,        color: "text-blue-600 border-blue-500 bg-blue-50" },
+  { key: "andamento",   label: "Em Andamento", icon: Clock,       color: "text-amber-600 border-amber-500 bg-amber-50" },
+  { key: "finalizados", label: "Finalizados",  icon: CheckSquare, color: "text-emerald-600 border-emerald-500 bg-emerald-50" },
 ];
 
 type LeadsViewProps = ReturnType<typeof useLeadsModel>;
@@ -54,18 +67,17 @@ export const LeadsView = (props: LeadsViewProps) => {
     onDateRangeChange,
     onStoreChange,
     onTeamChange,
+    store,
+    team,
+    activeTab,
+    switchTab,
+    counts,
   } = props;
-
-  const headerProps = {
-    onDateRangeChange,
-    onStoreChange,
-    onTeamChange,
-  };
 
   if (error) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <Header {...headerProps} />
+        <Header onDateRangeChange={onDateRangeChange} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-rose-50 p-8 rounded-lg text-center">
             <AlertCircle className="h-12 w-12 text-rose-500 mx-auto mb-4" />
@@ -76,38 +88,38 @@ export const LeadsView = (props: LeadsViewProps) => {
     );
   }
 
+  const activeTabConfig = TABS.find((t) => t.key === activeTab)!;
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header {...headerProps} />
+      <Header onDateRangeChange={onDateRangeChange} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* ── Cabeçalho ── */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold text-slate-800">Leads</h1>
-            <p className="text-sm text-slate-500 mt-1">
-              Gerencie e acompanhe todos os seus leads
-            </p>
+            <p className="text-sm text-slate-500 mt-1">Gerencie e acompanhe todos os seus leads</p>
           </div>
-          <div className="flex items-center gap-3">
-            {!isLoading && data && (
-              <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2.5 shadow-sm">
-                <Users size={16} className="text-[var(--color-primary)]" />
-                <span className="text-sm font-semibold text-slate-800">
-                  {data.total}
-                </span>
-                <span className="text-sm text-slate-500">
-                  leads encontrados
-                </span>
-              </div>
-            )}
-            {canCreate && (
-              <button
-                onClick={openCreate}
-                className="btn-primary flex items-center gap-2"
-              >
-                <Plus size={16} /> Novo Lead
-              </button>
-            )}
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              value={store}
+              onChange={(e) => onStoreChange(e.target.value)}
+              className="input text-sm py-2"
+            >
+              {STORES.map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
+            <select
+              value={team}
+              onChange={(e) => onTeamChange(e.target.value)}
+              className="input text-sm py-2"
+            >
+              {TEAMS.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -117,6 +129,61 @@ export const LeadsView = (props: LeadsViewProps) => {
           </div>
         )}
 
+        {/* ── Cards de contagem ── */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          {TABS.map((tab) => {
+            const Icon  = tab.icon;
+            const count = counts[tab.key];
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => switchTab(tab.key)}
+                className={`card p-4 text-left transition-all border-2 ${
+                  isActive
+                    ? tab.color + " shadow-md"
+                    : "border-transparent hover:border-slate-200"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    {tab.label}
+                  </span>
+                  <Icon size={16} className={isActive ? "" : "text-slate-400"} />
+                </div>
+                <p className="text-2xl font-bold text-slate-800">{count}</p>
+                <p className="text-xs text-slate-400 mt-0.5">leads</p>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── Aba ativa — barra superior ── */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-5 rounded-full ${
+              activeTab === "novos"       ? "bg-blue-500"
+              : activeTab === "andamento" ? "bg-amber-500"
+              : "bg-emerald-500"
+            }`} />
+            <h2 className="text-base font-semibold text-slate-700">
+              {activeTabConfig.label}
+              <span className="ml-2 text-sm font-normal text-slate-400">
+                ({counts[activeTab]} leads)
+              </span>
+            </h2>
+          </div>
+          {activeTab === "novos" && canCreate && (
+            <button
+              onClick={openCreate}
+              className="btn-primary flex items-center gap-2"
+            >
+              <Plus size={16} /> Novo Lead
+            </button>
+          )}
+        </div>
+
+        {/* ── Tabela ── */}
         <LeadsTable
           leads={data?.data || []}
           total={data?.total || 0}
@@ -131,6 +198,7 @@ export const LeadsView = (props: LeadsViewProps) => {
         />
       </main>
 
+      {/* ── Modal criar/editar lead ── */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
@@ -138,10 +206,7 @@ export const LeadsView = (props: LeadsViewProps) => {
               <h2 className="text-base font-semibold text-slate-800">
                 {editingLead ? "Editar Lead" : "Novo Lead"}
               </h2>
-              <button
-                onClick={closeModal}
-                className="text-slate-400 hover:text-slate-600"
-              >
+              <button onClick={closeModal} className="text-slate-400 hover:text-slate-600">
                 <X size={20} />
               </button>
             </div>
@@ -150,6 +215,13 @@ export const LeadsView = (props: LeadsViewProps) => {
               {formError && (
                 <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-700 px-3 py-2 rounded-lg text-sm">
                   <AlertCircle size={14} /> {formError}
+                </div>
+              )}
+
+              {editingLead && (
+                <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-700 px-3 py-2 rounded-lg text-xs">
+                  <AlertCircle size={13} className="mt-0.5 flex-shrink-0" />
+                  <span>Ao editar, apenas Loja, Origem e Atendente podem ser alterados.</span>
                 </div>
               )}
 
@@ -162,8 +234,9 @@ export const LeadsView = (props: LeadsViewProps) => {
                     type="text"
                     value={formData.name}
                     onChange={(e) => handleFormChange("name", e.target.value)}
-                    className="input w-full"
+                    className="input w-full disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed"
                     placeholder="Nome da empresa ou contato"
+                    disabled={!!editingLead}
                   />
                 </div>
                 <div>
@@ -174,8 +247,9 @@ export const LeadsView = (props: LeadsViewProps) => {
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleFormChange("email", e.target.value)}
-                    className="input w-full"
+                    className="input w-full disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed"
                     placeholder="email@empresa.com"
+                    disabled={!!editingLead}
                   />
                 </div>
                 <div>
@@ -186,49 +260,10 @@ export const LeadsView = (props: LeadsViewProps) => {
                     type="text"
                     value={formData.phone}
                     onChange={(e) => handleFormChange("phone", e.target.value)}
-                    className="input w-full"
+                    className="input w-full disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed"
                     placeholder="(00) 00000-0000"
+                    disabled={!!editingLead}
                   />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                    Status
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) =>
-                      handleFormChange(
-                        "status",
-                        e.target.value as Lead["status"],
-                      )
-                    }
-                    className="input w-full"
-                  >
-                    <option value="novo">Novo</option>
-                    <option value="contatado">Contatado</option>
-                    <option value="qualificado">Qualificado</option>
-                    <option value="perdido">Perdido</option>
-                    <option value="ganho">Ganho</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                    Importância
-                  </label>
-                  <select
-                    value={formData.importance}
-                    onChange={(e) =>
-                      handleFormChange(
-                        "importance",
-                        e.target.value as Lead["importance"],
-                      )
-                    }
-                    className="input w-full"
-                  >
-                    <option value="baixa">Baixa</option>
-                    <option value="media">Média</option>
-                    <option value="alta">Alta</option>
-                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
@@ -240,9 +275,7 @@ export const LeadsView = (props: LeadsViewProps) => {
                     className="input w-full"
                   >
                     {ORIGINS.map((o) => (
-                      <option key={o} value={o}>
-                        {o}
-                      </option>
+                      <option key={o} value={o}>{o}</option>
                     ))}
                   </select>
                 </div>
@@ -255,10 +288,8 @@ export const LeadsView = (props: LeadsViewProps) => {
                     onChange={(e) => handleFormChange("store", e.target.value)}
                     className="input w-full"
                   >
-                    {STORES.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
-                      </option>
+                    {STORES.filter((s) => s.value !== "all").map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
                     ))}
                   </select>
                 </div>
@@ -269,16 +300,12 @@ export const LeadsView = (props: LeadsViewProps) => {
                     </label>
                     <select
                       value={formData.assignedTo}
-                      onChange={(e) =>
-                        handleFormChange("assignedTo", e.target.value)
-                      }
+                      onChange={(e) => handleFormChange("assignedTo", e.target.value)}
                       className="input w-full"
                     >
                       <option value="">Selecionar atendente...</option>
                       {atendentes.map((a) => (
-                        <option key={a.id} value={a.id}>
-                          {a.name}
-                        </option>
+                        <option key={a.id} value={a.id}>{a.name}</option>
                       ))}
                     </select>
                   </div>
@@ -287,19 +314,15 @@ export const LeadsView = (props: LeadsViewProps) => {
             </div>
 
             <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
-              <button onClick={closeModal} className="btn-secondary">
-                Cancelar
-              </button>
+              <button onClick={closeModal} className="btn-secondary">Cancelar</button>
               <button
                 onClick={handleSave}
                 disabled={isSaving}
                 className="btn-primary flex items-center gap-2 disabled:opacity-50"
               >
-                {isSaving ? (
-                  <Loader2 size={15} className="animate-spin" />
-                ) : (
-                  <CheckCircle size={15} />
-                )}
+                {isSaving
+                  ? <Loader2 size={15} className="animate-spin" />
+                  : <CheckCircle size={15} />}
                 {editingLead ? "Salvar" : "Criar Lead"}
               </button>
             </div>

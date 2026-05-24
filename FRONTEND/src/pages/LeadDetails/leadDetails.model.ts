@@ -23,9 +23,9 @@ const ORIGINS = [
   "Outros",
 ];
 const STORES = [
-  { value: "loja1", label: "Loja Centro" },
-  { value: "loja2", label: "Loja Norte" },
-  { value: "loja3", label: "Loja Sul" },
+  { value: "Matriz Jacareí",             label: "Matriz Jacareí" },
+  { value: "Filial São José dos Campos", label: "Filial SJC" },
+  { value: "Loja Padrão CSV",            label: "Loja Padrão CSV" },
 ];
 
 const importanceBadge: Record<NegotiationImportance, string> = {
@@ -74,7 +74,13 @@ export const useLeadDetailsModel = ({
   const [closingId, setClosingId] = useState<string | null>(null);
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [closeReason, setCloseReason] = useState("");
+  const [closeFinalStatus, setCloseFinalStatus] = useState<"GANHA" | "PERDIDA">("GANHA");
   const [selectedNegotiation, setSelectedNeg] = useState<string | null>(null);
+
+  // Avançar estágio da negociação ativa
+  const [advanceStage, setAdvanceStage] = useState<NegotiationStage>("qualificacao");
+  const [advanceImp, setAdvanceImp]     = useState<NegotiationImportance>("frio");
+  const [advancing, setAdvancing]       = useState(false);
 
   // Editar lead
   const [showEditModal, setShowEditModal] = useState(false);
@@ -87,6 +93,20 @@ export const useLeadDetailsModel = ({
 
   const activeNegotiation = negotiations?.find((n) => n.status === "ativa");
   const hasActiveNegotiation = !!activeNegotiation;
+
+  const timeToFirstContact = (() => {
+    if (!lead || !negotiations || negotiations.length === 0) return null;
+    const earliest = negotiations.reduce((a, b) =>
+      new Date(a.createdAt) < new Date(b.createdAt) ? a : b
+    );
+    const diffMs = new Date(earliest.createdAt).getTime() - new Date(lead.createdAt).getTime();
+    if (diffMs < 0) return null;
+    const hours = diffMs / (1000 * 60 * 60);
+    if (hours < 1) return "Menos de 1h";
+    if (hours < 24) return `${Math.round(hours)}h`;
+    const days = Math.round(hours / 24);
+    return `${days} dia${days > 1 ? "s" : ""}`;
+  })();
 
   const statusColors: Record<string, string> = {
     novo: "bg-blue-100 text-blue-700",
@@ -131,7 +151,7 @@ export const useLeadDetailsModel = ({
       await queryClient.invalidateQueries({ queryKey: ["negotiations", id] });
     } catch (err: any) {
       setNegError(
-        err.response?.data?.message || "Erro ao adicionar negociação.",
+        err.response?.data?.error || err.response?.data?.message || "Erro ao adicionar negociação.",
       );
     } finally {
       setSending(false);
@@ -143,17 +163,37 @@ export const useLeadDetailsModel = ({
     setClosingId(selectedNegotiation);
     setNegError("");
     try {
-      await negotiationService.closeNegotiation(selectedNegotiation, closeReason);
+      await negotiationService.closeNegotiation(selectedNegotiation, closeReason, closeFinalStatus);
       await queryClient.invalidateQueries({ queryKey: ["negotiations", id] });
+      await queryClient.invalidateQueries({ queryKey: ["lead", id] });
       setShowCloseModal(false);
       setCloseReason("");
       setSelectedNeg(null);
     } catch (err: any) {
       setNegError(
-        err.response?.data?.message || "Erro ao encerrar negociação.",
+        err.response?.data?.error || err.response?.data?.message || "Erro ao encerrar negociação.",
       );
     } finally {
       setClosingId(null);
+    }
+  };
+
+  const handleAdvanceStage = async () => {
+    if (!activeNegotiation) return;
+    setAdvancing(true);
+    setNegError("");
+    try {
+      await negotiationService.updateNegotiation(activeNegotiation.id, {
+        estagioId:  advanceStage,
+        importancia: advanceImp,
+      });
+      await queryClient.invalidateQueries({ queryKey: ["negotiations", id] });
+    } catch (err: any) {
+      setNegError(
+        err.response?.data?.error || err.response?.data?.message || "Erro ao atualizar estágio.",
+      );
+    } finally {
+      setAdvancing(false);
     }
   };
 
@@ -229,5 +269,15 @@ export const useLeadDetailsModel = ({
     negImp,
     setNegImp,
     negStage,
+    timeToFirstContact,
+    activeNegotiation,
+    advanceStage,
+    setAdvanceStage,
+    advanceImp,
+    setAdvanceImp,
+    advancing,
+    handleAdvanceStage,
+    closeFinalStatus,
+    setCloseFinalStatus,
   };
 };

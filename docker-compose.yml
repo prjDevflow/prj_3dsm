@@ -57,6 +57,10 @@ services:
       VITE_BASE_URL: "http://localhost:3333/"
       VITE_API_URL: "http://localhost:3333"
       VITE_BACKEND_URL: "http://backend:3333"
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./FRONTEND:/usr/src/app
+      - /usr/src/app/node_modules
     ports:
       - "3000:3000"
     networks:

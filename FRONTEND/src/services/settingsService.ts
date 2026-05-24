@@ -53,6 +53,9 @@ const hexToChannels = (hex: string): [number, number, number] | null => {
 export const applySettings = (settings: AppSettings): void => {
   const root = document.documentElement;
 
+  // Nome do sistema no título
+  document.title = settings.systemName || 'AnalyticsPro';
+
   // Tema
   root.classList.toggle('dark', settings.theme === 'dark');
 

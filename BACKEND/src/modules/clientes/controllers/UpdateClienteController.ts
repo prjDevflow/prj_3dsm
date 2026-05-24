@@ -9,6 +9,7 @@ export class UpdateClienteController {
     const nome        = req.body.name        ?? req.body.nome;
     const email       = req.body.email;
     const telefone    = req.body.phone       ?? req.body.telefone;
+    const cpf         = req.body.cpf;
     const leadId      = req.body.leadId      ?? req.body.lead_id;
     const consultorId = req.body.consultorId ?? req.body.assignedTo;
 
@@ -27,9 +28,10 @@ export class UpdateClienteController {
     const atualizado = await prisma.cliente.update({
       where: { id_cliente: id },
       data: {
-        ...(nome        != null && { nome_cliente:      nome }),
-        ...(email       != null && { email_cliente:     email }),
-        ...(telefone    != null && { telefone_cliente:  telefone }),
+        ...(nome        != null  && { nome_cliente:      nome }),
+        ...(email       != null  && { email_cliente:     email }),
+        ...(telefone    != null  && { telefone_cliente:  telefone }),
+        ...(cpf         !== undefined && { cpf_cliente:  cpf || null }),
         ...(leadId      !== undefined && { id_lead_principal: leadId || null }),
         ...(consultorId !== undefined && { id_consultor:      consultorId || null }),
       },

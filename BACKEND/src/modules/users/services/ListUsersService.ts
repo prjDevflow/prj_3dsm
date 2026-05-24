@@ -7,7 +7,7 @@ export class ListUsersService {
     this.usersRepository = new UsersManagementRepository();
   }
 
-  async execute() {
-    return this.usersRepository.findAll();
+  async execute(filters?: { search?: string; role?: string; equipeId?: string }) {
+    return this.usersRepository.findAll(filters);
   }
 }

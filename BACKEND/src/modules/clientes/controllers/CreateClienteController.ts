@@ -8,6 +8,7 @@ export class CreateClienteController {
     const nome        = req.body.name        ?? req.body.nome;
     const email       = req.body.email;
     const telefone    = req.body.phone       ?? req.body.telefone;
+    const cpf         = req.body.cpf         ?? null;
     const leadId      = req.body.leadId      ?? req.body.lead_id   ?? null;
     const consultorId = req.body.consultorId ?? req.body.assignedTo ?? null;
 
@@ -25,6 +26,7 @@ export class CreateClienteController {
         nome_cliente:      nome,
         email_cliente:     email,
         telefone_cliente:  telefone,
+        cpf_cliente:       cpf,
         id_lead_principal: leadId,
         id_consultor:      consultorId,
       },

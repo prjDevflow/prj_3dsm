@@ -10,7 +10,7 @@ export class NegotiationService implements INegotiationService {
     await InstanceApi.put(`/leads/negotiations/${id}`, data);
   }
 
-  async closeNegotiation(id: string, reason: string): Promise<void> {
-    await InstanceApi.put(`/leads/negotiations/${id}/close`, { reason });
+  async closeNegotiation(id: string, reason: string, finalStatus?: "GANHA" | "PERDIDA"): Promise<void> {
+    await InstanceApi.put(`/leads/negotiations/${id}/close`, { reason, finalStatus });
   }
 }

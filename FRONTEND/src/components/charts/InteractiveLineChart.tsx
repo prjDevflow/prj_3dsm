@@ -127,7 +127,8 @@ const InteractiveLineChart: React.FC<InteractiveLineChartProps> = ({
             }}
             wrapperStyle={{
               cursor: 'pointer',
-              paddingTop: 20
+              paddingTop: 20,
+              fontSize: 14,
             }}
           />
           

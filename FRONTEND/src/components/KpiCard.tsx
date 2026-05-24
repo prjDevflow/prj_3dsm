@@ -23,13 +23,13 @@ const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon: Icon, change }) =
 
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{title}</span>
-          <div className={`p-2.5 rounded-xl ${iconBg}`}>
-            <Icon size={18} className={iconColor} />
+          <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">{title}</span>
+          <div className={`p-3 rounded-xl ${iconBg}`}>
+            <Icon size={22} className={iconColor} />
           </div>
         </div>
 
-        <span className="text-2xl font-bold text-slate-800">{value}</span>
+        <span className="text-4xl font-bold text-slate-800">{value}</span>
 
         {change !== undefined && (
           <div className="flex items-center mt-2 space-x-1">

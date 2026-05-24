@@ -25,32 +25,38 @@ export class LeadsRepository {
   };
 
   // Lista todos (Administrador e Gerente Geral)
-  async findAll(startDate?: Date, endDate?: Date) {
+  async findAll(startDate?: Date, endDate?: Date, lojaName?: string, equipeName?: string) {
     return prisma.lead.findMany({
-      where: { data_criacao_lead: { gte: startDate, lte: endDate } },
+      where: {
+        data_criacao_lead: { gte: startDate, lte: endDate },
+        ...(lojaName   ? { loja:    { nome_loja:               lojaName   } } : {}),
+        ...(equipeName ? { usuario: { equipe: { nome_equipe: equipeName } } } : {}),
+      },
       include: this.includeRelations,
     });
   }
 
   // Lista apenas os leads dos Atendentes da equipa do Gerente
-  async findByEquipeDoGerente(gerenteId: string, startDate?: Date, endDate?: Date) {
+  async findByEquipeDoGerente(gerenteId: string, startDate?: Date, endDate?: Date, lojaName?: string) {
     const gerente = await prisma.usuario.findUnique({ where: { id_usuario: gerenteId } });
 
     return prisma.lead.findMany({
       where: {
         usuario: { id_equipe: gerente?.id_equipe },
         data_criacao_lead: { gte: startDate, lte: endDate },
+        ...(lojaName ? { loja: { nome_loja: lojaName } } : {}),
       },
       include: this.includeRelations,
     });
   }
 
   // Lista apenas os leads do próprio Atendente
-  async findByAtendente(atendenteId: string, startDate?: Date, endDate?: Date) {
+  async findByAtendente(atendenteId: string, startDate?: Date, endDate?: Date, lojaName?: string) {
     return prisma.lead.findMany({
       where: {
         id_usuario: atendenteId,
         data_criacao_lead: { gte: startDate, lte: endDate },
+        ...(lojaName ? { loja: { nome_loja: lojaName } } : {}),
       },
       include: this.includeRelations,
     });

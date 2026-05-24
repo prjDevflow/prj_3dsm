@@ -21,11 +21,22 @@ export class CloseNegotiationController {
       return res.status(400).json({ error: 'Negociação já está encerrada.' });
     }
 
+    const { finalStatus } = req.body; // "GANHA" | "PERDIDA"
+
+    let newStatusId: string | undefined;
+    if (finalStatus) {
+      const sr = await prisma.status.findFirst({
+        where: { nome_status: { equals: finalStatus, mode: 'insensitive' } },
+      });
+      if (sr) newStatusId = sr.id_status;
+    }
+
     const updated = await prisma.negociacao.update({
       where: { id_negociacao: id },
       data: {
         estado_abertura_negociacao:    false,
         motivo_finalizacao_negociacao: reason ?? null,
+        ...(newStatusId ? { id_status: newStatusId } : {}),
       },
     });
 

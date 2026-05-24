@@ -26,6 +26,8 @@ export const ClientsView = (props: ClientsViewProps) => {
     success,
     search,
     setSearch,
+    leadFilter,
+    setLeadFilter,
     setPage,
     clients,
     totalPages,
@@ -90,22 +92,33 @@ export const ClientsView = (props: ClientsViewProps) => {
           </div>
         )}
 
-        {/* ── Busca ── */}
-        <div className="mb-4 relative max-w-sm">
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-            size={16}
-          />
-          <input
-            type="text"
-            placeholder="Buscar por nome, email ou CPF..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="input w-full pl-9"
-          />
+        {/* ── Busca e filtros ── */}
+        <div className="mb-4 flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              size={16}
+            />
+            <input
+              type="text"
+              placeholder="Buscar por nome, email ou telefone..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="input w-full pl-9"
+            />
+          </div>
+          <select
+            value={leadFilter}
+            onChange={(e) => { setLeadFilter(e.target.value as any); setPage(1); }}
+            className="input text-sm"
+          >
+            <option value="all">Todos os clientes</option>
+            <option value="with">Com lead vinculado</option>
+            <option value="without">Sem lead vinculado</option>
+          </select>
         </div>
 
         {/* ── Tabela ── */}
@@ -191,7 +204,7 @@ export const ClientsView = (props: ClientsViewProps) => {
                             href={`/leads/${client.leadId}`}
                             className="inline-flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline font-medium"
                           >
-                            {client.leadId}{" "}
+                            {leads.find((l) => l.id === client.leadId)?.name ?? client.leadId}{" "}
                             <ArrowUpRight size={11} />
                           </a>
                         ) : (
@@ -278,21 +291,35 @@ export const ClientsView = (props: ClientsViewProps) => {
                 >
                   <ChevronLeft size={16} />
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (p) => (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
-                      className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
-                        page === p
-                          ? "bg-[var(--color-primary)] text-white"
-                          : "border border-slate-200 text-slate-600 hover:bg-slate-50"
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  ),
-                )}
+                {(() => {
+                  const pages: (number | "...")[] = [];
+                  if (totalPages <= 7) {
+                    for (let i = 1; i <= totalPages; i++) pages.push(i);
+                  } else {
+                    pages.push(1);
+                    if (page > 3) pages.push("...");
+                    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+                    if (page < totalPages - 2) pages.push("...");
+                    pages.push(totalPages);
+                  }
+                  return pages.map((p, i) =>
+                    p === "..." ? (
+                      <span key={`ellipsis-${i}`} className="px-2 text-slate-400 text-sm">…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p as number)}
+                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
+                          page === p
+                            ? "bg-[var(--color-primary)] text-white"
+                            : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  );
+                })()}
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page === totalPages}
@@ -379,11 +406,17 @@ export const ClientsView = (props: ClientsViewProps) => {
                 <input
                   type="text"
                   value={formData.cpf ?? ""}
-                  onChange={(e) =>
-                    handleFormChange("cpf", e.target.value)
-                  }
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
+                    const masked = digits
+                      .replace(/(\d{3})(\d)/, "$1.$2")
+                      .replace(/(\d{3})(\d)/, "$1.$2")
+                      .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+                    handleFormChange("cpf", masked);
+                  }}
                   className="input w-full"
                   placeholder="000.000.000-00"
+                  maxLength={14}
                 />
               </div>
               <div>

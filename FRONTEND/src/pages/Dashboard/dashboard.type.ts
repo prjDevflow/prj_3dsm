@@ -17,6 +17,7 @@ export type DashboardViewModel = {
   convertedVsNonConverted: { name: string; value: number }[];
   byTeam: { team: string; count: number }[];
   performance: { agent: string; leads: number; conversions: number }[];
+  performanceByTeam: { team: string; leads: number; conversions: number }[];
   lossReasons: { reason: string; count: number }[];
   avgTimeToFirstContact: string;
 };
@@ -41,6 +42,7 @@ export const mapToViewModel = (
     convertedVsNonConverted: data.convertedVsNonConverted ?? [],
     byTeam:                  data.byTeam                  ?? [],
     performance:             data.performance             ?? [],
+    performanceByTeam:       data.performanceByTeam       ?? [],
     lossReasons:             data.lossReasons             ?? [],
     avgTimeToFirstContact:   data.avgTimeToFirstContact   ?? "N/A",
   };

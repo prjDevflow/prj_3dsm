@@ -84,8 +84,10 @@ const LeadsTable: React.FC<LeadsTableProps> = ({
               type="text"
               placeholder="Buscar por nome ou email..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                onSearch?.(e.target.value);
+              }}
               className="input w-full pl-9"
             />
           </div>

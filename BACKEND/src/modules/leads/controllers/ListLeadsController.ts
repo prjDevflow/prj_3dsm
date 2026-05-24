@@ -46,13 +46,15 @@ export class ListLeadsController {
     const { id: userId, role } = req.user;
     const inicio = (req.query.inicio ?? req.query.startDate) as string | undefined;
     const fim    = (req.query.fim   ?? req.query.endDate)   as string | undefined;
+    const store  = req.query.store  as string | undefined;
+    const team   = req.query.team   as string | undefined;
 
     const page  = Math.max(1, parseInt((req.query.page as string) ?? '1', 10));
     const limit = Math.min(100, Math.max(1, parseInt((req.query.limit as string) ?? '20', 10)));
 
     const listLeadsService = new ListLeadsService();
 
-    const allLeads = await listLeadsService.execute({ userId, role, inicio, fim });
+    const allLeads = await listLeadsService.execute({ userId, role, inicio, fim, store, team });
 
     const total      = allLeads.length;
     const totalPages = Math.ceil(total / limit);

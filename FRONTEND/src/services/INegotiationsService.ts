@@ -15,5 +15,5 @@ export interface IUpdateNegotiationRequest {
 export interface INegotiationService {
   createNegotiation(data: ICreateNegotiationRequest): Promise<void>;
   updateNegotiation(id: string, data: IUpdateNegotiationRequest): Promise<void>;
-  closeNegotiation(id: string, reason: string): Promise<void>;
+  closeNegotiation(id: string, reason: string, finalStatus?: "GANHA" | "PERDIDA"): Promise<void>;
 }

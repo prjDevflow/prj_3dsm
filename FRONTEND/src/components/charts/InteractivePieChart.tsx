@@ -92,8 +92,8 @@ const InteractivePieChart: React.FC<InteractivePieChartProps> = ({
   };
 
   return (
-    <div className="w-full">
-      <ResponsiveContainer width="100%" height={400}>
+    <div className="w-full h-full min-h-[220px]">
+      <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             activeIndex={activeIndex}
@@ -101,8 +101,8 @@ const InteractivePieChart: React.FC<InteractivePieChartProps> = ({
             data={data}
             cx="50%"
             cy="50%"
-            innerRadius={80}
-            outerRadius={120}
+            innerRadius={75}
+            outerRadius={115}
             dataKey="value"
             onMouseEnter={onPieEnter}
             onMouseLeave={onPieLeave}
@@ -118,12 +118,13 @@ const InteractivePieChart: React.FC<InteractivePieChartProps> = ({
           </Pie>
           <Tooltip content={<CustomTooltip />} />
           <Legend
-            layout="vertical"
-            align="right"
-            verticalAlign="middle"
+            layout="horizontal"
+            align="center"
+            verticalAlign="bottom"
             iconType="circle"
+            iconSize={10}
             formatter={(value, entry: any) => (
-              <span className="text-sm text-slate-600">
+              <span style={{ fontSize: 13, color: '#475569' }}>
                 {value} ({entry.payload.value})
               </span>
             )}

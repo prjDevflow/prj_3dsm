@@ -55,6 +55,7 @@ model Cliente {
   nome_cliente      String  @db.VarChar(150)
   telefone_cliente  String  @db.VarChar(20)
   email_cliente     String  @unique @db.VarChar(150)
+  cpf_cliente       String? @db.VarChar(14)
   id_lead_principal String? @db.Uuid
   id_consultor      String? @db.Uuid
   leads             Lead[]

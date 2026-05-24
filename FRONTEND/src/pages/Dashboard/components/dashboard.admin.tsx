@@ -1,4 +1,5 @@
-import { AlertCircle, Clock, DollarSign, Phone, Target, TrendingUp, Users } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronUp, Clock, DollarSign, Phone, Target, Users } from "lucide-react";
+import { useState } from "react";
 import { Header } from "../../../components/Header";
 import KpiCard from "../../../components/KpiCard";
 import { useDashboardModel } from "../dashboard.model";
@@ -6,9 +7,41 @@ import InteractivePieChart from "../../../components/charts/InteractivePieChart"
 import InteractiveLineChart from "../../../components/charts/InteractiveLineChart";
 import InteractiveBarChart from "../../../components/charts/InteractiveBarChart";
 
+// Cores semânticas por origem
+const ORIGIN_COLORS: Record<string, string> = {
+  "WhatsApp":      "#25D366",
+  "Facebook":      "#1877F2",
+  "Instagram":     "#E1306C",
+  "Site":          "#09D8C7",
+  "Indicação":     "#17364F",
+  "Loja Física":   "#BD0927",
+  "Mercado Livre": "#FFE11A",
+  "Google Ads":    "#EA4335",
+  "LinkedIn":      "#0A66C2",
+  "Telefone":      "#8B5CF6",
+  "Evento":        "#F97316",
+};
+
+// Cores por importância (frio/morno/quente)
+const IMPORTANCE_COLORS: Record<string, string> = {
+  "frio":   "#3B82F6",
+  "morno":  "#F59E0B",
+  "quente": "#BD0927",
+  "Frio":   "#3B82F6",
+  "Morno":  "#F59E0B",
+  "Quente": "#BD0927",
+  "FRIO":   "#3B82F6",
+  "MORNO":  "#F59E0B",
+  "QUENTE": "#BD0927",
+};
+
+// Paleta vibrante para gráficos genéricos
+const VIBRANT = ["#09D8C7","#BD0927","#17364F","#F97316","#8B5CF6","#FFE11A","#10B981","#1877F2","#E1306C","#411E3A"];
+
 type DashboardProps = ReturnType<typeof useDashboardModel>;
 
 export const DashboardAdmin = (props: DashboardProps) => {
+  const [showAllPerf, setShowAllPerf] = useState(false);
   const {
     metrics,
     safeArray,
@@ -29,17 +62,19 @@ export const DashboardAdmin = (props: DashboardProps) => {
   const byStatus = safeArray(metrics?.byStatus);
   const byImportance = safeArray(metrics?.byImportance);
   const byStore = safeArray(metrics?.byStore);
-  const convertedVsNonConverted = safeArray(metrics?.convertedVsNonConverted);
+  const convertedVsNonConverted = safeArray(metrics?.convertedVsNonConverted).map((item) => ({
+    ...item,
+    color: item.name === "Convertidos" ? "#10b981" : "#ef4444",
+  }));
   const byTeam = safeArray(metrics?.byTeam);
   const performance = safeArray(metrics?.performance);
+  const performanceByTeam = safeArray(metrics?.performanceByTeam);
   const lossReasons = safeArray(metrics?.lossReasons);
 
   return (
     <div className="min-h-screen bg-slate-50">
       <Header
         onDateRangeChange={handleDateRangeChange}
-        onStoreChange={handleStoreChange}
-        onTeamChange={handleTeamChange}
       />
       <main className="max-w-full px-6 md:px-8 py-8">
         <div className="mb-8">
@@ -76,10 +111,9 @@ export const DashboardAdmin = (props: DashboardProps) => {
             change={-1.2}
           />
           <KpiCard
-            title="Receita Total"
-            value={`R$ ${metrics?.kpis.totalRevenue?.toLocaleString() || 0}`}
-            icon={TrendingUp}
-            change={8.3}
+            title="Tempo Médio Atendimento"
+            value={metrics?.avgTimeToFirstContact || "—"}
+            icon={Clock}
           />
         </div>
 
@@ -105,19 +139,22 @@ export const DashboardAdmin = (props: DashboardProps) => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="card p-7">
-            <h3 className="text-base font-semibold text-slate-700 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="card p-5 flex flex-col lg:col-span-1">
+            <h3 className="text-lg font-semibold text-slate-700 mb-3 flex-shrink-0">
               Funil de Vendas
             </h3>
-            <InteractivePieChart
-              data={funnel.map((item) => ({
-                name: item.stage,
-                value: item.count,
-              }))}
-            />
+            <div className="flex-1 min-h-0">
+              <InteractivePieChart
+                data={funnel.map((item, i) => ({
+                  name:  item.stage,
+                  value: item.count,
+                  color: VIBRANT[i % VIBRANT.length],
+                }))}
+              />
+            </div>
           </div>
-          <div className="card p-7">
+          <div className="card p-5 lg:col-span-2">
             <h3 className="text-base font-semibold text-slate-700 mb-4">
               Evolução de Leads
             </h3>
@@ -126,64 +163,67 @@ export const DashboardAdmin = (props: DashboardProps) => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="card p-7">
+          <div className="card p-5">
             <h3 className="text-base font-semibold text-slate-700 mb-4">
               Por Origem
             </h3>
             <InteractiveBarChart
               data={bySource.map((item) => ({
-                name: item.source,
+                name:  item.source,
                 value: item.count,
+                color: ORIGIN_COLORS[item.source],
               }))}
               onBarClick={(point) => setSelectedSource(point.name)}
             />
           </div>
-          <div className="card p-7">
+          <div className="card p-5">
             <h3 className="text-base font-semibold text-slate-700 mb-4">
               Por Status
             </h3>
             <InteractiveBarChart
-              data={byStatus.map((item) => ({
-                name: item.status,
+              data={byStatus.map((item, i) => ({
+                name:  item.status,
                 value: item.count,
+                color: VIBRANT[i % VIBRANT.length],
               }))}
             />
           </div>
-          <div className="card p-7">
+          <div className="card p-5">
             <h3 className="text-base font-semibold text-slate-700 mb-4">
               Importância
             </h3>
             <InteractiveBarChart
               data={byImportance.map((item) => ({
-                name: item.importance,
+                name:  item.importance,
                 value: item.count,
+                color: IMPORTANCE_COLORS[item.importance],
               }))}
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="card p-7">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="card p-5">
             <h3 className="text-base font-semibold text-slate-700 mb-4">
               Leads por Loja
             </h3>
             <InteractiveBarChart
-              data={byStore.map((item) => ({
-                name: item.store,
+              data={byStore.map((item, i) => ({
+                name:  item.store,
                 value: item.count,
+                color: VIBRANT[i % VIBRANT.length],
               }))}
             />
           </div>
-          <div className="card p-7">
-            <h3 className="text-base font-semibold text-slate-700 mb-4">
+          <div className="card p-5 flex flex-col">
+            <h3 className="text-base font-semibold text-slate-700 mb-4 flex-shrink-0">
               Convertidos vs Não Convertidos
             </h3>
-            <InteractivePieChart data={convertedVsNonConverted} />
+            <div className="flex-1 min-h-0">
+              <InteractivePieChart data={convertedVsNonConverted} />
+            </div>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="card p-7">
+          <div className="card p-5">
             <h3 className="text-base font-semibold text-slate-700 mb-4">
               Leads por Equipe
             </h3>
@@ -194,49 +234,94 @@ export const DashboardAdmin = (props: DashboardProps) => {
               }))}
             />
           </div>
-          <div className="card p-7 flex items-center justify-between">
-            <div>
-              <p className="text-base font-medium text-slate-700">
-                Tempo médio até atendimento
-              </p>
-              <p className="text-3xl font-bold text-slate-800 mt-2">
-                {metrics?.avgTimeToFirstContact || "00:00"}
-              </p>
-            </div>
-            <Clock size={36} className="text-slate-400" />
-          </div>
         </div>
 
-        <div className="card p-7 mb-8">
+        <div className="card p-5 mb-8">
           <h3 className="text-base font-semibold text-slate-700 mb-4 flex items-center">
             <Phone className="mr-2 h-5 w-5 text-slate-400" />
             Performance dos Atendentes
           </h3>
-          <div className="space-y-4">
-            {performance.map((agent) => (
-              <div key={agent.agent} className="flex items-center">
-                <span className="text-sm text-slate-600 w-20">
-                  {agent.agent}
-                </span>
-                <div className="flex-1 mx-4">
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-[var(--color-primary)] rounded-full"
-                      style={{
-                        width: `${(agent.conversions / agent.leads) * 100}%`,
-                      }}
-                    />
-                  </div>
+          {(() => {
+            const sorted = [...performance].sort((a, b) => {
+              const rateA = a.leads > 0 ? a.conversions / a.leads : 0;
+              const rateB = b.leads > 0 ? b.conversions / b.leads : 0;
+              return rateB - rateA;
+            });
+            const visible = showAllPerf ? sorted : sorted.slice(0, 5);
+            return (
+              <>
+                <div className="space-y-3">
+                  {visible.map((agent, idx) => {
+                    const rate = agent.leads > 0 ? (agent.conversions / agent.leads) * 100 : 0;
+                    const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : null;
+                    return (
+                      <div key={agent.agent} className="flex items-center gap-3">
+                        <span className="text-base w-6 text-center">{medal ?? <span className="text-xs text-slate-400">{idx + 1}º</span>}</span>
+                        <span className="text-sm text-slate-700 w-28 truncate font-medium">{agent.agent}</span>
+                        <div className="flex-1">
+                          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all"
+                              style={{
+                                width: `${rate}%`,
+                                backgroundColor: VIBRANT[idx % VIBRANT.length],
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <span className="text-xs text-slate-500 w-24 text-right">
+                          {agent.conversions}/{agent.leads} ({rate.toFixed(1)}%)
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
-                <span className="text-sm text-slate-600">
-                  {agent.conversions}/{agent.leads}
-                </span>
-              </div>
-            ))}
-          </div>
+                {sorted.length > 5 && (
+                  <button
+                    onClick={() => setShowAllPerf((v) => !v)}
+                    className="mt-4 flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
+                  >
+                    {showAllPerf
+                      ? <><ChevronUp size={13} /> Ver menos</>
+                      : <><ChevronDown size={13} /> Ver todos ({sorted.length - 5} mais)</>}
+                  </button>
+                )}
+              </>
+            );
+          })()}
         </div>
 
-        <div className="card p-7">
+        {performanceByTeam.length > 0 && (
+          <div className="card p-5 mb-8">
+            <h3 className="text-base font-semibold text-slate-700 mb-4 flex items-center">
+              <Users className="mr-2 h-5 w-5 text-slate-400" />
+              Performance por Equipe
+            </h3>
+            <div className="space-y-4">
+              {performanceByTeam.map((t) => {
+                const rate = t.leads > 0 ? (t.conversions / t.leads) * 100 : 0;
+                return (
+                  <div key={t.team} className="flex items-center gap-4">
+                    <span className="text-sm text-slate-600 w-32 truncate">{t.team}</span>
+                    <div className="flex-1">
+                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-emerald-500 rounded-full"
+                          style={{ width: `${rate}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-sm text-slate-600 w-28 text-right">
+                      {t.conversions}/{t.leads} ({rate.toFixed(1)}%)
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="card p-5">
           <h3 className="text-base font-semibold text-slate-700 mb-4 flex items-center">
             <AlertCircle className="mr-2 h-5 w-5 text-slate-400" />
             Motivos de Perda

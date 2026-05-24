@@ -26,9 +26,7 @@ export const DashboardView = (props: DashboardProps) => {
       <div className="min-h-screen bg-slate-50">
         <Header
           onDateRangeChange={handleDateRangeChange}
-          onStoreChange={handleStoreChange}
-          onTeamChange={handleTeamChange}
-        />
+                  />
         <div className="flex items-center justify-center h-[80vh]">
           <div className="text-center">
             <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)] mx-auto mb-4" />
@@ -44,9 +42,7 @@ export const DashboardView = (props: DashboardProps) => {
       <div className="min-h-screen bg-slate-50">
         <Header
           onDateRangeChange={handleDateRangeChange}
-          onStoreChange={handleStoreChange}
-          onTeamChange={handleTeamChange}
-        />
+                  />
         <div className="max-w-full px-6 md:px-8 py-8">
           <div className="bg-rose-50 p-8 rounded-lg text-center">
             <AlertCircle className="h-12 w-12 text-rose-500 mx-auto mb-4" />

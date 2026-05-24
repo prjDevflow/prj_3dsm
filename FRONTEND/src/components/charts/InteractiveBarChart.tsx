@@ -14,6 +14,7 @@ import {
 interface DataPoint {
   name: string;
   value: number;
+  color?: string;
 }
 
 interface InteractiveBarChartProps {
@@ -86,7 +87,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
         <h4 className="text-sm font-medium text-slate-700 mb-4">{title}</h4>
       )}
 
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={340}>
         <BarChart
           data={enrichedData}
           margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
@@ -114,8 +115,8 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             onMouseLeave={handleMouseLeave}
             cursor="pointer"
           >
-            {data.map((_entry, index) => {
-              const color = BAR_COLORS[index % BAR_COLORS.length];
+            {data.map((entry, index) => {
+              const color = entry.color ?? BAR_COLORS[index % BAR_COLORS.length];
               return (
                 <Cell
                   key={`cell-${index}`}
@@ -137,12 +138,12 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
 
       <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
         {data.map((item, index) => {
-          const color = BAR_COLORS[index % BAR_COLORS.length];
+          const color = item.color ?? BAR_COLORS[index % BAR_COLORS.length];
           const percent = ((item.value / total) * 100).toFixed(1);
           return (
             <div
               key={index}
-              className={`text-xs p-2 rounded-lg transition-colors cursor-pointer
+              className={`text-sm p-2 rounded-lg transition-colors cursor-pointer
                 ${activeIndex === index ? 'bg-slate-100' : 'hover:bg-slate-50'}`}
               onMouseEnter={() => setActiveIndex(index)}
               onMouseLeave={() => setActiveIndex(null)}
@@ -150,14 +151,14 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
             >
               <div className="flex items-center">
                 <span
-                  className="w-2 h-2 rounded-full mr-2"
+                  className="w-2.5 h-2.5 rounded-full mr-2 flex-shrink-0"
                   style={{ backgroundColor: color }}
                 />
-                <span className="text-slate-600">{item.name}</span>
+                <span className="text-slate-600 truncate">{item.name}</span>
               </div>
               <div className="flex items-center justify-between mt-1">
-                <span className="font-medium text-slate-800">{item.value}</span>
-                <span className="text-slate-400">{percent}%</span>
+                <span className="font-semibold text-slate-800">{item.value}</span>
+                <span className="text-slate-400 text-xs">{percent}%</span>
               </div>
             </div>
           );

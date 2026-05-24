@@ -32,6 +32,7 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [leadFilter, setLeadFilter] = useState<"all" | "with" | "without">("all");
 
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<IClient | null>(null);
@@ -43,8 +44,15 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
   const assignedTo = isAdmin ? undefined : user?.id;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["clients", { page, limit, search, assignedTo }],
-    queryFn: () => clientsService.getClients({ page, limit, search, assignedTo }),
+    queryKey: ["clients", { page, limit, search, assignedTo, leadFilter }],
+    queryFn: async () => {
+      const result = await clientsService.getClients({ page, limit, search, assignedTo });
+      if (leadFilter === "all") return result;
+      const filtered = result.data.filter((c) =>
+        leadFilter === "with" ? !!c.leadId : !c.leadId
+      );
+      return { ...result, data: filtered, total: filtered.length, totalPages: Math.ceil(filtered.length / limit) };
+    },
   });
 
   const { data: leadsData } = useLeads({ limit: 100 }); // Assuming useLeads exists and returns lead data
@@ -178,6 +186,8 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
     endItem,
     search,
     setSearch,
+    leadFilter,
+    setLeadFilter,
     isLoading,
     showModal,
     formData,

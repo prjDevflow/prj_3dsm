@@ -18,11 +18,14 @@ function mapUserToDTO(u: any) {
 
 export class UsersManagementController {
   async list(request: Request, response: Response): Promise<Response> {
-    const page  = Math.max(1, parseInt((request.query.page as string) ?? '1', 10));
-    const limit = Math.min(100, Math.max(1, parseInt((request.query.limit as string) ?? '20', 10)));
+    const page     = Math.max(1, parseInt((request.query.page as string) ?? '1', 10));
+    const limit    = Math.min(100, Math.max(1, parseInt((request.query.limit as string) ?? '20', 10)));
+    const search   = request.query.search   as string | undefined;
+    const role     = request.query.role     as string | undefined;
+    const equipeId = (request.query.teamId ?? request.query.equipeId) as string | undefined;
 
     const listUsersService = new ListUsersService();
-    const allUsers = await listUsersService.execute();
+    const allUsers = await listUsersService.execute({ search, role, equipeId });
 
     const total      = allUsers.length;
     const totalPages = Math.ceil(total / limit);

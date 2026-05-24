@@ -110,6 +110,12 @@ ALTER TABLE "leads" DROP COLUMN IF EXISTS "data_atualizacao_lead";
 ALTER TABLE "negociacoes" ADD COLUMN IF NOT EXISTS "motivo_finalizacao_negociacao" TEXT;
 ALTER TABLE "logs_operacoes" ADD COLUMN IF NOT EXISTS "id_registro_afetado" UUID;
 
+-- Migrations 3-6: colunas adicionadas posteriormente
+ALTER TABLE "clientes" ADD COLUMN IF NOT EXISTS "cpf_cliente" VARCHAR(14);
+ALTER TABLE "clientes" ADD COLUMN IF NOT EXISTS "id_lead_principal" UUID;
+ALTER TABLE "clientes" ADD COLUMN IF NOT EXISTS "id_consultor" UUID;
+ALTER TABLE "usuarios" ADD COLUMN IF NOT EXISTS "ativo_usuario" BOOLEAN NOT NULL DEFAULT TRUE;
+
 -- Foreign Keys
 ALTER TABLE "usuarios"
     ADD CONSTRAINT "usuarios_id_papel_fkey"  FOREIGN KEY ("id_papel")  REFERENCES "papeis"("id_papel")  ON DELETE RESTRICT ON UPDATE CASCADE,

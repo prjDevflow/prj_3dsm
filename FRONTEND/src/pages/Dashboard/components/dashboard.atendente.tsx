@@ -33,8 +33,6 @@ export const DashboardAtendente = (props: DashboardProps) => {
     <div className="min-h-screen bg-slate-50">
       <Header
         onDateRangeChange={handleDateRangeChange}
-        onStoreChange={handleStoreChange}
-        onTeamChange={handleTeamChange}
       />
       <main className="max-w-full px-6 md:px-8 py-8">
         <div className="mb-8">

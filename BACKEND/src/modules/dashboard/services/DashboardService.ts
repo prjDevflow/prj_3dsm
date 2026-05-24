@@ -71,13 +71,19 @@ export class DashboardService {
     });
     const byStore = Object.entries(storeMap).map(([store, count]) => ({ store, count }));
 
-    // byTeam
+    // byTeam + performanceByTeam
     const teamMap: Record<string, number> = {};
+    const teamPerfMap: Record<string, { leads: number; conversions: number }> = {};
     leads.forEach(l => {
       const team = l.usuario.equipe?.nome_equipe ?? 'Sem equipe';
       teamMap[team] = (teamMap[team] || 0) + 1;
+      if (!teamPerfMap[team]) teamPerfMap[team] = { leads: 0, conversions: 0 };
+      teamPerfMap[team].leads++;
+      const ganhou = l.negociacoes.some(n => n.status.nome_status.toUpperCase() === 'GANHA');
+      if (ganhou) teamPerfMap[team].conversions++;
     });
     const byTeam = Object.entries(teamMap).map(([team, count]) => ({ team, count }));
+    const performanceByTeam = Object.entries(teamPerfMap).map(([team, v]) => ({ team, ...v }));
 
     // Todas as negociações dos leads filtrados
     const allNegs = leads.flatMap(l => l.negociacoes);
@@ -166,7 +172,24 @@ export class DashboardService {
       byStore,
       convertedVsNonConverted,
       byTeam,
-      avgTimeToFirstContact: 'N/A',
+      performanceByTeam,
+      avgTimeToFirstContact: (() => {
+        const diffs: number[] = [];
+        leads.forEach(l => {
+          if (l.negociacoes.length === 0) return;
+          const earliest = l.negociacoes.reduce((a, b) =>
+            a.data_criacao_negociacao < b.data_criacao_negociacao ? a : b
+          );
+          const diffMs = earliest.data_criacao_negociacao.getTime() - l.data_criacao_lead.getTime();
+          if (diffMs >= 0) diffs.push(diffMs);
+        });
+        if (diffs.length === 0) return 'N/A';
+        const avgHours = (diffs.reduce((a, b) => a + b, 0) / diffs.length) / (1000 * 60 * 60);
+        if (avgHours < 1) return 'Menos de 1h';
+        if (avgHours < 24) return `${Math.round(avgHours)}h`;
+        const avgDays = Math.round(avgHours / 24);
+        return `${avgDays} dia${avgDays > 1 ? 's' : ''}`;
+      })(),
       evolution,
       performance,
       lossReasons
