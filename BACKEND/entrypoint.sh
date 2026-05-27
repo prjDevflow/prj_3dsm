@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+echo ">>> Rodando migrations..."
+npx prisma migrate deploy
+
 echo ">>> Rodando seed (dados de teste)..."
 npx prisma db seed
 
