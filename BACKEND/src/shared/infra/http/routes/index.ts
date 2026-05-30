@@ -5,7 +5,11 @@ import { UpdateClienteController } from '../../../../modules/clientes/controller
 import { DeleteClienteController } from '../../../../modules/clientes/controllers/DeleteClienteController';
 import { ListConsultoresController } from '../../../../modules/clientes/controllers/ListConsultoresController';
 import { CreateLojaController } from '../../../../modules/lojas/controllers/CreateLojaController';
+import { ListLojasController } from '../../../../modules/lojas/controllers/ListLojasController';
+import { DeleteLojaController } from '../../../../modules/lojas/controllers/DeleteLojaController';
 import { CreateOrigemController } from '../../../../modules/origens/controllers/CreateOrigemController';
+import { ListOrigensController } from '../../../../modules/origens/controllers/ListOrigensController';
+import { DeleteOrigemController } from '../../../../modules/origens/controllers/DeleteOrigemController';
 import { ensureAuthenticated } from '../middlewares/ensureAuthenticated';
 import { ensureRole } from '../middlewares/ensureRole';
 import { UserRole } from '../../../../domain/models/UserRole';
@@ -25,7 +29,11 @@ const updateClienteController    = new UpdateClienteController();
 const deleteClienteController    = new DeleteClienteController();
 const listConsultoresController  = new ListConsultoresController();
 const createLojaController    = new CreateLojaController();
+const listLojasController     = new ListLojasController();
+const deleteLojaController    = new DeleteLojaController();
 const createOrigemController  = new CreateOrigemController();
+const listOrigensController   = new ListOrigensController();
+const deleteOrigemController  = new DeleteOrigemController();
 const dashboardController     = new DashboardController();
 const createUserController    = new CreateUserController();
 
@@ -64,7 +72,11 @@ router.put('/clients/:id',      ensureAuthenticated, updateClienteController.han
 router.delete('/clients/:id',   ensureAuthenticated, deleteClienteController.handle);
 
 // Lojas e Origens
-router.post('/lojas',   ensureAuthenticated, ensureRole([UserRole.ADMIN]), createLojaController.handle);
-router.post('/origens', ensureAuthenticated, ensureRole([UserRole.ADMIN]), createOrigemController.handle);
+router.get('/lojas',          ensureAuthenticated, listLojasController.handle);
+router.post('/lojas',         ensureAuthenticated, ensureRole([UserRole.ADMIN]), createLojaController.handle);
+router.delete('/lojas/:id',   ensureAuthenticated, ensureRole([UserRole.ADMIN]), deleteLojaController.handle);
+router.get('/origens',        ensureAuthenticated, listOrigensController.handle);
+router.post('/origens',       ensureAuthenticated, ensureRole([UserRole.ADMIN]), createOrigemController.handle);
+router.delete('/origens/:id', ensureAuthenticated, ensureRole([UserRole.ADMIN]), deleteOrigemController.handle);
 
 export { router };

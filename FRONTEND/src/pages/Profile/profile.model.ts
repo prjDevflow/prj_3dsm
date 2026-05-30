@@ -1,6 +1,7 @@
 import { useAuth } from "./../../context/AuthContext";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IAuthService } from "../../services/IAuthService";
+import { AVATAR_CHANGED_EVENT } from "../../hooks/useUserAvatar";
 
 type ProfileModelProps = {
   authService: IAuthService;
@@ -28,6 +29,32 @@ export const useProfileModel = ({ authService }: ProfileModelProps) => {
   const [showEmailPass, setShowEmailPass] = useState(false);
 
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+
+  const avatarKey = `user_avatar_${user?.id ?? "guest"}`;
+  const [avatar, setAvatar] = useState<string | null>(() => localStorage.getItem(avatarKey));
+
+  useEffect(() => {
+    setAvatar(localStorage.getItem(avatarKey));
+  }, [user?.id]);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      localStorage.setItem(avatarKey, base64);
+      setAvatar(base64);
+      window.dispatchEvent(new CustomEvent(AVATAR_CHANGED_EVENT));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeAvatar = () => {
+    localStorage.removeItem(avatarKey);
+    setAvatar(null);
+    window.dispatchEvent(new CustomEvent(AVATAR_CHANGED_EVENT));
+  };
 
   const validatePassword = (pass: string) => {
     const errors = [];
@@ -94,7 +121,7 @@ export const useProfileModel = ({ authService }: ProfileModelProps) => {
     setLoading(true);
 
     try {
-      await authService.updateCredentials({ password: newPassword });
+      await authService.updateCredentials({ password: newPassword, currentPassword });
 
       setSuccess("Senha atualizada com sucesso!");
       setIsEditingPassword(false);
@@ -106,8 +133,8 @@ export const useProfileModel = ({ authService }: ProfileModelProps) => {
       setTimeout(() => {
         setSuccess("");
       }, 3000);
-    } catch (err) {
-      setError("Erro ao atualizar senha. Tente novamente.");
+    } catch (err: any) {
+      setError(err?.response?.data?.error ?? "Erro ao atualizar senha. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -132,6 +159,9 @@ export const useProfileModel = ({ authService }: ProfileModelProps) => {
   return {
     user,
     logout,
+    avatar,
+    handleAvatarChange,
+    removeAvatar,
     isEditingEmail,
     setIsEditingEmail,
     isEditingPassword,

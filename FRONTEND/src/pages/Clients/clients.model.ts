@@ -28,11 +28,13 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  const isViewAll = isAdmin || user?.role === "gerente" || user?.role === "gerente_geral";
   const limit = 10;
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [leadFilter, setLeadFilter] = useState<"all" | "with" | "without">("all");
+  const handleLeadFilterChange = (f: "all" | "with" | "without") => { setLeadFilter(f); setPage(1); };
 
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<IClient | null>(null);
@@ -41,18 +43,13 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
   const [formError, setFormError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const assignedTo = isAdmin ? undefined : user?.id;
+  const assignedTo = isViewAll ? undefined : user?.id;
+
+  const hasLeadParam = leadFilter === "with" ? true : leadFilter === "without" ? false : undefined;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["clients", { page, limit, search, assignedTo, leadFilter }],
-    queryFn: async () => {
-      const result = await clientsService.getClients({ page, limit, search, assignedTo });
-      if (leadFilter === "all") return result;
-      const filtered = result.data.filter((c) =>
-        leadFilter === "with" ? !!c.leadId : !c.leadId
-      );
-      return { ...result, data: filtered, total: filtered.length, totalPages: Math.ceil(filtered.length / limit) };
-    },
+    queryFn: () => clientsService.getClients({ page, limit, search, assignedTo, hasLead: hasLeadParam }),
   });
 
   const { data: leadsData } = useLeads({ limit: 100 }); // Assuming useLeads exists and returns lead data
@@ -187,7 +184,7 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
     search,
     setSearch,
     leadFilter,
-    setLeadFilter,
+    setLeadFilter: handleLeadFilterChange,
     isLoading,
     showModal,
     formData,

@@ -146,10 +146,10 @@ const InteractiveLineChart: React.FC<InteractiveLineChartProps> = ({
           <Line
             type="monotone"
             dataKey="conversions"
-            stroke="#2C7DA0"
+            stroke="#10B981"
             strokeWidth={2}
-            dot={{ r: 4, fill: '#2C7DA0', strokeWidth: 0 }}
-            activeDot={{ r: 6, fill: '#2C7DA0', stroke: '#fff', strokeWidth: 2 }}
+            dot={{ r: 4, fill: '#10B981', strokeWidth: 0 }}
+            activeDot={{ r: 6, fill: '#10B981', stroke: '#fff', strokeWidth: 2 }}
             hide={hiddenSeries.includes('conversions')}
             name="Conversões"
           />

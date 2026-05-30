@@ -176,6 +176,10 @@ async function main() {
     const statusNome = statusDistribuicao[i % statusDistribuicao.length];
     const importancia = pick(importancias);
 
+    // Idempotente: só cria lead se ainda não existe para este cliente
+    const leadExistente = await prisma.lead.findFirst({ where: { id_cliente: cliente.id_cliente } });
+    if (leadExistente) continue;
+
     const lead = await prisma.lead.create({
       data: {
         id_cliente: cliente.id_cliente,
@@ -212,7 +216,11 @@ async function main() {
     });
   }
 
-  console.log(` ${leadsCount} leads e negociações criados.`);
+  if (leadsCount > 0) {
+    console.log(` ${leadsCount} leads e negociações criados.`);
+  } else {
+    console.log(' Leads já existem, seed ignorado.');
+  }
   console.log(' Semeadura concluída com sucesso!');
   console.log('');
   console.log(' Logins disponíveis (senha: 123):');

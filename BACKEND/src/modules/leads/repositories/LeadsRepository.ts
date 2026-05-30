@@ -33,6 +33,7 @@ export class LeadsRepository {
         ...(equipeName ? { usuario: { equipe: { nome_equipe: equipeName } } } : {}),
       },
       include: this.includeRelations,
+      orderBy: { data_criacao_lead: 'desc' },
     });
   }
 
@@ -47,6 +48,7 @@ export class LeadsRepository {
         ...(lojaName ? { loja: { nome_loja: lojaName } } : {}),
       },
       include: this.includeRelations,
+      orderBy: { data_criacao_lead: 'desc' },
     });
   }
 
@@ -59,6 +61,7 @@ export class LeadsRepository {
         ...(lojaName ? { loja: { nome_loja: lojaName } } : {}),
       },
       include: this.includeRelations,
+      orderBy: { data_criacao_lead: 'desc' },
     });
   }
 

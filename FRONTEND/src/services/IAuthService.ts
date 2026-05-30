@@ -8,6 +8,7 @@ export interface IAuthCredentials {
 export interface IAuthUpdateCredentials {
   email?: string;
   password?: string;
+  currentPassword?: string;
 }
 
 export interface IAuthLoginResponse {

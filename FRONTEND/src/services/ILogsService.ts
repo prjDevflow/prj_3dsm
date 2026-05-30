@@ -2,6 +2,7 @@ export interface ILog {
   id: string;
   action: string;
   entityType: string;
+  entityId?: string;
   entityName?: string;
   details: string;
   userName: string;

@@ -4,7 +4,7 @@ import { CreateNegotiationService } from '../services/CreateNegotiationService';
 export class CreateNegotiationController {
   async handle(req: Request, res: Response): Promise<Response> {
     try {
-      const { leadId, importancia, estagio } = req.body;
+      const { leadId, importancia, estagio, conteudo } = req.body;
       const usuarioLogadoId = req.user.id;
 
       const createNegotiationService = new CreateNegotiationService();
@@ -13,7 +13,8 @@ export class CreateNegotiationController {
         leadId,
         importancia,
         estagio,
-        usuarioLogadoId
+        usuarioLogadoId,
+        observacao: conteudo,
       });
 
       return res.status(201).json(negotiation);

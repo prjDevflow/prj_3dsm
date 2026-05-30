@@ -1,4 +1,4 @@
-import { hash } from 'bcryptjs';
+import { hash, compare } from 'bcryptjs';
 import { UsersRepository } from '../repositories/UsersRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
@@ -7,6 +7,7 @@ interface IUpdateCredentialsRequest {
   userId: string;
   email?: string;
   senha?: string;
+  senhaAtual?: string;
 }
 
 export class UpdateUserCredentialsService {
@@ -18,7 +19,7 @@ export class UpdateUserCredentialsService {
     this.createLogService = new CreateLogService();
   }
 
-  async execute({ userId, email, senha }: IUpdateCredentialsRequest) {
+  async execute({ userId, email, senha, senhaAtual }: IUpdateCredentialsRequest) {
     // 1. Busca o utilizador no banco de dados
     const user = await this.usersRepository.findById(userId);
 
@@ -37,8 +38,19 @@ export class UpdateUserCredentialsService {
 
     // 3. Regra de Negócio: Atualização de Senha com Hash Seguro (RNF02)
     if (senha) {
+      if (!senhaAtual) {
+        const error = new Error("A senha atual é obrigatória para alterar a senha.");
+        (error as any).statusCode = 400;
+        throw error;
+      }
+      const passwordMatch = await compare(senhaAtual, user.senha);
+      if (!passwordMatch) {
+        const error = new Error("Senha atual incorreta.");
+        (error as any).statusCode = 400;
+        throw error;
+      }
       const hashedPassword = await hash(senha, 10);
-      user.senha = hashedPassword; // Atualiza a propriedade com o hash gerado
+      user.senha = hashedPassword;
     }
 
     // 4. Salva as alterações na base de dados (PostgreSQL via Prisma)

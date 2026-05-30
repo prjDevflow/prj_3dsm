@@ -1,11 +1,12 @@
 import { AlertCircle, ChevronDown, ChevronUp, Clock, DollarSign, Phone, Target, Users } from "lucide-react";
 import { useState } from "react";
-import { Header } from "../../../components/Header";
+import { useNavigate } from "react-router-dom";
 import KpiCard from "../../../components/KpiCard";
 import { useDashboardModel } from "../dashboard.model";
 import InteractivePieChart from "../../../components/charts/InteractivePieChart";
 import InteractiveLineChart from "../../../components/charts/InteractiveLineChart";
 import InteractiveBarChart from "../../../components/charts/InteractiveBarChart";
+import { useUserAvatar } from "../../../hooks/useUserAvatar";
 
 // Cores semânticas por origem
 const ORIGIN_COLORS: Record<string, string> = {
@@ -40,22 +41,38 @@ const VIBRANT = ["#09D8C7","#BD0927","#17364F","#F97316","#8B5CF6","#FFE11A","#1
 
 type DashboardProps = ReturnType<typeof useDashboardModel>;
 
+const ROLE_LABELS: Record<string, string> = {
+  atendente:     "Atendente",
+  gerente:       "Gerente",
+  gerente_geral: "Gerente Geral",
+  admin:         "Administrador",
+};
+
 export const DashboardAdmin = (props: DashboardProps) => {
   const [showAllPerf, setShowAllPerf] = useState(false);
   const {
     metrics,
     safeArray,
-    handleDateRangeChange,
-    handleStoreChange,
-    handleTeamChange,
     selectedPeriod,
     selectedSource,
     firstName,
     greeting,
+    role,
+    user,
     setSelectedPeriod,
     setSelectedSource,
-    role,
   } = props;
+
+  const navigate = useNavigate();
+  const avatar = useUserAvatar();
+  const fullName = user?.nome || user?.name || firstName;
+  const initials = fullName
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w: string) => w[0].toUpperCase())
+    .join("");
+
   const funnel = safeArray(metrics?.funnel);
   const evolution = safeArray(metrics?.evolution);
   const bySource = safeArray(metrics?.bySource);
@@ -72,23 +89,53 @@ export const DashboardAdmin = (props: DashboardProps) => {
   const lossReasons = safeArray(metrics?.lossReasons);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Header
-        onDateRangeChange={handleDateRangeChange}
-      />
-      <main className="max-w-full px-6 md:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-slate-800">
-            {role === "admin" ? "Painel Executivo" : "Painel Gerencial"}
-          </h1>
-          <p className="text-base text-slate-500 mt-1">
-            {greeting}, {firstName}.
-          </p>
-          <p className="text-sm text-slate-400 mt-1">
-            {role === "admin"
-              ? "Visão geral completa da operação"
-              : "Visão consolidada de todas as equipes"}
-          </p>
+    <main className="max-w-full px-6 md:px-8 py-8">
+
+        {/* Header card — avatar + identidade + métricas */}
+        <div className="card p-5 mb-8 flex items-center gap-5">
+          {avatar ? (
+            <img src={avatar} alt="" className="w-14 h-14 rounded-2xl object-cover flex-shrink-0" />
+          ) : (
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-lg font-bold flex-shrink-0 select-none"
+              style={{ backgroundColor: "var(--color-primary)" }}
+            >
+              {initials}
+            </div>
+          )}
+
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">
+              {greeting}
+            </p>
+            <h1 className="text-xl font-bold text-slate-800 leading-tight truncate">
+              {fullName}
+            </h1>
+            <p className="text-sm text-slate-500 mt-0.5">
+              {ROLE_LABELS[role ?? ""] ?? role} · {role === "admin" ? "Painel Executivo" : "Painel Gerencial"}
+            </p>
+          </div>
+
+          <div className="hidden sm:flex items-stretch gap-6 divide-x divide-slate-100">
+            <div className="text-right">
+              <p className="text-2xl font-bold text-slate-800 leading-none">
+                {metrics?.kpis.totalLeads ?? 0}
+              </p>
+              <p className="text-xs text-slate-400 mt-1">Leads</p>
+            </div>
+            <div className="pl-6 text-right">
+              <p className="text-2xl font-bold text-slate-800 leading-none">
+                {metrics?.kpis.convertedLeads ?? 0}
+              </p>
+              <p className="text-xs text-slate-400 mt-1">Conversões</p>
+            </div>
+            <div className="pl-6 text-right">
+              <p className="text-2xl font-bold leading-none" style={{ color: "var(--color-primary)" }}>
+                {metrics?.kpis.conversionRate ?? 0}%
+              </p>
+              <p className="text-xs text-slate-400 mt-1">Taxa</p>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -96,19 +143,16 @@ export const DashboardAdmin = (props: DashboardProps) => {
             title="Total de Leads"
             value={metrics?.kpis.totalLeads || 0}
             icon={Users}
-            change={12}
           />
           <KpiCard
             title="Taxa de Conversão"
             value={`${metrics?.kpis.conversionRate || 0}%`}
             icon={Target}
-            change={2.5}
           />
           <KpiCard
             title="Ticket Médio"
             value={`R$ ${metrics?.kpis.avgDealValue?.toLocaleString() || 0}`}
             icon={DollarSign}
-            change={-1.2}
           />
           <KpiCard
             title="Tempo Médio Atendimento"
@@ -257,7 +301,13 @@ export const DashboardAdmin = (props: DashboardProps) => {
                     return (
                       <div key={agent.agent} className="flex items-center gap-3">
                         <span className="text-base w-6 text-center">{medal ?? <span className="text-xs text-slate-400">{idx + 1}º</span>}</span>
-                        <span className="text-sm text-slate-700 w-28 truncate font-medium">{agent.agent}</span>
+                        <button
+                          onClick={() => navigate(`/leads?search=${encodeURIComponent(agent.agent)}`)}
+                          className="text-sm text-[var(--color-primary)] w-28 truncate font-medium text-left hover:underline"
+                          title={`Ver leads de ${agent.agent}`}
+                        >
+                          {agent.agent}
+                        </button>
                         <div className="flex-1">
                           <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                             <div
@@ -354,7 +404,6 @@ export const DashboardAdmin = (props: DashboardProps) => {
             dar zoom • Clique na legenda para ocultar séries
           </p>
         </div>
-      </main>
-    </div>
+    </main>
   );
 };

@@ -31,8 +31,9 @@ export class AuthService implements IAuthService {
 
   async updateCredentials(data: IAuthUpdateCredentials): Promise<void> {
     await InstanceApi.put("auth/me/credentials", {
-      ...(data.email    !== undefined && { email: data.email }),
-      ...(data.password !== undefined && { senha: data.password }),
+      ...(data.email           !== undefined && { email: data.email }),
+      ...(data.password        !== undefined && { senha: data.password }),
+      ...(data.currentPassword !== undefined && { senhaAtual: data.currentPassword }),
     });
   }
 }

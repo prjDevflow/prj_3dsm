@@ -9,6 +9,9 @@ import {
   CheckCircle,
   AlertCircle,
   ChevronRight,
+  Plus,
+  Trash2,
+  Store,
 } from "lucide-react";
 import { Toggle } from "./components/Toggle";
 import { useSettingsModel } from "./settings.model";
@@ -25,7 +28,19 @@ export const SettingsView = (props: SettingsViewProps) => {
     cfg,
     handleSave,
     saving,
-    set
+    set,
+    lojas,
+    origens,
+    newLoja,
+    setNewLoja,
+    newOrigem,
+    setNewOrigem,
+    loadingData,
+    dataError,
+    handleAddLoja,
+    handleDeleteLoja,
+    handleAddOrigem,
+    handleDeleteOrigem,
   } = props;
 
   return (
@@ -394,8 +409,118 @@ export const SettingsView = (props: SettingsViewProps) => {
                 </div>
               )}
 
+              {/* ── Lojas & Origens ── */}
+              {activeTab === "data" && (
+                <div>
+                  <div className="px-6 py-4 border-b border-slate-100">
+                    <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                      <Store size={16} className="text-[var(--color-primary)]" />
+                      Lojas &amp; Origens
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Gerencie as lojas e origens disponíveis no sistema
+                    </p>
+                  </div>
+                  {loadingData ? (
+                    <div className="flex justify-center py-12">
+                      <Loader2 className="h-6 w-6 animate-spin text-[var(--color-primary)]" />
+                    </div>
+                  ) : (
+                    <div className="p-6 space-y-8">
+                      {dataError && (
+                        <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-700 px-3 py-2 rounded-lg text-sm">
+                          <AlertCircle size={14} /> {dataError}
+                        </div>
+                      )}
+
+                      {/* Lojas */}
+                      <div>
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
+                          Lojas ({lojas.length})
+                        </p>
+                        <div className="flex gap-2 mb-3">
+                          <input
+                            type="text"
+                            value={newLoja}
+                            onChange={(e) => setNewLoja(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleAddLoja()}
+                            placeholder="Nome da loja..."
+                            className="input flex-1 text-sm"
+                          />
+                          <button
+                            onClick={handleAddLoja}
+                            disabled={!newLoja.trim()}
+                            className="btn-primary flex items-center gap-1.5 text-sm disabled:opacity-50"
+                          >
+                            <Plus size={14} /> Adicionar
+                          </button>
+                        </div>
+                        <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden">
+                          {lojas.length === 0 ? (
+                            <p className="text-sm text-slate-400 italic p-4">Nenhuma loja cadastrada.</p>
+                          ) : (
+                            lojas.map((l) => (
+                              <div key={l.id} className="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50">
+                                <span className="text-sm text-slate-700">{l.nome}</span>
+                                <button
+                                  onClick={() => handleDeleteLoja(l.id)}
+                                  className="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Origens */}
+                      <div>
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
+                          Origens ({origens.length})
+                        </p>
+                        <div className="flex gap-2 mb-3">
+                          <input
+                            type="text"
+                            value={newOrigem}
+                            onChange={(e) => setNewOrigem(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleAddOrigem()}
+                            placeholder="Nome da origem..."
+                            className="input flex-1 text-sm"
+                          />
+                          <button
+                            onClick={handleAddOrigem}
+                            disabled={!newOrigem.trim()}
+                            className="btn-primary flex items-center gap-1.5 text-sm disabled:opacity-50"
+                          >
+                            <Plus size={14} /> Adicionar
+                          </button>
+                        </div>
+                        <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden">
+                          {origens.length === 0 ? (
+                            <p className="text-sm text-slate-400 italic p-4">Nenhuma origem cadastrada.</p>
+                          ) : (
+                            origens.map((o) => (
+                              <div key={o.id} className="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50">
+                                <span className="text-sm text-slate-700">{o.nome}</span>
+                                <button
+                                  onClick={() => handleDeleteOrigem(o.id)}
+                                  className="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* ── Botão Salvar ── */}
-              <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+              {activeTab !== "data" && <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
                 <p className="text-xs text-slate-400">
                   As alterações são aplicadas imediatamente ao salvar.
                 </p>
@@ -416,7 +541,7 @@ export const SettingsView = (props: SettingsViewProps) => {
                     </>
                   )}
                 </button>
-              </div>
+              </div>}
             </div>
           </div>
         </div>

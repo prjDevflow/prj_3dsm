@@ -177,11 +177,18 @@ export const UsersView = (props: UsersViewProps) => {
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center flex-shrink-0">
-                              <span className="text-white font-medium text-sm">
-                                {user.name.charAt(0).toUpperCase()}
-                              </span>
-                            </div>
+                            {(() => {
+                              const av = localStorage.getItem(`user_avatar_${user.id}`);
+                              return av ? (
+                                <img src={av} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+                              ) : (
+                                <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <span className="text-white font-medium text-sm">
+                                    {user.name.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                              );
+                            })()}
                             <div>
                               <p className="text-sm font-medium text-slate-800">
                                 {user.name}
@@ -360,27 +367,29 @@ export const UsersView = (props: UsersViewProps) => {
                 </div>
               )}
 
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">
-                  Papel *
-                </label>
-                <select
-                  value={formData.role}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      role: e.target.value as UserRole,
-                    })
-                  }
-                  className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
-                  required
-                >
-                  <option value="atendente">Atendente</option>
-                  <option value="gerente">Gerente</option>
-                  <option value="gerente_geral">Gerente Geral</option>
-                  <option value="admin">Administrador</option>
-                </select>
-              </div>
+              {!editingUser && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                    Papel *
+                  </label>
+                  <select
+                    value={formData.role}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        role: e.target.value as UserRole,
+                      })
+                    }
+                    className="border border-slate-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-20)] focus:border-[var(--color-primary)]"
+                    required
+                  >
+                    <option value="atendente">Atendente</option>
+                    <option value="gerente">Gerente</option>
+                    <option value="gerente_geral">Gerente Geral</option>
+                    <option value="admin">Administrador</option>
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">

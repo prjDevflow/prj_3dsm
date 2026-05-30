@@ -1,4 +1,3 @@
-import React from "react";
 import { Header } from "../../components/Header";
 import {
   FileText,
@@ -7,9 +6,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  ChevronDown,
-  ChevronUp,
   Monitor,
+  Eye,
+  User,
+  Calendar,
+  Globe,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -20,8 +21,8 @@ export const LogsView = (props: LogsViewProps) => {
   const {
     actionConfig,
     entityLabels,
-    expandedRow,
-    setExpandedRow,
+    expandedRow: _expandedRow,
+    setExpandedRow: _setExpandedRow,
     page,
     setPage,
     search,
@@ -43,6 +44,8 @@ export const LogsView = (props: LogsViewProps) => {
     handleAction,
     handleEntity,
     isLoading,
+    selectedLog,
+    setSelectedLog,
   } = props;
   return (
     <div className="min-h-screen bg-slate-50">
@@ -183,94 +186,49 @@ export const LogsView = (props: LogsViewProps) => {
                   logs.map((log) => {
                     const action = actionConfig[log.action];
                     const ActionIcon = action?.Icon;
-                    const expanded = expandedRow === log.id;
                     return (
-                      <React.Fragment key={log.id}>
-                        <tr className="hover:bg-slate-50 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <p className="text-sm font-medium text-slate-700">
-                              {format(new Date(log.createdAt), "dd MMM yyyy", {
-                                locale: ptBR,
-                              })}
-                            </p>
-                            <p className="text-xs text-slate-400 mt-0.5">
-                              {format(new Date(log.createdAt), "HH:mm:ss")}
-                            </p>
-                          </td>
-                          <td className="px-6 py-4">
-                            <p className="text-sm font-medium text-slate-700">
-                              {log.userName}
-                            </p>
-                            <p className="text-xs text-slate-400 mt-0.5">
-                              {log.userEmail}
-                            </p>
-                          </td>
-                          <td className="px-6 py-4">
-                            {action && (
-                              <span
-                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${action.classes}`}
-                              >
-                                <ActionIcon size={11} />
-                                {action.label}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4">
-                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                              {entityLabels[log.entityType] ?? log.entityType}
-                            </p>
-                            {log.entityName && (
-                              <p className="text-sm text-slate-700 mt-0.5">
-                                {log.entityName}
-                              </p>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-slate-500 max-w-xs">
-                            <p className="truncate">{log.details}</p>
-                          </td>
-                          <td className="px-4 py-4 text-right">
-                            <button
-                              onClick={() =>
-                                setExpandedRow(expanded ? null : log.id)
-                              }
-                              className="text-slate-400 hover:text-slate-600 transition-colors"
-                              title="Detalhes técnicos"
-                            >
-                              {expanded ? (
-                                <ChevronUp size={15} />
-                              ) : (
-                                <ChevronDown size={15} />
-                              )}
-                            </button>
-                          </td>
-                        </tr>
-                        {expanded && (
-                          <tr className="bg-slate-50">
-                            <td
-                              colSpan={6}
-                              className="px-6 py-3 border-t border-slate-100"
-                            >
-                              <div className="flex flex-wrap gap-6 text-xs text-slate-500">
-                                <span className="flex items-center gap-1.5">
-                                  <span className="font-semibold text-slate-600">
-                                    IP:
-                                  </span>
-                                  <code className="bg-slate-100 px-2 py-0.5 rounded">
-                                    {log.ipAddress}
-                                  </code>
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                  <Monitor size={13} />
-                                  <span className="font-semibold text-slate-600">
-                                    Agente:
-                                  </span>
-                                  <span>{log.userAgent}</span>
-                                </span>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
+                      <tr key={log.id} className="hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => setSelectedLog(log)}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <p className="text-sm font-medium text-slate-700">
+                            {format(new Date(log.createdAt), "dd MMM yyyy", { locale: ptBR })}
+                          </p>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            {format(new Date(log.createdAt), "HH:mm:ss")}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-medium text-slate-700">{log.userName}</p>
+                          <p className="text-xs text-slate-400 mt-0.5">{log.userEmail}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          {action && (
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${action.classes}`}>
+                              <ActionIcon size={11} />
+                              {action.label}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                            {entityLabels[log.entityType] ?? log.entityType}
+                          </p>
+                          {log.entityName && (
+                            <p className="text-sm text-slate-700 mt-0.5">{log.entityName}</p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-500 max-w-xs">
+                          <p className="truncate">{log.details}</p>
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setSelectedLog(log); }}
+                            className="p-1.5 text-slate-400 hover:text-[var(--color-primary)] transition-colors"
+                            title="Ver detalhes"
+                          >
+                            <Eye size={15} />
+                          </button>
+                        </td>
+                      </tr>
                     );
                   })
                 )}
@@ -340,6 +298,85 @@ export const LogsView = (props: LogsViewProps) => {
           </div>
         </div>
       </main>
+
+      {/* ── Modal detalhe de log ── */}
+      {selectedLog && (() => {
+        const action = actionConfig[selectedLog.action];
+        const ActionIcon = action?.Icon;
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedLog(null)}>
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                <h2 className="text-base font-semibold text-slate-800">Detalhes do Log</h2>
+                <button onClick={() => setSelectedLog(null)} className="text-slate-400 hover:text-slate-600">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 space-y-5 overflow-y-auto">
+                {/* Ação */}
+                <div className="flex items-center gap-3">
+                  {action && (
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${action.classes}`}>
+                      {ActionIcon && <ActionIcon size={13} />}
+                      {action.label}
+                    </span>
+                  )}
+                  <span className="text-sm font-semibold text-slate-600 uppercase tracking-wide">
+                    {entityLabels[selectedLog.entityType] ?? selectedLog.entityType}
+                    {selectedLog.entityName ? ` — ${selectedLog.entityName}` : ""}
+                  </span>
+                </div>
+
+                {/* Usuário */}
+                <div className="bg-slate-50 rounded-xl p-4 space-y-1">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Usuário</p>
+                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                    <User size={14} className="text-slate-400" />
+                    {selectedLog.userName}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <span className="w-3.5" />
+                    {selectedLog.userEmail}
+                  </div>
+                </div>
+
+                {/* Data e detalhes */}
+                <div className="bg-slate-50 rounded-xl p-4 space-y-2">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Evento</p>
+                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                    <Calendar size={14} className="text-slate-400 flex-shrink-0" />
+                    {format(new Date(selectedLog.createdAt), "dd 'de' MMMM yyyy 'às' HH:mm:ss", { locale: ptBR })}
+                  </div>
+                  {selectedLog.details && (
+                    <div className="flex items-start gap-2 text-sm text-slate-700">
+                      <FileText size={14} className="text-slate-400 flex-shrink-0 mt-0.5" />
+                      <span>{selectedLog.details}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Técnico */}
+                <div className="bg-slate-50 rounded-xl p-4 space-y-2">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Informações Técnicas</p>
+                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                    <Globe size={14} className="text-slate-400" />
+                    IP: <code className="bg-white border border-slate-200 px-2 py-0.5 rounded text-xs font-mono ml-1">{selectedLog.ipAddress || "—"}</code>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm text-slate-700">
+                    <Monitor size={14} className="text-slate-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-xs text-slate-500 break-all">{selectedLog.userAgent || "—"}</span>
+                  </div>
+                  {selectedLog.entityId && (
+                    <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
+                      ID: {selectedLog.entityId}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

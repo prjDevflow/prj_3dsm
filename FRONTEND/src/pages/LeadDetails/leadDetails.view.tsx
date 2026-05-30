@@ -41,7 +41,6 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
     setNegStage,
     negLoading,
     negotiations,
-    typeIcons,
     importanceBadge,
     stageLabel,
     importanceLabel,
@@ -76,6 +75,7 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
     handleAdvanceStage,
     closeFinalStatus,
     setCloseFinalStatus,
+    atendentes,
   } = props;
 
   if (leadLoading) {
@@ -430,87 +430,106 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
             )}
           </div>
 
-          {/* Lista */}
+          {/* Timeline de negociações */}
           <div className="p-6">
             {negLoading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-[var(--color-primary)]" />
               </div>
             ) : negotiations && negotiations.length > 0 ? (
-              <div className="space-y-4">
-                {negotiations.map((item: Negotiation) => (
-                  <div
-                    key={item.id}
-                    className={`flex items-start gap-3 p-4 rounded-xl transition-colors ${
-                      item.status === "ativa"
-                        ? "bg-emerald-50 border border-emerald-200"
-                        : "bg-slate-50 hover:bg-slate-100"
-                    }`}
-                  >
-                    <div className="flex-shrink-0 mt-1">
-                      {typeIcons[item.type]}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-semibold text-slate-500 uppercase">
-                            {item.type}
-                          </span>
-                          <span
-                            className={`badge text-xs ${importanceBadge[item.importance as NegotiationImportance] ?? "bg-slate-100 text-slate-600"}`}
-                          >
-                            {importanceLabel[
-                              item.importance as NegotiationImportance
-                            ] ?? item.importance}
-                          </span>
-                          <span className="badge bg-slate-100 text-slate-600 text-xs">
-                            {stageLabel[item.stage as NegotiationStage] ??
-                              item.stage}
-                          </span>
-                          <span
-                            className={`badge text-xs ${item.status === "ativa" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}
-                          >
-                            {item.status === "ativa" ? "Ativa" : "Encerrada"}
-                          </span>
+              <div className="relative">
+                {/* Linha vertical da timeline */}
+                <div className="absolute left-4 top-4 bottom-4 w-px bg-slate-200" />
+
+                <div className="space-y-6">
+                  {negotiations.map((item: Negotiation, idx: number) => {
+                    const isActive = item.status === "ativa";
+                    return (
+                      <div key={item.id} className="relative flex items-start gap-4">
+                        {/* Dot da timeline */}
+                        <div className={`relative z-10 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-2 ${
+                          isActive
+                            ? "bg-emerald-500 border-emerald-500"
+                            : "bg-white border-slate-300"
+                        }`}>
+                          {isActive ? (
+                            <CheckCircle size={14} className="text-white" />
+                          ) : (
+                            <span className="text-xs font-bold text-slate-400">{negotiations.length - idx}</span>
+                          )}
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-slate-400 flex items-center gap-1">
-                            <Clock size={11} />
-                            {format(
-                              new Date(item.createdAt),
-                              "dd/MM/yyyy HH:mm",
-                            )}
-                          </span>
-                          {item.status === "ativa" && (
-                            <button
-                              onClick={() => {
-                                setSelectedNeg(item.id);
-                                setShowCloseModal(true);
-                              }}
-                              className="text-xs text-amber-600 hover:text-amber-700 font-medium"
-                            >
-                              Encerrar
-                            </button>
+
+                        {/* Conteúdo */}
+                        <div className={`flex-1 min-w-0 rounded-xl border p-4 transition-colors ${
+                          isActive
+                            ? "bg-emerald-50 border-emerald-200"
+                            : "bg-white border-slate-200 hover:border-slate-300"
+                        }`}>
+                          {/* Cabeçalho */}
+                          <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${
+                                isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                              }`}>
+                                {isActive ? <CheckCircle size={11} /> : <Clock size={11} />}
+                                {isActive ? "Ativa" : "Encerrada"}
+                              </span>
+                              <span className={`badge text-xs ${importanceBadge[item.importance as NegotiationImportance] ?? "bg-slate-100 text-slate-600"}`}>
+                                {importanceLabel[item.importance as NegotiationImportance] ?? item.importance}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                              <span className="text-xs text-slate-400 flex items-center gap-1">
+                                <Clock size={11} />
+                                {format(new Date(item.createdAt), "dd/MM/yyyy HH:mm")}
+                              </span>
+                              {isActive && (
+                                <button
+                                  onClick={() => { setSelectedNeg(item.id); setShowCloseModal(true); }}
+                                  className="text-xs text-amber-600 hover:text-amber-700 font-medium"
+                                >
+                                  Encerrar
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Estágio */}
+                          <div className="flex items-center gap-2 mb-3">
+                            <TrendingUp size={12} className="text-slate-400 flex-shrink-0" />
+                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Estágio:</span>
+                            <span className="text-xs font-medium text-slate-700">
+                              {stageLabel[item.stage as NegotiationStage] ?? item.stage}
+                            </span>
+                          </div>
+
+                          {/* Observação / Conteúdo da negociação */}
+                          {item.content && (
+                            <div className="mt-2 text-sm text-slate-600 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
+                              {item.content}
+                            </div>
+                          )}
+
+                          {/* Motivo de finalização — destaque */}
+                          {item.closedReason && (
+                            <div className={`mt-3 rounded-lg px-4 py-3 border-l-4 ${
+                              item.closedReason.toLowerCase().includes("ganho") ||
+                              item.closedReason.toLowerCase().includes("contrato") ||
+                              item.closedReason.toLowerCase().includes("fechado")
+                                ? "bg-emerald-50 border-emerald-400"
+                                : "bg-amber-50 border-amber-400"
+                            }`}>
+                              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                                Motivo de Finalização
+                              </p>
+                              <p className="text-sm text-slate-700">{item.closedReason}</p>
+                            </div>
                           )}
                         </div>
                       </div>
-                      <p className="text-sm text-slate-700">{item.content}</p>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-slate-500 flex items-center gap-1">
-                          <User size={11} />
-                          Atendente {item.userId}
-                        </span>
-                        {item.closedAt && (
-                          <span className="text-xs text-slate-400">
-                            Encerrado em:{" "}
-                            {format(new Date(item.closedAt), "dd/MM/yyyy")}
-                            {item.closedReason && ` · ${item.closedReason}`}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                    );
+                  })}
+                </div>
               </div>
             ) : (
               <div className="text-center py-12">
@@ -734,6 +753,25 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
                     {STORES.map((s) => (
                       <option key={s.value} value={s.value}>
                         {s.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                    Responsável (Atendente)
+                  </label>
+                  <select
+                    value={(editForm as any).assignedToId ?? ""}
+                    onChange={(e) =>
+                      setEditForm((p) => ({ ...p, assignedToId: e.target.value }))
+                    }
+                    className="input w-full"
+                  >
+                    <option value="">Sem atendente</option>
+                    {atendentes.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name ?? a.nome}
                       </option>
                     ))}
                   </select>

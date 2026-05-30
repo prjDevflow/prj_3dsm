@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Lead } from '../types';
 import { ChevronLeft, ChevronRight, Search, Loader2, X, ArrowUpRight, Pencil } from 'lucide-react';
@@ -16,7 +16,14 @@ interface LeadsTableProps {
   onFilter?: (filters: { status?: string; importance?: string }) => void;
   onEdit?: (lead: Lead) => void;
   loading?: boolean;
+  activeTab?: 'novos' | 'andamento' | 'finalizados';
 }
+
+const STATUS_OPTIONS: Record<string, { value: string; label: string }[]> = {
+  novos:       [],
+  andamento:   [{ value: 'contatado', label: 'Contatado' }, { value: 'qualificado', label: 'Qualificado' }],
+  finalizados: [{ value: 'ganho', label: 'Ganho' }, { value: 'perdido', label: 'Perdido' }],
+};
 
 const statusConfig: Record<string, { label: string; classes: string; dot: string }> = {
   novo:        { label: 'Novo',        dot: 'bg-blue-400',    classes: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' },
@@ -40,11 +47,18 @@ const getAvatarColor = (name: string) => avatarColors[name.charCodeAt(0) % avata
 
 const LeadsTable: React.FC<LeadsTableProps> = ({
   leads, total, page, limit, totalPages,
-  onPageChange, onSearch, onFilter, onEdit, loading = false,
+  onPageChange, onSearch, onFilter, onEdit, loading = false, activeTab,
 }) => {
   const [searchTerm, setSearchTerm]       = useState('');
   const [statusFilter, setStatusFilter]   = useState('');
   const [importanceFilter, setImportanceFilter] = useState('');
+
+  const statusOptions = activeTab ? STATUS_OPTIONS[activeTab] : undefined;
+
+  useEffect(() => {
+    setStatusFilter('');
+    onFilter?.({ importance: importanceFilter || undefined });
+  }, [activeTab]);
 
   const hasActiveFilters = !!(statusFilter || importanceFilter || searchTerm);
 
@@ -92,18 +106,18 @@ const LeadsTable: React.FC<LeadsTableProps> = ({
             />
           </div>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => handleStatusChange(e.target.value)}
-            className="input sm:w-44 text-sm"
-          >
-            <option value="">Todos os status</option>
-            <option value="novo">Novo</option>
-            <option value="contatado">Contatado</option>
-            <option value="qualificado">Qualificado</option>
-            <option value="perdido">Perdido</option>
-            <option value="ganho">Ganho</option>
-          </select>
+          {statusOptions && statusOptions.length > 0 && (
+            <select
+              value={statusFilter}
+              onChange={(e) => handleStatusChange(e.target.value)}
+              className="input sm:w-44 text-sm"
+            >
+              <option value="">Todos os status</option>
+              {statusOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          )}
 
           <select
             value={importanceFilter}

@@ -109,9 +109,10 @@ model Negociacao {
   id_negociacao              String   @id @default(uuid()) @db.Uuid
   id_lead                    String   @db.Uuid
   estado_abertura_negociacao Boolean  @default(true)
-  importancia_negociacao     String   @db.VarChar(50) 
-  motivo_finalizacao_negociacao String? @db.Text // ADICIONADO para o RF05
-  data_criacao_negociacao    DateTime @default(now()) @db.Timestamp()
+  importancia_negociacao        String   @db.VarChar(50)
+  observacao_negociacao         String?  @db.Text
+  motivo_finalizacao_negociacao String?  @db.Text
+  data_criacao_negociacao       DateTime @default(now()) @db.Timestamp()
   id_estagio                 String   @db.Uuid
   id_status                  String   @db.Uuid
 

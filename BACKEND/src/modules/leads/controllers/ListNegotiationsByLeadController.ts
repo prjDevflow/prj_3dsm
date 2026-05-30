@@ -25,7 +25,7 @@ export class ListNegotiationsByLeadController {
         id:           neg.id_negociacao,
         leadId:       neg.id_lead,
         userId:       null,
-        content:      '',
+        content:      neg.observacao_negociacao ?? '',
         type:         'comentário' as const,
         importance:   imp === 'quente' ? 'quente' : imp === 'morno' ? 'morno' : 'frio',
         stage:        estagioNome.replace(/ /g, '_'),

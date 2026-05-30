@@ -1,4 +1,4 @@
-import { subDays, subYears, isAfter, parseISO, startOfDay, endOfDay } from 'date-fns';
+import { subDays, subYears, isAfter, isBefore, parseISO, startOfDay, endOfDay } from 'date-fns';
 import { UserRole } from '../../domain/models/UserRole';
 
 export class DateValidator {
@@ -12,9 +12,9 @@ export class DateValidator {
 
     // RF06: Restrição de 1 ano para quem não é ADMIN
     if (role !== UserRole.ADMIN) {
-      const umAnoAtras = subYears(hoje, 1);
-      
-      if (!isAfter(startDate, umAnoAtras)) {
+      const umAnoAtras = startOfDay(subYears(hoje, 1));
+
+      if (isBefore(startDate, umAnoAtras)) {
         throw new Error("Limite de consulta excedido: Usuários não-administradores só podem consultar dados dos últimos 12 meses.");
       }
     }

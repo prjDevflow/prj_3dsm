@@ -8,6 +8,7 @@ interface ICreateNegotiationRequest {
   importancia: 'FRIO' | 'MORNO' | 'QUENTE';
   estagio: string;
   usuarioLogadoId: string;
+  observacao?: string;
 }
 
 export class CreateNegotiationService {
@@ -22,7 +23,7 @@ export class CreateNegotiationService {
   async execute(data: ICreateNegotiationRequest) {
     // 🚨 VALIDAÇÃO DO RF03: Verifica ativamente se o Lead já tem uma negociação aberta!
     const negociacaoAtiva = await this.negotiationsRepository.findActiveByLeadId(data.leadId);
-    
+
     if (negociacaoAtiva) {
       const error = new Error("Regra de Negócio Violada (RF03): Este Lead já possui uma negociação ativa aberta.");
       (error as any).statusCode = 400; // O nosso controller agora sabe ler isto e devolverá o Status 400!
@@ -35,7 +36,8 @@ export class CreateNegotiationService {
       importancia: data.importancia,
       estagio: data.estagio,
       status: NegotiationStatus.ABERTA,
-      isAberta: true
+      isAberta: true,
+      observacao: data.observacao,
     });
 
     // 2. Grava o histórico inicial da Negociação (RF03)

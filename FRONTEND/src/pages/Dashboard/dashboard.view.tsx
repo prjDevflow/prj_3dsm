@@ -11,8 +11,6 @@ export const DashboardView = (props: DashboardProps) => {
   const {
     isLoading,
     handleDateRangeChange,
-    handleStoreChange,
-    handleTeamChange,
     error,
     metrics,
     refetch,
@@ -21,28 +19,20 @@ export const DashboardView = (props: DashboardProps) => {
     isAdminOuGerenteGeral,
   } = props;
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50">
-        <Header
-          onDateRangeChange={handleDateRangeChange}
-                  />
+  const renderContent = () => {
+    if (isLoading) {
+      return (
         <div className="flex items-center justify-center h-[80vh]">
           <div className="text-center">
             <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)] mx-auto mb-4" />
             <p className="text-slate-600">Carregando dashboard...</p>
           </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (error || !metrics) {
-    return (
-      <div className="min-h-screen bg-slate-50">
-        <Header
-          onDateRangeChange={handleDateRangeChange}
-                  />
+    if (error || !metrics) {
+      return (
         <div className="max-w-full px-6 md:px-8 py-8">
           <div className="bg-rose-50 p-8 rounded-lg text-center">
             <AlertCircle className="h-12 w-12 text-rose-500 mx-auto mb-4" />
@@ -55,22 +45,18 @@ export const DashboardView = (props: DashboardProps) => {
             </button>
           </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // ==================== ATENDENTE ====================
-  if (isAtendente) {
-    return <DashboardAtendente {...props} />;
-  }
+    if (isAtendente) return <DashboardAtendente {...props} />;
+    if (isGerente) return <DashboardGerente {...props} />;
+    if (isAdminOuGerenteGeral) return <DashboardAdmin {...props} />;
+  };
 
-  // ==================== GERENTE ====================
-  if (isGerente) {
-    return <DashboardGerente {...props} />;
-  }
-
-  // ==================== ADMIN OU GERENTE GERAL ====================
-  if (isAdminOuGerenteGeral) {
-    return <DashboardAdmin {...props} />;
-  }
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <Header onDateRangeChange={handleDateRangeChange} />
+      {renderContent()}
+    </div>
+  );
 };

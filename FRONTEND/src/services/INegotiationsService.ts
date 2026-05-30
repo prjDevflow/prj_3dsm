@@ -4,6 +4,7 @@ export interface ICreateNegotiationRequest {
   leadId: string;
   importancia: NegotiationImportance;
   estagio: NegotiationStage;
+  conteudo?: string;
 }
 
 export interface IUpdateNegotiationRequest {

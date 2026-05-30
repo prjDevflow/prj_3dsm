@@ -35,8 +35,9 @@ function mapLeadToDTO(lead: any) {
     importance: importanceFromNeg,
     origin:     lead.origem?.nome_origem ?? '',
     store:      lead.loja?.nome_loja ?? '',
-    assignedTo: lead.usuario?.nome_usuario ?? '',
-    teamId:     lead.usuario?.id_equipe ?? null,
+    assignedTo:   lead.usuario?.nome_usuario ?? '',
+    assignedToId: lead.usuario?.id_usuario ?? null,
+    teamId:       lead.usuario?.id_equipe ?? null,
     createdAt:  lead.data_criacao_lead?.toISOString() ?? new Date().toISOString(),
     updatedAt:  lead.data_criacao_lead?.toISOString() ?? new Date().toISOString(),
   };

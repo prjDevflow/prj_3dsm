@@ -32,7 +32,7 @@ export class NegotiationsRepository {
     };
   }
 
-  async create(data: { leadId: string; importancia: string; estagio: string; status: string; isAberta: boolean }) {
+  async create(data: { leadId: string; importancia: string; estagio: string; status: string; isAberta: boolean; observacao?: string }) {
     // Resolve UUID do status pelo nome (ex: 'ABERTA' → UUID)
     const statusRecord = await prisma.status.findFirst({
       where: { nome_status: { equals: data.status, mode: 'insensitive' } },
@@ -53,11 +53,12 @@ export class NegotiationsRepository {
 
     const neg = await prisma.negociacao.create({
       data: {
-        id_lead:                   data.leadId,
-        importancia_negociacao:    data.importancia.toUpperCase(),
-        id_estagio:                estagioRecord.id_estagio,
-        id_status:                 statusRecord.id_status,
+        id_lead:                    data.leadId,
+        importancia_negociacao:     data.importancia.toUpperCase(),
+        id_estagio:                 estagioRecord.id_estagio,
+        id_status:                  statusRecord.id_status,
         estado_abertura_negociacao: data.isAberta,
+        ...(data.observacao ? { observacao_negociacao: data.observacao } : {}),
       },
     });
 

@@ -35,6 +35,7 @@ export type FetchClientsParams = {
   limit?: number;
   search?: string;
   assignedTo?: string;
+  hasLead?: boolean;
 };
 
 export interface IClientsService {

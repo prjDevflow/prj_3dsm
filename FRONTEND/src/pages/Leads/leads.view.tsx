@@ -1,26 +1,16 @@
-import React from "react";
 import { Header } from "../../components/Header";
 import LeadsTable from "../../components/LeadsTable";
-import { Lead } from "../../types";
 import {
   AlertCircle,
   Plus,
   X,
   CheckCircle,
   Loader2,
-  Users,
   Clock,
-  TrendingUp,
   CheckSquare,
 } from "lucide-react";
 import { useLeadsModel, LeadTab } from "./leads.model";
 
-const STORES = [
-  { value: "all",                          label: "Todas as lojas" },
-  { value: "Matriz Jacareí",               label: "Matriz Jacareí" },
-  { value: "Filial São José dos Campos",   label: "Filial SJC" },
-  { value: "Loja Padrão CSV",              label: "Loja Padrão CSV" },
-];
 
 const TEAMS = [
   { value: "all",           label: "Todas as equipes" },
@@ -72,6 +62,7 @@ export const LeadsView = (props: LeadsViewProps) => {
     activeTab,
     switchTab,
     counts,
+    lojas,
   } = props;
 
   if (error) {
@@ -107,7 +98,8 @@ export const LeadsView = (props: LeadsViewProps) => {
               onChange={(e) => onStoreChange(e.target.value)}
               className="input text-sm py-2"
             >
-              {STORES.map((s) => (
+              <option value="all">Todas as lojas</option>
+              {lojas.map((s) => (
                 <option key={s.value} value={s.value}>{s.label}</option>
               ))}
             </select>
@@ -195,6 +187,7 @@ export const LeadsView = (props: LeadsViewProps) => {
           onFilter={handleFilter}
           onEdit={canCreate ? openEdit : undefined}
           loading={isLoading}
+          activeTab={activeTab}
         />
       </main>
 
@@ -288,7 +281,7 @@ export const LeadsView = (props: LeadsViewProps) => {
                     onChange={(e) => handleFormChange("store", e.target.value)}
                     className="input w-full"
                   >
-                    {STORES.filter((s) => s.value !== "all").map((s) => (
+                    {lojas.map((s) => (
                       <option key={s.value} value={s.value}>{s.label}</option>
                     ))}
                   </select>

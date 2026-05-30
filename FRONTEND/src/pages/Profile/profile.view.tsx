@@ -1,12 +1,18 @@
 import { useProfileModel } from "./profile.model";
 import { Header } from "../../components/Header";
-import { Eye, EyeOff, Loader2, Save, Key, User, Mail, AlertCircle, CheckCircle, Lock } from "lucide-react";
+import { useRef } from "react";
+import { Eye, EyeOff, Loader2, Save, Key, User, Mail, AlertCircle, CheckCircle, Lock, Camera, Trash2 } from "lucide-react";
 
 type ProfileViewProps = ReturnType<typeof useProfileModel>;
 
 export const ProfileView = (props: ProfileViewProps) => {
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const {user,
+    avatar,
+    handleAvatarChange,
+    removeAvatar,
     isEditingEmail,
     setIsEditingEmail,
     isEditingPassword,
@@ -75,8 +81,71 @@ export const ProfileView = (props: ProfileViewProps) => {
               <h2 className="text-sm font-semibold text-slate-800">Informações Básicas</h2>
             </div>
           </div>
-          
+
           <div className="p-6">
+            {/* Avatar */}
+            <div className="flex items-center gap-5 mb-6 pb-6 border-b border-slate-100">
+              <div className="relative group flex-shrink-0">
+                {avatar ? (
+                  <img
+                    src={avatar}
+                    alt="Avatar"
+                    className="w-20 h-20 rounded-2xl object-cover"
+                  />
+                ) : (
+                  <div
+                    className="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-2xl font-bold select-none"
+                    style={{ backgroundColor: "var(--color-primary)" }}
+                  >
+                    {(user?.nome || user?.name || "?")
+                      .split(" ").filter(Boolean).slice(0, 2)
+                      .map((w: string) => w[0].toUpperCase()).join("")}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Alterar foto"
+                >
+                  <Camera size={20} className="text-white" />
+                </button>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-800">{user?.nome}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{user?.email}</p>
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-primary)] hover:underline"
+                  >
+                    <Camera size={13} />
+                    {avatar ? "Alterar foto" : "Adicionar foto"}
+                  </button>
+                  {avatar && (
+                    <button
+                      type="button"
+                      onClick={removeAvatar}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-rose-500 hover:underline"
+                    >
+                      <Trash2 size={13} />
+                      Remover
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+            </div>
+
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">

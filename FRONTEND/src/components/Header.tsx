@@ -1,6 +1,8 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useUserAvatar } from '../hooks/useUserAvatar';
+import { useNewLeadNotification } from '../hooks/useNewLeadNotification';
 import { validateDateRange, DateRange, formatDateRange } from '../utils/dateUtils';
 import {
   LayoutDashboard,
@@ -14,12 +16,10 @@ import {
   Settings,
   Calendar,
   AlertCircle,
-  Info,
   Users as UsersIcon,
   Building2,
   FileText,
   UserCheck,
-  ShieldCheck,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -28,20 +28,23 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
   const { user, logout } = useAuth();
+  const avatar = useUserAvatar();
   const navigate = useNavigate();
   const location = useLocation();
+  const { newLeadsCount, clearNewLeads } = useNewLeadNotification();
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [dateError, setDateError] = useState<string | null>(null);
   const [showMorePeriods, setShowMorePeriods] = useState(false);
+  const [activePreset, setActivePreset] = useState<string | null>(null);
   
-  const errorTimeoutRef = useRef<NodeJS.Timeout>();
+  const errorTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const lastValidationRef = useRef<string>('');
 
   // Verificar se está em página que NÃO deve mostrar filtros
-  const hideFiltersRoutes = ['/profile', '/settings', '/users', '/teams', '/logs', '/clients'];
+  const hideFiltersRoutes = ['/profile', '/settings', '/users', '/teams', '/logs', '/clients', '/leads', '/admin'];
   const shouldHideFilters = hideFiltersRoutes.includes(location.pathname);
 
   const [startDate, setStartDate] = useState(() => {
@@ -63,74 +66,82 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
   const isActive = (path: string) => location.pathname === path;
 
   // Função para definir período rápido (semana, mês, ano)
+  const clearPresetError = () => { clearErrorTimeout(); setDateError(null); };
+
   const setDatePreset = (preset: 'week' | 'month' | 'year') => {
+    clearPresetError();
     const end = new Date();
     const start = new Date();
     switch (preset) {
-      case 'week':
-        start.setDate(end.getDate() - 7);
-        break;
-      case 'month':
-        start.setMonth(end.getMonth() - 1);
-        break;
-      case 'year':
-        start.setFullYear(end.getFullYear() - 1);
-        break;
+      case 'week':  start.setDate(end.getDate() - 7); break;
+      case 'month': start.setMonth(end.getMonth() - 1); break;
+      case 'year':  start.setDate(end.getDate() - 365); break;
     }
     const newStart = start.toISOString().split('T')[0];
     const newEnd = end.toISOString().split('T')[0];
     setStartDate(newStart);
     setEndDate(newEnd);
+    setActivePreset(preset);
     if (onDateRangeChange) onDateRangeChange({ start, end });
   };
 
   // Novos períodos personalizados
   const setCustomRange = (days: number) => {
+    clearPresetError();
     const end = new Date();
     const start = new Date();
     start.setDate(end.getDate() - days);
     setStartDate(start.toISOString().split('T')[0]);
     setEndDate(end.toISOString().split('T')[0]);
+    setActivePreset(`${days}d`);
     if (onDateRangeChange) onDateRangeChange({ start, end });
     setShowMorePeriods(false);
   };
 
   const setCurrentMonth = () => {
+    clearPresetError();
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1);
     const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     setStartDate(start.toISOString().split('T')[0]);
     setEndDate(end.toISOString().split('T')[0]);
+    setActivePreset('current-month');
     if (onDateRangeChange) onDateRangeChange({ start, end });
     setShowMorePeriods(false);
   };
 
   const setLastMonth = () => {
+    clearPresetError();
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const end = new Date(now.getFullYear(), now.getMonth(), 0);
     setStartDate(start.toISOString().split('T')[0]);
     setEndDate(end.toISOString().split('T')[0]);
+    setActivePreset('last-month');
     if (onDateRangeChange) onDateRangeChange({ start, end });
     setShowMorePeriods(false);
   };
 
   const setCurrentYear = () => {
+    clearPresetError();
     const now = new Date();
     const start = new Date(now.getFullYear(), 0, 1);
     const end = new Date(now.getFullYear(), 11, 31);
     setStartDate(start.toISOString().split('T')[0]);
     setEndDate(end.toISOString().split('T')[0]);
+    setActivePreset('current-year');
     if (onDateRangeChange) onDateRangeChange({ start, end });
     setShowMorePeriods(false);
   };
 
   const setLastYear = () => {
+    clearPresetError();
     const now = new Date();
     const start = new Date(now.getFullYear() - 1, 0, 1);
     const end = new Date(now.getFullYear() - 1, 11, 31);
     setStartDate(start.toISOString().split('T')[0]);
     setEndDate(end.toISOString().split('T')[0]);
+    setActivePreset('last-year');
     if (onDateRangeChange) onDateRangeChange({ start, end });
     setShowMorePeriods(false);
   };
@@ -185,21 +196,48 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
     }
   };
 
+  const addOneYear = (dateStr: string) => {
+    const d = new Date(dateStr);
+    d.setFullYear(d.getFullYear() + 1);
+    return d.toISOString().split('T')[0];
+  };
+  const subOneYear = (dateStr: string) => {
+    const d = new Date(dateStr);
+    d.setFullYear(d.getFullYear() - 1);
+    return d.toISOString().split('T')[0];
+  };
+
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStart = e.target.value;
+    let newEnd = endDate;
+    if (!isAdmin) {
+      const cap = addOneYear(newStart);
+      if (newEnd > cap) { newEnd = cap; setEndDate(newEnd); }
+    }
     setStartDate(newStart);
-    validateAndUpdateDates(newStart, endDate);
+    setActivePreset(null);
+    validateAndUpdateDates(newStart, newEnd);
   };
 
   const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEnd = e.target.value;
+    let newStart = startDate;
+    if (!isAdmin) {
+      const cap = subOneYear(newEnd);
+      if (newStart < cap) { newStart = cap; setStartDate(newStart); }
+    }
     setEndDate(newEnd);
-    validateAndUpdateDates(startDate, newEnd);
+    setActivePreset(null);
+    validateAndUpdateDates(newStart, newEnd);
   };
 
   useEffect(() => {
     return () => clearErrorTimeout();
   }, []);
+
+  useEffect(() => {
+    if (location.pathname === '/leads') clearNewLeads();
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -232,11 +270,12 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
           <nav className="hidden lg:flex items-center space-x-1">
             {navigation.map((item) => {
               const Icon = item.icon;
+              const showBadge = item.href === '/leads' && newLeadsCount > 0;
               return (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors
+                  className={`relative px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors
                     ${isActive(item.href)
                       ? 'bg-[var(--color-primary-10)] text-[var(--color-primary)]'
                       : 'text-slate-600 hover:bg-slate-100'
@@ -244,6 +283,11 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
                 >
                   <Icon size={18} />
                   <span>{item.name}</span>
+                  {showBadge && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                      {newLeadsCount > 99 ? '99+' : newLeadsCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -255,11 +299,15 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-100 transition-colors"
               >
-                <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">
-                  <span className="text-white font-medium text-sm">
-                    {user?.nome?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
+                {avatar ? (
+                  <img src={avatar} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">
+                    <span className="text-white font-medium text-sm">
+                      {user?.nome?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-medium text-slate-700">{user?.nome}</p>
                   <p className="text-xs text-slate-500">{user?.role}</p>
@@ -283,11 +331,6 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
                   {isSuperAdmin && (
                     <Link to="/users" className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center space-x-2" onClick={() => setUserMenuOpen(false)}>
                       <UsersIcon size={16} /><span>Usuários</span>
-                    </Link>
-                  )}
-                  {isSuperAdmin && (
-                    <Link to="/admin" className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center space-x-2" onClick={() => setUserMenuOpen(false)}>
-                      <ShieldCheck size={16} /><span>Painel Admin</span>
                     </Link>
                   )}
                   {(isSuperAdmin || isGerente) && (
@@ -315,39 +358,101 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
           <div className="hidden lg:block py-2 border-t border-slate-100">
             <div className="flex flex-wrap items-center gap-3">
               {/* Botões rápidos existentes */}
-              <button onClick={() => setDatePreset('week')} className="text-xs px-3 py-1.5 bg-slate-50 rounded-lg hover:bg-slate-100">Semana</button>
-              <button onClick={() => setDatePreset('month')} className="text-xs px-3 py-1.5 bg-slate-50 rounded-lg hover:bg-slate-100">Mês</button>
-              <button onClick={() => setDatePreset('year')} className="text-xs px-3 py-1.5 bg-slate-50 rounded-lg hover:bg-slate-100">Ano</button>
+              {(['week', 'month', 'year'] as const).map((preset) => {
+                const labels = { week: 'Semana', month: 'Mês', year: 'Ano' };
+                const active = activePreset === preset;
+                return (
+                  <button
+                    key={preset}
+                    onClick={() => setDatePreset(preset)}
+                    className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                    style={active
+                      ? { backgroundColor: 'var(--color-primary)', color: 'white' }
+                      : { backgroundColor: '#f8fafc', color: '#475569' }
+                    }
+                  >
+                    {labels[preset]}
+                  </button>
+                );
+              })}
 
               {/* Dropdown com mais períodos */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowMorePeriods(!showMorePeriods)}
-                  className="text-xs px-3 py-1.5 bg-slate-50 rounded-lg hover:bg-slate-100 flex items-center gap-1"
-                >
-                  Mais períodos <ChevronDown size={14} className={`transition-transform ${showMorePeriods ? 'rotate-180' : ''}`} />
-                </button>
-                {showMorePeriods && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 z-20 py-1">
-                    <button onClick={() => setCustomRange(7)} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Últimos 7 dias</button>
-                    <button onClick={() => setCustomRange(15)} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Últimos 15 dias</button>
-                    <button onClick={() => setCustomRange(30)} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Últimos 30 dias</button>
-                    <button onClick={() => setCustomRange(90)} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Últimos 90 dias</button>
-                    <div className="border-t border-slate-100 my-1"></div>
-                    <button onClick={setCurrentMonth} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Este mês</button>
-                    <button onClick={setLastMonth} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Mês passado</button>
-                    <button onClick={setCurrentYear} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Este ano</button>
-                    <button onClick={setLastYear} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Ano passado</button>
+              {(() => {
+                const customPresetLabels: Record<string, string> = {
+                  '7d': 'Últimos 7 dias',
+                  '15d': 'Últimos 15 dias',
+                  '30d': 'Últimos 30 dias',
+                  '90d': 'Últimos 90 dias',
+                  'current-month': 'Este mês',
+                  'last-month': 'Mês passado',
+                  'current-year': 'Este ano',
+                  'last-year': 'Ano passado',
+                };
+                const isCustomActive = activePreset !== null && activePreset in customPresetLabels;
+                const buttonLabel = isCustomActive ? customPresetLabels[activePreset!] : 'Mais períodos';
+                return (
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowMorePeriods(!showMorePeriods)}
+                      className="text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1 transition-colors"
+                      style={isCustomActive
+                        ? { backgroundColor: 'var(--color-primary)', color: 'white' }
+                        : { backgroundColor: '#f8fafc', color: '#475569' }
+                      }
+                    >
+                      {buttonLabel} <ChevronDown size={14} className={`transition-transform ${showMorePeriods ? 'rotate-180' : ''}`} />
+                    </button>
+                    {showMorePeriods && (
+                      <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 z-20 py-1">
+                        {[
+                          { label: 'Últimos 7 dias', action: () => setCustomRange(7), key: '7d' },
+                          { label: 'Últimos 15 dias', action: () => setCustomRange(15), key: '15d' },
+                          { label: 'Últimos 30 dias', action: () => setCustomRange(30), key: '30d' },
+                          { label: 'Últimos 90 dias', action: () => setCustomRange(90), key: '90d' },
+                        ].map(({ label, action, key }) => (
+                          <button
+                            key={key}
+                            onClick={action}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                              activePreset === key
+                                ? 'bg-[var(--color-primary-10)] text-[var(--color-primary)] font-medium'
+                                : 'text-slate-700 hover:bg-slate-50'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                        <div className="border-t border-slate-100 my-1"></div>
+                        {[
+                          { label: 'Este mês', action: setCurrentMonth, key: 'current-month' },
+                          { label: 'Mês passado', action: setLastMonth, key: 'last-month' },
+                          { label: 'Este ano', action: setCurrentYear, key: 'current-year' },
+                          ...(isAdmin ? [{ label: 'Ano passado', action: setLastYear, key: 'last-year' }] : []),
+                        ].map(({ label, action, key }) => (
+                          <button
+                            key={key}
+                            onClick={action}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                              activePreset === key
+                                ? 'bg-[var(--color-primary-10)] text-[var(--color-primary)] font-medium'
+                                : 'text-slate-700 hover:bg-slate-50'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()}
 
               {/* Seletor de data customizado */}
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-lg ml-auto">
                 <Calendar size={18} className="text-slate-400" />
-                <input type="date" value={startDate} onChange={handleStartDateChange} className="bg-transparent border-none focus:ring-0 text-slate-600 w-28" max={endDate} />
+                <input type="date" value={startDate} onChange={handleStartDateChange} className="bg-transparent border-none focus:ring-0 text-slate-600 w-28" max={endDate} min={!isAdmin ? subOneYear(endDate) : undefined} />
                 <span className="text-slate-400">até</span>
-                <input type="date" value={endDate} onChange={handleEndDateChange} className="bg-transparent border-none focus:ring-0 text-slate-600 w-28" min={startDate} />
+                <input type="date" value={endDate} onChange={handleEndDateChange} className="bg-transparent border-none focus:ring-0 text-slate-600 w-28" min={startDate} max={!isAdmin ? addOneYear(startDate) : undefined} />
               </div>
 
             </div>
@@ -358,9 +463,6 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
                 <span className="text-sm text-amber-700">{dateError}</span>
                 <button onClick={handleCloseError}><X size={16} className="text-amber-500" /></button>
               </div>
-            )}
-            {!isAdmin && !dateError && (
-              <div className="mt-1 text-right text-xs text-slate-400">Período máximo: 1 ano</div>
             )}
           </div>
         )}
@@ -390,13 +492,53 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
                 <input type="date" value={endDate} onChange={handleEndDateChange} className="border border-slate-200 rounded-lg px-4 py-2 w-full" min={startDate} />
               </div>
               <div className="flex space-x-2 mt-2">
-                <button onClick={() => setDatePreset('week')} className="flex-1 text-xs px-3 py-1.5 bg-slate-100 rounded-lg">Semana</button>
-                <button onClick={() => setDatePreset('month')} className="flex-1 text-xs px-3 py-1.5 bg-slate-100 rounded-lg">Mês</button>
-                <button onClick={() => setDatePreset('year')} className="flex-1 text-xs px-3 py-1.5 bg-slate-100 rounded-lg">Ano</button>
+                {(['week', 'month', 'year'] as const).map((preset) => {
+                  const labels = { week: 'Semana', month: 'Mês', year: 'Ano' };
+                  return (
+                    <button
+                      key={preset}
+                      onClick={() => setDatePreset(preset)}
+                      className="flex-1 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                      style={activePreset === preset
+                        ? { backgroundColor: 'var(--color-primary)', color: 'white' }
+                        : { backgroundColor: '#e2e8f0', color: '#475569' }
+                      }
+                    >
+                      {labels[preset]}
+                    </button>
+                  );
+                })}
               </div>
-              <button onClick={() => setCustomRange(30)} className="w-full text-xs px-3 py-1.5 bg-slate-100 rounded-lg">Últimos 30 dias</button>
-              <button onClick={setCurrentMonth} className="w-full text-xs px-3 py-1.5 bg-slate-100 rounded-lg">Este mês</button>
-              <button onClick={setCurrentYear} className="w-full text-xs px-3 py-1.5 bg-slate-100 rounded-lg">Este ano</button>
+              <button
+                onClick={() => setCustomRange(30)}
+                className="w-full text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                style={activePreset === '30d'
+                  ? { backgroundColor: 'var(--color-primary)', color: 'white' }
+                  : { backgroundColor: '#e2e8f0', color: '#475569' }
+                }
+              >
+                Últimos 30 dias
+              </button>
+              <button
+                onClick={setCurrentMonth}
+                className="w-full text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                style={activePreset === 'current-month'
+                  ? { backgroundColor: 'var(--color-primary)', color: 'white' }
+                  : { backgroundColor: '#e2e8f0', color: '#475569' }
+                }
+              >
+                Este mês
+              </button>
+              <button
+                onClick={setCurrentYear}
+                className="w-full text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                style={activePreset === 'current-year'
+                  ? { backgroundColor: 'var(--color-primary)', color: 'white' }
+                  : { backgroundColor: '#e2e8f0', color: '#475569' }
+                }
+              >
+                Este ano
+              </button>
             </div>
           </div>
         )}
@@ -414,11 +556,6 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
                   </div>
                   <button onClick={handleCloseError} className="text-amber-500 hover:text-amber-700"><X size={16} /></button>
                 </div>
-              </div>
-            )}
-            {!isAdmin && !dateError && (
-              <div className="flex items-center justify-end text-xs text-slate-400">
-                <Info size={12} className="mr-1" /> Período máximo: 1 ano
               </div>
             )}
           </div>
@@ -481,16 +618,6 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
               >
                 <UsersIcon size={18} />
                 <span>Usuários</span>
-              </Link>
-            )}
-            {isSuperAdmin && (
-              <Link
-                to="/admin"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-3 rounded-lg text-sm font-medium flex items-center space-x-3 text-slate-600 hover:bg-slate-100"
-              >
-                <ShieldCheck size={18} />
-                <span>Painel Admin</span>
               </Link>
             )}
             {(isSuperAdmin || isGerente) && (

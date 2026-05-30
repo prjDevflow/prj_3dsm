@@ -1,9 +1,12 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { LEAD_CREATED_BY_ME_EVENT } from "../../hooks/useNewLeadNotification";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { DateRange } from "../../utils/dateUtils";
 import { ILead, ILeadsService } from "../../services/ILeadsService";
 import { useUsers } from "../../hooks/useUsers";
+import { useLojas } from "../../hooks/useLojas";
 
 type LeadsModelProps = {
   leadsService: ILeadsService;
@@ -37,10 +40,12 @@ const TAB_PAGE_SIZE = 10;
 
 export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
   const { user } = useAuth();
+  const location = useLocation();
   const isAdmin   = user?.role === "admin";
   const isGerente = user?.role === "gerente" || user?.role === "gerente_geral";
 
-  const [search, setSearch]         = useState("");
+  const urlSearch = new URLSearchParams(location.search).get("search") ?? "";
+  const [search, setSearch]         = useState(urlSearch);
   const [status, setStatus]         = useState<string | undefined>();
   const [importance, setImportance] = useState<string | undefined>();
   const [showFilters, setShowFilters] = useState(false);
@@ -69,6 +74,12 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
     [usersData]
   );
 
+  const { data: lojasData } = useLojas();
+  const lojas = useMemo(
+    () => (lojasData ?? []).map((l) => ({ value: l.nome, label: l.nome })),
+    [lojasData]
+  );
+
   // Fetch all leads for the period (large limit for client-side tab filtering)
   const { data: rawData, isLoading, error, refetch } = useQuery({
     queryKey: ["leads", { dateRange, store, team }],
@@ -83,20 +94,27 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
     const q = search.toLowerCase().trim();
     return allLeads.filter((l) => {
       if (q) {
-        const matchName  = l.name.toLowerCase().includes(q);
-        const matchEmail = l.email.toLowerCase().includes(q);
-        const matchPhone = l.phone ? l.phone.replace(/\D/g, '').includes(q.replace(/\D/g, '')) : false;
-        if (!matchName && !matchEmail && !matchPhone) return false;
+        const matchName     = l.name.toLowerCase().includes(q);
+        const matchEmail    = l.email.toLowerCase().includes(q);
+        const matchPhone    = l.phone ? l.phone.replace(/\D/g, '').includes(q.replace(/\D/g, '')) : false;
+        const matchAgent    = (l.assignedTo ?? '').toLowerCase().includes(q);
+        if (!matchName && !matchEmail && !matchPhone && !matchAgent) return false;
       }
       if (importance && l.importance !== importance) return false;
       return true;
     });
   }, [allLeads, search, importance]);
 
+  // Sort newest first so newly created leads appear at the top
+  const sortedLeads = useMemo(
+    () => [...filteredLeads].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    [filteredLeads]
+  );
+
   // Split by tab
-  const novosLeads      = filteredLeads.filter((l) => l.status === "novo");
-  const andamentoLeads  = filteredLeads.filter((l) => l.status === "contatado" || l.status === "qualificado");
-  const finalizadosLeads = filteredLeads.filter((l) => l.status === "ganho" || l.status === "perdido");
+  const novosLeads      = sortedLeads.filter((l) => l.status === "novo");
+  const andamentoLeads  = sortedLeads.filter((l) => l.status === "contatado" || l.status === "qualificado");
+  const finalizadosLeads = sortedLeads.filter((l) => l.status === "ganho" || l.status === "perdido");
 
   const tabLeads = activeTab === "novos"
     ? novosLeads.filter((l) => !status || l.status === status)
@@ -140,6 +158,7 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
   const openCreate = () => {
     setFormData({
       ...emptyForm(),
+      store: lojas[0]?.value ?? "Matriz Jacareí",
       assignedTo: (!isAdmin && !isGerente) ? user?.id ?? "" : "",
     });
     setEditingLead(null);
@@ -155,7 +174,7 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
       status:     lead.status,
       importance: lead.importance,
       origin:     lead.origin,
-      store:      lead.store ?? "Matriz Jacareí",
+      store:      lead.store ?? lojas[0]?.value ?? "Matriz Jacareí",
       assignedTo: lead.assignedTo ?? "",
     });
     setEditingLead(lead);
@@ -188,6 +207,8 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
           assignedTo: formData.assignedTo || undefined,
         });
         showFeedback("Lead atualizado com sucesso!");
+        setShowModal(false);
+        refetch();
       } else {
         await leadsService.createLead({
           name:       formData.name,
@@ -198,9 +219,13 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
           assignedTo: formData.assignedTo || undefined,
         });
         showFeedback("Lead criado com sucesso!");
+        setShowModal(false);
+        setSearch("");
+        setActiveTab("novos");
+        setTabPage(1);
+        window.dispatchEvent(new CustomEvent(LEAD_CREATED_BY_ME_EVENT));
+        await refetch();
       }
-      setShowModal(false);
-      refetch();
     } catch {
       setFormError("Erro ao salvar lead. Tente novamente.");
     }
@@ -261,5 +286,6 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
       finalizados: finalizadosLeads.length,
     },
     handleDeleteLead,
+    lojas,
   };
 };

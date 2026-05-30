@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DateRange } from "../../utils/dateUtils";
-import { IGetLogsResponse, ILogsService } from "../../services/ILogsService";
+import { ILog, IGetLogsResponse, ILogsService } from "../../services/ILogsService";
 import { LogIn, Plus, Pencil, Trash2, LogOut } from "lucide-react";
 
 type LogsModelProps = {
@@ -47,6 +47,7 @@ export const useLogsModel = ({ logsService }: LogsModelProps) => {
   };
 
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [selectedLog, setSelectedLog] = useState<ILog | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [actionFilter, setAction] = useState("");
@@ -120,6 +121,8 @@ export const useLogsModel = ({ logsService }: LogsModelProps) => {
     entityLabels,
     expandedRow,
     setExpandedRow,
+    selectedLog,
+    setSelectedLog,
     page,
     setPage,
     search,

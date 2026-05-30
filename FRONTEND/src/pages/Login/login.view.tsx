@@ -248,20 +248,22 @@ export const LoginView = (props: LoginViewProps) => {
           {/* Credenciais de teste */}
           <div className="mt-8 p-4 bg-slate-100 rounded-xl border border-slate-200">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-              Credenciais de teste
+              Credenciais de teste · senha: <span className="font-bold text-slate-700">123</span>
             </p>
             <div className="space-y-1">
               {[
-                ["Atendente", "atendente@email.com"],
-                ["Gerente", "gerente@email.com"],
-                ["Admin", "admin@email.com"],
+                ["Admin", "admin@1000valle.com.br"],
+                ["Gerente Geral", "gerente.geral@1000valle.com.br"],
+                ["Gerente Alpha", "carlos@1000valle.com.br"],
+                ["Gerente Beta", "fernanda@1000valle.com.br"],
+                ["Atendente", "ana@1000valle.com.br"],
               ].map(([role, mail]) => (
                 <button
                   key={mail}
                   type="button"
                   onClick={() => {
                     setEmail(mail);
-                    setPassword("123456");
+                    setPassword("123");
                   }}
                   className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg hover:bg-slate-200 transition-colors text-left"
                 >

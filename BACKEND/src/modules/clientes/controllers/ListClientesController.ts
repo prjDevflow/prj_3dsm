@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export class ListClientesController {
   async handle(req: Request, res: Response) {
-    const { search, page = '1', limit = '20', assignedTo } = req.query as Record<string, string>;
+    const { search, page = '1', limit = '20', assignedTo, hasLead } = req.query as Record<string, string>;
     const { id: userId, role } = req.user;
 
     const pageNum  = Math.max(1, parseInt(page, 10));
@@ -22,9 +22,23 @@ export class ListClientesController {
       ];
     }
 
-    // Atendente só vê seus próprios clientes
+    if (hasLead === 'true') {
+      where.id_lead_principal = { not: null };
+    } else if (hasLead === 'false') {
+      where.id_lead_principal = null;
+    }
+
+    // Atendente: vê clientes onde é consultor OU onde o lead vinculado é dele
     if (role === 'ATENDENTE') {
-      where.id_consultor = userId;
+      const leadsDoAtendente = await prisma.lead.findMany({
+        where: { id_usuario: userId },
+        select: { id_lead: true },
+      });
+      const leadIds = leadsDoAtendente.map((l) => l.id_lead);
+      where.OR = [
+        { id_consultor: userId },
+        ...(leadIds.length > 0 ? [{ id_lead_principal: { in: leadIds } }] : []),
+      ];
     } else if (assignedTo) {
       where.id_consultor = assignedTo;
     }

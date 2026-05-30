@@ -8,6 +8,8 @@ import {
   INegotiationService,
   ICreateNegotiationRequest,
 } from "../../services/INegotiationsService";
+import { useUsers } from "../../hooks/useUsers";
+import { useLojas } from "../../hooks/useLojas";
 
 const ORIGINS = [
   "Site",
@@ -21,11 +23,6 @@ const ORIGINS = [
   "Telefone",
   "Visita Presencial",
   "Outros",
-];
-const STORES = [
-  { value: "Matriz Jacareí",             label: "Matriz Jacareí" },
-  { value: "Filial São José dos Campos", label: "Filial SJC" },
-  { value: "Loja Padrão CSV",            label: "Loja Padrão CSV" },
 ];
 
 const importanceBadge: Record<NegotiationImportance, string> = {
@@ -90,6 +87,10 @@ export const useLeadDetailsModel = ({
 
   const { data: lead, isLoading: leadLoading, error: leadError } = useLead(id!);
   const { data: negotiations, isLoading: negLoading } = useNegotiations(id!);
+  const { data: usersData } = useUsers({ limit: 100 });
+  const atendentes = (usersData?.data ?? []).filter((u) => u.role === "atendente");
+  const { data: lojasData } = useLojas();
+  const STORES = (lojasData ?? []).map((l) => ({ value: l.nome, label: l.nome }));
 
   const activeNegotiation = negotiations?.find((n) => n.status === "ativa");
   const hasActiveNegotiation = !!activeNegotiation;
@@ -142,6 +143,7 @@ export const useLeadDetailsModel = ({
         leadId: id!,
         importancia: negImp,
         estagio: negStage,
+        conteudo: content.trim(),
       };
       await negotiationService.createNegotiation(createRequest);
       setContent("");
@@ -207,6 +209,7 @@ export const useLeadDetailsModel = ({
       importance: lead.importance,
       origin: lead.origin,
       store: lead.store,
+      assignedToId: lead.assignedToId ?? "",
     });
     setEditError("");
     setShowEditModal(true);
@@ -218,7 +221,12 @@ export const useLeadDetailsModel = ({
       return;
     }
     try {
-      await updateLead.mutateAsync({ id: id!, ...editForm });
+      const { assignedToId, ...rest } = editForm;
+      await updateLead.mutateAsync({
+        id: id!,
+        ...rest,
+        ...(assignedToId ? { assignedTo: assignedToId } : {}),
+      });
       setShowEditModal(false);
       await queryClient.invalidateQueries({ queryKey: ["lead", id] });
     } catch {
@@ -279,5 +287,6 @@ export const useLeadDetailsModel = ({
     handleAdvanceStage,
     closeFinalStatus,
     setCloseFinalStatus,
+    atendentes,
   };
 };

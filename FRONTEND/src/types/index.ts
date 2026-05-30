@@ -67,6 +67,7 @@ export interface Lead {
   origin: string;
   store?: string;
   assignedTo?: string;
+  assignedToId?: string;
   teamId?: string;
   createdAt: string;
   updatedAt: string;

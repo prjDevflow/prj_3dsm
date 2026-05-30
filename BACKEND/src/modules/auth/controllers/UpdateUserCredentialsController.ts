@@ -8,17 +8,20 @@ export class UpdateUserCredentialsController {
     const userId = request.user.id; 
     
     // Pegamos o que o usuário deseja alterar
-    const { email, senha } = request.body;
+    const { email, senha, senhaAtual } = request.body;
 
     const updateUserCredentialsService = new UpdateUserCredentialsService();
 
-    // Passamos para a camada de serviço
-    const user = await updateUserCredentialsService.execute({
-      userId,
-      email,
-      senha
-    });
-
-    return response.status(200).json(user);
+    try {
+      const user = await updateUserCredentialsService.execute({
+        userId,
+        email,
+        senha,
+        senhaAtual
+      });
+      return response.status(200).json(user);
+    } catch (error: any) {
+      return response.status(error.statusCode ?? 400).json({ error: error.message });
+    }
   }
 }

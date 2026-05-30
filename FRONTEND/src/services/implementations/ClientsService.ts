@@ -15,6 +15,7 @@ export class ClientsService implements IClientsService {
         limit: params.limit,
         search: params.search,
         assignedTo: params.assignedTo,
+        ...(params.hasLead !== undefined && { hasLead: params.hasLead }),
       },
     });
     return response.data;

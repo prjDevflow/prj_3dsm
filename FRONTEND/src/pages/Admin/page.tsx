@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { useTeams } from "../../hooks/useTeams";
 import { UsersService } from "../../services/implementations/UsersService";
 import { IUser } from "../../services/IUsersService";
 import { Header } from "../../components/Header";
@@ -22,11 +21,10 @@ const ROLE_COLORS: Record<string, string> = {
   atendente:     "bg-slate-100 text-slate-700",
 };
 
-type EditRow = { role: string; teamId: string; active: boolean };
+type EditRow = { role: string; active: boolean };
 
 const AdminPage = () => {
   const { user: currentUser } = useAuth();
-  const { data: teams } = useTeams();
 
   const [users, setUsers]       = useState<IUser[]>([]);
   const [total, setTotal]       = useState(0);
@@ -53,7 +51,7 @@ const AdminPage = () => {
   const startEdit = (u: IUser) => {
     setEditRows((prev) => ({
       ...prev,
-      [u.id]: { role: u.role, teamId: u.teamId ?? "", active: u.active ?? true },
+      [u.id]: { role: u.role, active: u.active ?? true },
     }));
   };
 
@@ -69,7 +67,6 @@ const AdminPage = () => {
     try {
       await usersService.updateUser(u.id, {
         role:   row.role,
-        teamId: row.teamId || undefined,
         active: row.active,
       });
       setSaved((p) => ({ ...p, [u.id]: true }));
@@ -131,7 +128,6 @@ const AdminPage = () => {
                   <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Usuário</th>
                   <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Perfil atual</th>
                   <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Alterar perfil</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Equipe</th>
                   <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Status</th>
                   <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Ações</th>
                 </tr>
@@ -146,11 +142,18 @@ const AdminPage = () => {
                       {/* Usuário */}
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-sm font-semibold">
-                              {u.name.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
+                          {(() => {
+                            const av = localStorage.getItem(`user_avatar_${u.id}`);
+                            return av ? (
+                              <img src={av} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center flex-shrink-0">
+                                <span className="text-white text-sm font-semibold">
+                                  {u.name.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                            );
+                          })()}
                           <div>
                             <p className="text-sm font-medium text-slate-800">{u.name}</p>
                             <p className="text-xs text-slate-400">{u.email}</p>
@@ -181,26 +184,6 @@ const AdminPage = () => {
                           </select>
                         ) : (
                           <span className="text-xs text-slate-400">—</span>
-                        )}
-                      </td>
-
-                      {/* Equipe */}
-                      <td className="px-5 py-3.5">
-                        {editing ? (
-                          <select
-                            value={row.teamId}
-                            onChange={(e) => setEditRows((p) => ({ ...p, [u.id]: { ...p[u.id], teamId: e.target.value } }))}
-                            className="input text-sm py-1"
-                          >
-                            <option value="">Sem equipe</option>
-                            {teams?.map((t) => (
-                              <option key={t.id} value={t.id}>{t.name}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <span className="text-sm text-slate-600">
-                            {teams?.find((t) => t.id === u.teamId)?.name ?? "—"}
-                          </span>
                         )}
                       </td>
 
