@@ -99,8 +99,8 @@ export class DashboardService {
     // byImportance
     const impMap: Record<string, number> = {};
     allNegs.forEach(n => {
-      const raw = (n.importancia_negociacao ?? '').toUpperCase();
-      const label = raw === 'QUENTE' ? 'Quente' : raw === 'FRIO' ? 'Frio' : 'Morno';
+      const raw = (n.importancia_negociacao ?? '').toLowerCase();
+      const label = raw === 'quente' ? 'Quente' : raw === 'frio' ? 'Frio' : 'Morno';
       impMap[label] = (impMap[label] || 0) + 1;
     });
     const byImportance = Object.entries(impMap).map(([importance, count]) => ({ importance, count }));

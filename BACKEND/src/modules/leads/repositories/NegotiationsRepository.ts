@@ -54,7 +54,7 @@ export class NegotiationsRepository {
     const neg = await prisma.negociacao.create({
       data: {
         id_lead:                    data.leadId,
-        importancia_negociacao:     data.importancia.toUpperCase(),
+        importancia_negociacao:     data.importancia.toLowerCase(),
         id_estagio:                 estagioRecord.id_estagio,
         id_status:                  statusRecord.id_status,
         estado_abertura_negociacao: data.isAberta,
@@ -94,7 +94,7 @@ export class NegotiationsRepository {
         id_status:  statusId,
         id_estagio: estagioId,
         ...(data.importancia_negociacao
-          ? { importancia_negociacao: data.importancia_negociacao.toUpperCase() }
+          ? { importancia_negociacao: data.importancia_negociacao.toLowerCase() }
           : {}),
       },
     });
