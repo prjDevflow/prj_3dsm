@@ -1,21 +1,23 @@
 <div align="center">
 
-<img src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/UML-Casos.png" alt="banner" width="0" height="0" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:17364F,100:BD0927&height=200&section=header&text=DevFlow%20CRM&fontSize=52&fontColor=ffffff&fontAlignY=38&desc=Sistema%20de%20Gestão%20de%20Leads%20%7C%201000%20Valle%20Multimarcas&descAlignY=58&descSize=16&animation=fadeIn" width="100%" />
 
-# DevFlow — Sistema de Gestão de Leads
+<br/>
 
-**Plataforma web para centralização, gestão e análise de leads comerciais**  
-Desenvolvido para a **1000 Valle Multimarcas** em parceria com a **FATEC Jacareí**
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&size=18&pause=1000&color=09D8C7&center=true&vCenter=true&width=600&lines=Plataforma+web+para+gestão+de+leads+comerciais;Dashboard+analítico+em+tempo+real;Controle+de+acesso+hierárquico+com+JWT;Desenvolvido+para+a+1000+Valle+Multimarcas)](https://git.io/typing-svg)
 
-<br>
+<br/>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://choosealicense.com/licenses/mit/)
-[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![Trello](https://img.shields.io/badge/Trello-Board-0052CC?logo=trello&logoColor=white)](https://trello.com/b/TtUCzMT8/3dsm-abpsprint-1)
+[![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg?style=for-the-badge)](https://choosealicense.com/licenses/mit/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+
+<br/>
+
+[![Trello](https://img.shields.io/badge/Acessar%20Board-Trello-0052CC?style=for-the-badge&logo=trello&logoColor=white)](https://trello.com/b/TtUCzMT8/3dsm-abpsprint-1)
 
 </div>
 
@@ -23,23 +25,25 @@ Desenvolvido para a **1000 Valle Multimarcas** em parceria com a **FATEC Jacare�
 
 ## Sobre o Projeto
 
-O **DevFlow** é uma plataforma desenvolvida para centralizar, gerenciar e analisar os leads comerciais da **1000 Valle Multimarcas**, revendedora de veículos com múltiplas unidades.
+> **DevFlow** é uma plataforma desenvolvida para centralizar, gerenciar e analisar os leads comerciais da **1000 Valle Multimarcas**, revendedora de veículos com múltiplas unidades, em parceria com a **FATEC Jacareí**.
 
-O sistema integra dados de diferentes canais de captação — presenciais e digitais — em uma única interface, oferecendo visibilidade total do funil de vendas para todos os níveis hierárquicos da empresa.
+O sistema integra dados de diferentes canais de captação — presenciais e digitais — em uma única interface, entregando visibilidade total do funil de vendas para todos os níveis hierárquicos da empresa.
 
 ---
 
 ## Funcionalidades
 
-| Módulo | Descrição |
-|--------|-----------|
-| **Controle de Acesso** | Autenticação JWT com perfis hierárquicos: Atendente, Gerente, Gerente Geral e Administrador |
-| **Gestão de Leads** | Registro, acompanhamento e evolução de leads por status e importância |
-| **Negociações** | Ciclo completo de negociação com histórico de estágios e motivo de encerramento |
-| **Dashboard Operacional** | Leads por status, origem, loja e importância com filtros temporais |
-| **Dashboard Analítico** | Taxa de conversão, desempenho por atendente e equipe, funil de vendas |
-| **Filtros Temporais** | Semana, mês, ano ou período customizado com validação por perfil |
-| **Logs de Auditoria** | Registro completo de acessos e operações com rastreabilidade total |
+<div align="center">
+
+| 🔐 Controle de Acesso | 📋 Gestão de Leads | 🤝 Negociações |
+|:---:|:---:|:---:|
+| JWT + perfis hierárquicos | Registro e acompanhamento completo | Ciclo com histórico de estágios |
+| **📊 Dashboard Operacional** | **📈 Dashboard Analítico** | **🔍 Filtros Temporais** |
+| KPIs por status, origem e loja | Taxa de conversão e desempenho | Semana, mês, ano ou customizado |
+| **📁 Logs de Auditoria** | **🏢 Multi-lojas** | **👥 Multi-equipes** |
+| Rastreabilidade total de ações | Suporte a múltiplas unidades | Gestão por times e gerentes |
+
+</div>
 
 ---
 
@@ -62,10 +66,56 @@ O sistema integra dados de diferentes canais de captação — presenciais e dig
 ![PostgreSQL](https://skillicons.dev/icons?i=postgresql)&nbsp;
 ![Prisma](https://skillicons.dev/icons?i=prisma)
 
-### Infraestrutura
-![Docker](https://skillicons.dev/icons?i=docker)
+### Infraestrutura & Ferramentas
+![Docker](https://skillicons.dev/icons?i=docker)&nbsp;
+![Git](https://skillicons.dev/icons?i=git)&nbsp;
+![GitHub](https://skillicons.dev/icons?i=github)&nbsp;
+![VSCode](https://skillicons.dev/icons?i=vscode)
 
 </div>
+
+---
+
+## Como Executar
+
+<details>
+<summary><b>Pré-requisitos</b></summary>
+<br>
+
+- [Docker](https://www.docker.com/) e Docker Compose instalados
+- [Git](https://git-scm.com/) instalado
+
+</details>
+
+<details>
+<summary><b>Passo a passo</b></summary>
+<br>
+
+```bash
+# 1. Clone o repositório
+git clone https://github.com/prjDevflow/prj_3dsm.git
+cd prj_3dsm
+
+# 2. Suba todos os containers
+docker compose up -d
+
+# 3. Acesse a aplicação
+# Frontend: http://localhost:3000
+# Backend:  http://localhost:3333
+# Swagger:  http://localhost:3333/api-docs
+```
+
+**Logins disponíveis (senha: `123`)**
+
+| Usuário | E-mail | Perfil |
+|---------|--------|--------|
+| Admin | `admin@1000valle.com.br` | Administrador |
+| Gerente Geral | `gerente.geral@1000valle.com.br` | Gerente Geral |
+| Carlos | `carlos@1000valle.com.br` | Gerente — Equipe Alpha |
+| Fernanda | `fernanda@1000valle.com.br` | Gerente — Equipe Beta |
+| Ana | `ana@1000valle.com.br` | Atendente |
+
+</details>
 
 ---
 
@@ -203,31 +253,31 @@ O sistema integra dados de diferentes canais de captação — presenciais e dig
 <details>
 <summary>Autenticação de Usuário</summary>
 <br>
-<img alt="Diagrama de Sequência — Autenticação" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/autenticacao.png" />
+<img alt="Autenticação" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/autenticacao.png" />
 </details>
 
 <details>
 <summary>Criação de Lead</summary>
 <br>
-<img alt="Diagrama de Sequência — Lead" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/lead.png" />
+<img alt="Lead" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/lead.png" />
 </details>
 
 <details>
 <summary>Atualizar Estágio da Negociação</summary>
 <br>
-<img alt="Diagrama de Sequência — Estágio" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/estagio.png" />
+<img alt="Estágio" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/estagio.png" />
 </details>
 
 <details>
-<summary>Visualizar Dashboard (Gerente)</summary>
+<summary>Visualizar Dashboard — Gerente</summary>
 <br>
-<img alt="Diagrama de Sequência — Dashboard" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/dashboard.png" />
+<img alt="Dashboard" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/dashboard.png" />
 </details>
 
 <details>
-<summary>Visualizar Logs (Administrador)</summary>
+<summary>Visualizar Logs — Administrador</summary>
 <br>
-<img alt="Diagrama de Sequência — Logs" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/logs.png" />
+<img alt="Logs" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/logs.png" />
 </details>
 
 ---
@@ -237,19 +287,19 @@ O sistema integra dados de diferentes canais de captação — presenciais e dig
 ### Sprint 1 — Poker Planning
 
 | # | Item | Pontos | Status |
-|---|------|:------:|--------|
-| 1 | [FE] Página de Login | 3 | ✅ Concluído |
-| 2 | [FE] Página Dashboard + Filtros por permissão | 8 | ✅ Concluído |
-| 3 | [FE] Página Leads + Filtros por permissão | 8 | ✅ Concluído |
-| 4 | [FE] Página Configuração | 3 | ✅ Concluído |
-| 5 | [FE] Página Usuários | 5 | ✅ Concluído |
-| 6 | [FE] Página Equipes | 5 | ✅ Concluído |
-| 7 | [FE] Página Logs | 3 | ✅ Concluído |
-| 8 | [BE] RF01 — Autenticação com JWT + Bcrypt | 5 | ✅ Concluído |
-| 9 | [BE] RF02 — RBAC: controle de acesso por perfil | 8 | ✅ Concluído |
-| 10 | [BE] RF06 — Filtros Temporais com DateValidator | 3 | ✅ Concluído |
-| 11 | [BE] Infraestrutura: Controller/Service/Repository + Middlewares | 5 | ✅ Concluído |
-| 12 | [BE] Documentação inicial via Swagger | 2 | ✅ Concluído |
+|---|------|:------:|:------:|
+| 1 | [FE] Página de Login | 3 | ✅ |
+| 2 | [FE] Página Dashboard + Filtros por permissão | 8 | ✅ |
+| 3 | [FE] Página Leads + Filtros por permissão | 8 | ✅ |
+| 4 | [FE] Página Configuração | 3 | ✅ |
+| 5 | [FE] Página Usuários | 5 | ✅ |
+| 6 | [FE] Página Equipes | 5 | ✅ |
+| 7 | [FE] Página Logs | 3 | ✅ |
+| 8 | [BE] RF01 — Autenticação com JWT + Bcrypt | 5 | ✅ |
+| 9 | [BE] RF02 — RBAC: controle de acesso por perfil | 8 | ✅ |
+| 10 | [BE] RF06 — Filtros Temporais com DateValidator | 3 | ✅ |
+| 11 | [BE] Infraestrutura: Controller / Service / Repository + Middlewares | 5 | ✅ |
+| 12 | [BE] Documentação inicial via Swagger | 2 | ✅ |
 | | **Total** | **58** | |
 
 <img alt="Burndown Sprint 1" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/burndown_sprint1.png" />
@@ -259,24 +309,26 @@ O sistema integra dados de diferentes canais de captação — presenciais e dig
 ### Sprint 2 — Poker Planning
 
 | # | Item | Pontos | Status |
-|---|------|:------:|--------|
-| 1 | Remover limitação/barreira de espaço | 5 | ✅ Concluído |
-| 2 | Ampliar fontes para melhor visualização | 3 | ✅ Concluído |
-| 3 | Ajustar responsividade para diferentes dispositivos | 5 | ✅ Concluído |
-| 4 | Aplicar filtros padrão (7, 15, 30 e 60 dias) | 3 | ✅ Concluído |
-| 5 | Melhorar visibilidade geral da interface | 5 | ✅ Concluído |
-| 6 | Criar Dockerfile para o backend | 8 | ✅ Concluído |
-| 7 | Criar docker-compose.yml com serviços: postgres, backend e frontend | 5 | ✅ Concluído |
-| 8 | Criar seletor de período (última semana, mês, ano e personalizado) | 5 | ✅ Concluído |
-| 9 | Implementar Date Picker para período customizado | 3 | ✅ Concluído |
-| 10 | Atualizar gráficos dinamicamente | 5 | ✅ Concluído |
-| 11 | Salvar preferência de filtros no LocalStorage | 3 | ✅ Concluído |
-| 12 | Adicionar tooltips e informações detalhadas nos gráficos | 5 | ✅ Concluído |
+|---|------|:------:|:------:|
+| 1 | Remover limitação/barreira de espaço | 5 | ✅ |
+| 2 | Ampliar fontes para melhor visualização | 3 | ✅ |
+| 3 | Ajustar responsividade para diferentes dispositivos | 5 | ✅ |
+| 4 | Aplicar filtros padrão (7, 15, 30 e 60 dias) | 3 | ✅ |
+| 5 | Melhorar visibilidade geral da interface | 5 | ✅ |
+| 6 | Criar Dockerfile para o backend | 8 | ✅ |
+| 7 | Criar docker-compose.yml com serviços: postgres, backend e frontend | 5 | ✅ |
+| 8 | Criar seletor de período (última semana, mês, ano e personalizado) | 5 | ✅ |
+| 9 | Implementar Date Picker para período customizado | 3 | ✅ |
+| 10 | Atualizar gráficos dinamicamente | 5 | ✅ |
+| 11 | Salvar preferência de filtros no LocalStorage | 3 | ✅ |
+| 12 | Adicionar tooltips e informações detalhadas nos gráficos | 5 | ✅ |
 | | **Total** | **55** | |
 
 <img alt="Burndown Sprint 2" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/burndown_sprint2.png" />
 
 ---
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:BD0927,100:17364F&height=120&section=footer" width="100%" />
 
 <div align="center">
 
