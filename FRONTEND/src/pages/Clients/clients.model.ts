@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../context/AuthContext";
 import { IClient, IClientsService, ICreateClientRequest, IUpdateClientRequest } from "../../services/IClientsService";
 import { useLeads } from "../../hooks/useLeads";
+import { useUsers } from "../../hooks/useUsers";
 import { useToast } from "../../components/Toast";
 
 type ClientsModelProps = {
@@ -15,6 +16,7 @@ type ClientFormData = {
   phone: string;
   cpf?: string;
   leadId?: string;
+  consultorId?: string;
 };
 
 const emptyForm = (): ClientFormData => ({
@@ -23,6 +25,7 @@ const emptyForm = (): ClientFormData => ({
   phone: "",
   cpf: "",
   leadId: "",
+  consultorId: "",
 });
 
 export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
@@ -54,8 +57,11 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
     queryFn: () => clientsService.getClients({ page, limit, search, assignedTo, hasLead: hasLeadParam }),
   });
 
-  const { data: leadsData } = useLeads({ limit: 100 }); // Assuming useLeads exists and returns lead data
+  const { data: leadsData } = useLeads({ limit: 500 });
   const leads = leadsData?.data ?? [];
+
+  const { data: usersData } = useUsers({ limit: 100 });
+  const atendentes = (usersData?.data ?? []).filter((u) => u.role === "atendente" || u.role === "gerente");
 
   const createClientMutation = useMutation<IClient, Error, ICreateClientRequest>({
     mutationFn: (newClient) => clientsService.createClient(newClient),
@@ -93,11 +99,12 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
 
   const openEdit = (client: IClient) => {
     setFormData({
-      name: client.name,
-      email: client.email,
-      phone: client.phone,
-      cpf: client.cpf,
-      leadId: client.leadId,
+      name:        client.name,
+      email:       client.email,
+      phone:       client.phone,
+      cpf:         client.cpf,
+      leadId:      client.leadId,
+      consultorId: client.consultorId ?? "",
     });
     setEditingClient(client);
     setFormError("");
@@ -137,7 +144,11 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
         await updateClientMutation.mutateAsync({ id: editingClient.id, data: formData });
         showFeedback("Cliente atualizado com sucesso!");
       } else {
-        await createClientMutation.mutateAsync({ ...formData, assignedTo: user?.id ?? "" } as ICreateClientRequest);
+        await createClientMutation.mutateAsync({
+          ...formData,
+          assignedTo: formData.consultorId || user?.id || "",
+          consultorId: formData.consultorId || user?.id || "",
+        } as ICreateClientRequest);
         showFeedback("Cliente criado com sucesso!");
       }
       setShowModal(false);
@@ -206,6 +217,7 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
     avatarColor,
     total,
     deleteClientMutation,
-    editingClient
+    editingClient,
+    atendentes,
   };
 };
