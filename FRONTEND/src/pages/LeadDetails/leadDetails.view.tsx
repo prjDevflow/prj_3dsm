@@ -49,6 +49,9 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
     showCloseModal,
     closeReason,
     setCloseReason,
+    closePredefinedReason,
+    setClosePredefinedReason,
+    isCloseValid,
     handleCloseNegotiation,
     closingId,
     showEditModal,
@@ -581,19 +584,48 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
               </button>
             </div>
 
-            <textarea
-              rows={3}
-              value={closeReason}
-              onChange={(e) => setCloseReason(e.target.value)}
-              placeholder={closeFinalStatus === "GANHA"
-                ? "Ex: Contrato assinado, proposta aceita..."
-                : "Ex: Cliente desistiu, concorrente escolhido..."}
-              className="input w-full mb-4"
-            />
+            {closeFinalStatus === "PERDIDA" ? (
+              <div className="space-y-3 mb-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                    Motivo da perda <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={closePredefinedReason}
+                    onChange={(e) => setClosePredefinedReason(e.target.value)}
+                    className="input w-full"
+                  >
+                    <option value="">Selecione o motivo...</option>
+                    <option value="Preço alto">Preço alto</option>
+                    <option value="Concorrente escolhido">Concorrente escolhido</option>
+                    <option value="Sem interesse">Sem interesse</option>
+                    <option value="Sem retorno do cliente">Sem retorno do cliente</option>
+                    <option value="Prazo incompatível">Prazo incompatível</option>
+                    <option value="Produto não atende a necessidade">Produto não atende a necessidade</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+                <textarea
+                  rows={2}
+                  value={closeReason}
+                  onChange={(e) => setCloseReason(e.target.value)}
+                  placeholder="Detalhes adicionais (opcional)..."
+                  className="input w-full"
+                />
+              </div>
+            ) : (
+              <textarea
+                rows={3}
+                value={closeReason}
+                onChange={(e) => setCloseReason(e.target.value)}
+                placeholder="Ex: Contrato assinado, proposta aceita..."
+                className="input w-full mb-4"
+              />
+            )}
             <div className="flex gap-3">
               <button
                 onClick={handleCloseNegotiation}
-                disabled={!closeReason.trim() || closingId !== null}
+                disabled={!isCloseValid || closingId !== null}
                 className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-medium text-sm text-white disabled:opacity-50 ${
                   closeFinalStatus === "GANHA" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"
                 }`}
@@ -608,6 +640,7 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
                 onClick={() => {
                   setShowCloseModal(false);
                   setCloseReason("");
+                  setClosePredefinedReason("");
                   setSelectedNeg(null);
                 }}
                 className="flex-1 btn-secondary"

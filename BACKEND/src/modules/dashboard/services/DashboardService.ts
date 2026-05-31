@@ -130,15 +130,15 @@ export class DashboardService {
     const lossReasons = Object.entries(lossMap).map(([reason, count]) => ({ reason, count }));
 
     // performance (por atendente)
-    const perfMap: Record<string, { leads: number; conversions: number }> = {};
+    const perfMap: Record<string, { leads: number; conversions: number; openLeads: number }> = {};
     leads.forEach(l => {
       const agent = l.usuario.nome_usuario;
-      if (!perfMap[agent]) perfMap[agent] = { leads: 0, conversions: 0 };
+      if (!perfMap[agent]) perfMap[agent] = { leads: 0, conversions: 0, openLeads: 0 };
       perfMap[agent].leads++;
-      const ganhou = l.negociacoes.some(
-        n => n.status.nome_status.toUpperCase() === 'GANHA'
-      );
+      const ganhou = l.negociacoes.some(n => n.status.nome_status.toUpperCase() === 'GANHA');
       if (ganhou) perfMap[agent].conversions++;
+      const isOpen = l.negociacoes.length === 0 || l.negociacoes.some(n => n.estado_abertura_negociacao === true);
+      if (isOpen) perfMap[agent].openLeads++;
     });
     const performance = Object.entries(perfMap).map(([agent, v]) => ({ agent, ...v }));
 

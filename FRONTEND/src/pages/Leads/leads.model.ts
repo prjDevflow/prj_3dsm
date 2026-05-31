@@ -88,8 +88,23 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
     placeholderData: (prev) => prev,
   });
 
-  // Apply search + filters client-side for instant feedback
   const allLeads = rawData?.data ?? [];
+
+  // Detecção de duplicatas: verifica email e telefone contra leads já carregados
+  const duplicateWarning = useMemo(() => {
+    if (!showModal || editingLead) return null;
+    const email = formData.email.toLowerCase().trim();
+    const phone = formData.phone.replace(/\D/g, '').trim();
+    if (email) {
+      const match = allLeads.find((l) => l.email?.toLowerCase() === email);
+      if (match) return { name: match.name, status: match.status, field: 'email' as const };
+    }
+    if (phone.length >= 8) {
+      const match = allLeads.find((l) => l.phone?.replace(/\D/g, '') === phone);
+      if (match) return { name: match.name, status: match.status, field: 'telefone' as const };
+    }
+    return null;
+  }, [formData.email, formData.phone, allLeads, showModal, editingLead]);
   const filteredLeads = useMemo(() => {
     const q = search.toLowerCase().trim();
     return allLeads.filter((l) => {
@@ -287,5 +302,6 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
     },
     handleDeleteLead,
     lojas,
+    duplicateWarning,
   };
 };

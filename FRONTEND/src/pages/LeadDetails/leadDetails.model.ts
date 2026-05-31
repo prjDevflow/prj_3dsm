@@ -71,6 +71,7 @@ export const useLeadDetailsModel = ({
   const [closingId, setClosingId] = useState<string | null>(null);
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [closeReason, setCloseReason] = useState("");
+  const [closePredefinedReason, setClosePredefinedReason] = useState("");
   const [closeFinalStatus, setCloseFinalStatus] = useState<"GANHA" | "PERDIDA">("GANHA");
   const [selectedNegotiation, setSelectedNeg] = useState<string | null>(null);
 
@@ -160,16 +161,30 @@ export const useLeadDetailsModel = ({
     }
   };
 
+  const isCloseValid = closeFinalStatus === "PERDIDA"
+    ? !!closePredefinedReason
+    : !!closeReason.trim();
+
+  const buildCloseReason = () => {
+    if (closeFinalStatus === "PERDIDA") {
+      return closeReason.trim()
+        ? `${closePredefinedReason}: ${closeReason.trim()}`
+        : closePredefinedReason;
+    }
+    return closeReason.trim();
+  };
+
   const handleCloseNegotiation = async () => {
-    if (!selectedNegotiation || !closeReason.trim()) return;
+    if (!selectedNegotiation || !isCloseValid) return;
     setClosingId(selectedNegotiation);
     setNegError("");
     try {
-      await negotiationService.closeNegotiation(selectedNegotiation, closeReason, closeFinalStatus);
+      await negotiationService.closeNegotiation(selectedNegotiation, buildCloseReason(), closeFinalStatus);
       await queryClient.invalidateQueries({ queryKey: ["negotiations", id] });
       await queryClient.invalidateQueries({ queryKey: ["lead", id] });
       setShowCloseModal(false);
       setCloseReason("");
+      setClosePredefinedReason("");
       setSelectedNeg(null);
     } catch (err: any) {
       setNegError(
@@ -261,6 +276,9 @@ export const useLeadDetailsModel = ({
     showCloseModal,
     closeReason,
     setCloseReason,
+    closePredefinedReason,
+    setClosePredefinedReason,
+    isCloseValid,
     handleCloseNegotiation,
     closingId,
     showEditModal,

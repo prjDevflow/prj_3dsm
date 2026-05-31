@@ -16,7 +16,7 @@ export type DashboardViewModel = {
   byStore: { store: string; count: number }[];
   convertedVsNonConverted: { name: string; value: number }[];
   byTeam: { team: string; count: number }[];
-  performance: { agent: string; leads: number; conversions: number }[];
+  performance: { agent: string; leads: number; conversions: number; openLeads: number }[];
   performanceByTeam: { team: string; leads: number; conversions: number }[];
   lossReasons: { reason: string; count: number }[];
   avgTimeToFirstContact: string;

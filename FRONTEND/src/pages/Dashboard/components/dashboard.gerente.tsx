@@ -1,4 +1,4 @@
-import { AlertCircle, Clock, Phone, Target, TrendingUp, UsersIcon } from "lucide-react";
+import { AlertCircle, Clock, Inbox, Phone, Target, TrendingUp, UsersIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import KpiCard from "../../../components/KpiCard";
 import { useDashboardModel } from "../dashboard.model";
@@ -303,6 +303,54 @@ export const DashboardGerente = (props: DashboardProps) => {
             ))}
           </div>
         </div>
+
+        {/* ── Carga por Atendente ── */}
+        {performance.length > 0 && (
+          <div className="card p-5 mt-6">
+            <h3 className="text-base font-semibold text-slate-700 mb-4 flex items-center gap-2">
+              <Inbox size={18} className="text-slate-400" />
+              Carga de Leads por Atendente
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-xs font-semibold text-slate-400 uppercase tracking-wide border-b border-slate-100">
+                    <th className="text-left py-2 pr-4">Atendente</th>
+                    <th className="text-center py-2 px-4">Em aberto</th>
+                    <th className="text-center py-2 px-4">Total</th>
+                    <th className="text-center py-2 px-4">Conversões</th>
+                    <th className="text-right py-2 pl-4">Taxa</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {[...performance]
+                    .sort((a, b) => (b.openLeads ?? 0) - (a.openLeads ?? 0))
+                    .map((agent) => {
+                      const taxa = agent.leads > 0 ? Math.round((agent.conversions / agent.leads) * 100) : 0;
+                      const openLeads = agent.openLeads ?? 0;
+                      const urgency = openLeads >= 20 ? "text-rose-600 font-bold" : openLeads >= 10 ? "text-amber-600 font-semibold" : "text-slate-700";
+                      return (
+                        <tr key={agent.agent} className="hover:bg-slate-50">
+                          <td className="py-2.5 pr-4 font-medium text-slate-700">{agent.agent}</td>
+                          <td className={`py-2.5 px-4 text-center ${urgency}`}>{openLeads}</td>
+                          <td className="py-2.5 px-4 text-center text-slate-500">{agent.leads}</td>
+                          <td className="py-2.5 px-4 text-center text-emerald-600">{agent.conversions}</td>
+                          <td className="py-2.5 pl-4 text-right">
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${taxa >= 50 ? "bg-emerald-50 text-emerald-700" : taxa >= 20 ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-slate-500"}`}>
+                              {taxa}%
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+              <p className="text-xs text-slate-400 mt-3">
+                Vermelho: ≥20 leads em aberto · Amarelo: ≥10 leads em aberto
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="mt-8 text-xs text-slate-400 text-center">
           <p>

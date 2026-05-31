@@ -63,6 +63,7 @@ export const LeadsView = (props: LeadsViewProps) => {
     switchTab,
     counts,
     lojas,
+    duplicateWarning,
   } = props;
 
   if (error) {
@@ -215,6 +216,16 @@ export const LeadsView = (props: LeadsViewProps) => {
                 <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-700 px-3 py-2 rounded-lg text-xs">
                   <AlertCircle size={13} className="mt-0.5 flex-shrink-0" />
                   <span>Ao editar, apenas Loja, Origem e Atendente podem ser alterados.</span>
+                </div>
+              )}
+
+              {duplicateWarning && (
+                <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-700 px-3 py-2.5 rounded-lg text-sm">
+                  <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
+                  <span>
+                    Possível duplicata: já existe um lead com este <strong>{duplicateWarning.field}</strong> —{" "}
+                    <strong>{duplicateWarning.name}</strong> ({duplicateWarning.status}). Você pode continuar mesmo assim.
+                  </span>
                 </div>
               )}
 
