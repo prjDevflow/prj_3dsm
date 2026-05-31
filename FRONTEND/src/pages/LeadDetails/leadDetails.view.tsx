@@ -263,10 +263,15 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
 
         {/* ── Negociações ── */}
         <div className="card overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-200">
+          <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-slate-800">
               Histórico de Negociações
             </h3>
+            {history.length > 0 && (
+              <a href="#historico-atividades" className="flex items-center gap-1.5 text-xs text-[var(--color-primary)] hover:underline">
+                <History size={13} /> {history.length} atividade{history.length > 1 ? 's' : ''} registrada{history.length > 1 ? 's' : ''}
+              </a>
+            )}
           </div>
 
           {/* Form nova negociação */}
@@ -553,7 +558,7 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
       </main>
 
       {/* ── Histórico de atividades ── */}
-      <div className="card overflow-hidden mt-6">
+      <div id="historico-atividades" className="card overflow-hidden mt-6">
         <div className="px-6 py-5 border-b border-slate-200 flex items-center gap-2">
           <History size={16} className="text-slate-400" />
           <h3 className="text-sm font-semibold text-slate-800">Histórico de Atividades</h3>

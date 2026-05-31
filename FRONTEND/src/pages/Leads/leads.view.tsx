@@ -106,17 +106,6 @@ export const LeadsView = (props: LeadsViewProps) => {
             <p className="text-sm text-slate-500 mt-1">Gerencie e acompanhe todos os seus leads</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {(isAdmin || isGerente) && (
-              <>
-                <button onClick={exportCSV} className="btn-secondary flex items-center gap-2 text-sm py-2">
-                  <Download size={15} /> Exportar CSV
-                </button>
-                <label className="btn-secondary flex items-center gap-2 text-sm py-2 cursor-pointer">
-                  <Upload size={15} /> Importar CSV
-                  <input ref={importFileRef} type="file" accept=".csv" className="hidden" onChange={handleImportFile} />
-                </label>
-              </>
-            )}
             <select
               value={store}
               onChange={(e) => onStoreChange(e.target.value)}
@@ -189,14 +178,22 @@ export const LeadsView = (props: LeadsViewProps) => {
               </span>
             </h2>
           </div>
-          {activeTab === "novos" && canCreate && (
-            <button
-              onClick={openCreate}
-              className="btn-primary flex items-center gap-2"
-            >
-              <Plus size={16} /> Novo Lead
+          <div className="flex items-center gap-2">
+            <button onClick={exportCSV} className="btn-secondary flex items-center gap-2 text-sm" title="Exportar leads visíveis como CSV">
+              <Download size={15} /> Exportar CSV
             </button>
-          )}
+            {(isAdmin || isGerente) && (
+              <label className="btn-secondary flex items-center gap-2 text-sm cursor-pointer" title="Importar leads de um arquivo CSV">
+                <Upload size={15} /> Importar CSV
+                <input ref={importFileRef} type="file" accept=".csv" className="hidden" onChange={handleImportFile} />
+              </label>
+            )}
+            {activeTab === "novos" && canCreate && (
+              <button onClick={openCreate} className="btn-primary flex items-center gap-2">
+                <Plus size={16} /> Novo Lead
+              </button>
+            )}
+          </div>
         </div>
 
         {/* ── Tabela ── */}
