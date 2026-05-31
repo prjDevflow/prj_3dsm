@@ -31,6 +31,55 @@ O sistema integra dados de diferentes canais de captação — presenciais e dig
 
 ---
 
+## Números do Projeto
+
+<div align="center">
+
+| 📦 Módulos | 🔐 Perfis de Acesso | 🔗 Endpoints REST | 🐳 Containers Docker | 🗃️ Tabelas no Banco |
+|:---:|:---:|:---:|:---:|:---:|
+| **7** | **4** | **+25** | **3** | **10** |
+
+</div>
+
+---
+
+## Screenshots
+
+> 💡 **Substitua as imagens abaixo pelos screenshots reais do sistema**
+
+### Dashboard
+<img src="https://placehold.co/1280x640/f8fafc/94a3b8?text=📊+Adicione+o+screenshot+do+Dashboard+aqui" alt="Dashboard" width="100%" />
+
+### Página de Leads
+<img src="https://placehold.co/1280x640/f8fafc/94a3b8?text=📋+Adicione+o+screenshot+da+página+de+Leads+aqui" alt="Leads" width="100%" />
+
+### Detalhes do Lead & Negociações
+<img src="https://placehold.co/1280x640/f8fafc/94a3b8?text=🤝+Adicione+o+screenshot+de+Detalhes+do+Lead+aqui" alt="Lead Details" width="100%" />
+
+### Login
+<img src="https://placehold.co/1280x640/f8fafc/94a3b8?text=🔐+Adicione+o+screenshot+da+tela+de+Login+aqui" alt="Login" width="100%" />
+
+---
+
+## Arquitetura
+
+```mermaid
+graph TD
+    User([👤 Usuário]) --> FE
+
+    subgraph Docker Compose
+        FE["🖥️ Frontend\nReact + Vite\n:3000"]
+        BE["⚙️ Backend\nNode.js + Express\n:3333"]
+        DB[("🗄️ Banco de Dados\nPostgreSQL\n:5432")]
+    end
+
+    FE -- "REST API / JSON" --> BE
+    BE -- "Prisma ORM" --> DB
+    BE -- "JWT Auth" --> FE
+```
+
+---
+
 ## Funcionalidades
 
 <div align="center">
@@ -76,6 +125,57 @@ O sistema integra dados de diferentes canais de captação — presenciais e dig
 
 ---
 
+## Estrutura do Projeto
+
+<details>
+<summary><b>Ver estrutura de pastas</b></summary>
+<br>
+
+```
+prj_3dsm/
+├── 🖥️ FRONTEND/
+│   ├── src/
+│   │   ├── components/       # Componentes reutilizáveis (Header, KpiCard, LeadsTable...)
+│   │   ├── pages/            # Páginas da aplicação (Dashboard, Leads, Login...)
+│   │   │   ├── Dashboard/
+│   │   │   ├── Leads/
+│   │   │   ├── LeadDetails/
+│   │   │   ├── Logs/
+│   │   │   └── ...
+│   │   ├── hooks/            # Custom hooks (useLeads, useLojas, useAuth...)
+│   │   ├── services/         # Serviços e interfaces de API
+│   │   ├── context/          # Contextos React (AuthContext)
+│   │   ├── types/            # Tipagens TypeScript globais
+│   │   └── utils/            # Utilitários (dateUtils, settings...)
+│   ├── Dockerfile
+│   └── package.json
+│
+├── ⚙️ BACKEND/
+│   ├── src/
+│   │   ├── modules/          # Módulos da aplicação
+│   │   │   ├── auth/         # Autenticação e usuários
+│   │   │   ├── leads/        # Leads e negociações
+│   │   │   ├── dashboard/    # Métricas e KPIs
+│   │   │   ├── clientes/     # Clientes
+│   │   │   ├── equipes/      # Equipes
+│   │   │   ├── lojas/        # Lojas
+│   │   │   └── logs/         # Auditoria
+│   │   ├── shared/           # Middlewares, rotas, utilitários
+│   │   └── domain/           # Modelos de domínio
+│   ├── prisma/
+│   │   ├── schema.prisma     # Esquema do banco de dados
+│   │   ├── migrations/       # Histórico de migrações
+│   │   └── seed.ts           # Dados iniciais
+│   ├── Dockerfile
+│   └── package.json
+│
+└── 🐳 docker-compose.yml
+```
+
+</details>
+
+---
+
 ## Como Executar
 
 <details>
@@ -100,9 +200,9 @@ cd prj_3dsm
 docker compose up -d
 
 # 3. Acesse a aplicação
-# Frontend: http://localhost:3000
-# Backend:  http://localhost:3333
-# Swagger:  http://localhost:3333/api-docs
+# Frontend → http://localhost:3000
+# Backend  → http://localhost:3333
+# Swagger  → http://localhost:3333/api-docs
 ```
 
 **Logins disponíveis (senha: `123`)**
@@ -131,7 +231,7 @@ docker compose up -d
 
 **Critérios de Aceitação**
 - O sistema permite login via e-mail e senha
-- A autenticação gera um token JWT com identificador do usuário, papel e tempo de expiração
+- A autenticação gera um token JWT com identificador, papel e tempo de expiração
 - Rotas protegidas rejeitam requisições sem token válido
 - Todos os usuários podem atualizar seu próprio e-mail e senha
 - Senhas são armazenadas com hash seguro (bcrypt)
@@ -147,7 +247,7 @@ docker compose up -d
 **Para que** o acesso aos dados seja controlado de forma hierárquica e segura.
 
 **Critérios de Aceitação**
-- Perfis implementados: Atendente, Gerente, Gerente Geral e Administrador
+- Perfis: Atendente, Gerente, Gerente Geral e Administrador
 - Atendente visualiza e gerencia apenas seus próprios leads
 - Gerente visualiza e gerencia leads de toda a sua equipe
 - Gerente Geral visualiza dados consolidados de todas as equipes
@@ -216,7 +316,7 @@ docker compose up -d
 
 **Critérios de Aceitação**
 - Filtros disponíveis: semana, mês, ano e período customizado
-- Usuários não administradores têm limite máximo de 1 ano no período
+- Usuários não administradores têm limite máximo de 1 ano
 - Administradores não possuem limitação de período
 - Validação do período ocorre no backend
 
@@ -232,7 +332,7 @@ docker compose up -d
 
 **Critérios de Aceitação**
 - O sistema registra login de usuários
-- São registradas operações de criação, atualização e exclusão de clientes, usuários, times, leads e negociações
+- São registradas operações de criação, atualização e exclusão de entidades
 - Cada log armazena data, hora e usuário responsável
 - Apenas o Administrador tem acesso à visualização completa dos logs
 
@@ -325,6 +425,56 @@ docker compose up -d
 | | **Total** | **55** | |
 
 <img alt="Burndown Sprint 2" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/burndown_sprint2.png" />
+
+---
+
+## Equipe
+
+> 💡 **Substitua os usernames do GitHub pelos da equipe real**
+
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/username1">
+        <img src="https://placehold.co/100x100/17364F/ffffff?text=Dev+1" width="80" style="border-radius:50%" /><br/>
+        <sub><b>Nome do Integrante</b></sub>
+      </a><br/>
+      <sub>Função / RA</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/username2">
+        <img src="https://placehold.co/100x100/BD0927/ffffff?text=Dev+2" width="80" style="border-radius:50%" /><br/>
+        <sub><b>Nome do Integrante</b></sub>
+      </a><br/>
+      <sub>Função / RA</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/username3">
+        <img src="https://placehold.co/100x100/09D8C7/ffffff?text=Dev+3" width="80" style="border-radius:50%" /><br/>
+        <sub><b>Nome do Integrante</b></sub>
+      </a><br/>
+      <sub>Função / RA</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/username4">
+        <img src="https://placehold.co/100x100/17364F/ffffff?text=Dev+4" width="80" style="border-radius:50%" /><br/>
+        <sub><b>Nome do Integrante</b></sub>
+      </a><br/>
+      <sub>Função / RA</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/username5">
+        <img src="https://placehold.co/100x100/BD0927/ffffff?text=Dev+5" width="80" style="border-radius:50%" /><br/>
+        <sub><b>Nome do Integrante</b></sub>
+      </a><br/>
+      <sub>Função / RA</sub>
+    </td>
+  </tr>
+</table>
+
+</div>
 
 ---
 
