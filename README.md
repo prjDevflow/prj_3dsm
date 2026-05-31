@@ -48,16 +48,16 @@ O sistema integra dados de diferentes canais de captação — presenciais e dig
 > 💡 **Substitua as imagens abaixo pelos screenshots reais do sistema**
 
 ### Dashboard
-<img src="https://placehold.co/1280x640/f8fafc/94a3b8?text=📊+Adicione+o+screenshot+do+Dashboard+aqui" alt="Dashboard" width="100%" />
+<img src="https://placehold.co/1280x640/f1f5f9/94a3b8?text=Dashboard+-+Adicione+o+screenshot+aqui&font=montserrat" alt="Dashboard" width="100%" />
 
 ### Página de Leads
-<img src="https://placehold.co/1280x640/f8fafc/94a3b8?text=📋+Adicione+o+screenshot+da+página+de+Leads+aqui" alt="Leads" width="100%" />
+<img src="https://placehold.co/1280x640/f1f5f9/94a3b8?text=Leads+-+Adicione+o+screenshot+aqui&font=montserrat" alt="Leads" width="100%" />
 
 ### Detalhes do Lead & Negociações
-<img src="https://placehold.co/1280x640/f8fafc/94a3b8?text=🤝+Adicione+o+screenshot+de+Detalhes+do+Lead+aqui" alt="Lead Details" width="100%" />
+<img src="https://placehold.co/1280x640/f1f5f9/94a3b8?text=Detalhes+do+Lead+-+Adicione+o+screenshot+aqui&font=montserrat" alt="Lead Details" width="100%" />
 
 ### Login
-<img src="https://placehold.co/1280x640/f8fafc/94a3b8?text=🔐+Adicione+o+screenshot+da+tela+de+Login+aqui" alt="Login" width="100%" />
+<img src="https://placehold.co/1280x640/f1f5f9/94a3b8?text=Login+-+Adicione+o+screenshot+aqui&font=montserrat" alt="Login" width="100%" />
 
 ---
 
@@ -438,35 +438,42 @@ docker compose up -d
   <tr>
     <td align="center">
       <a href="https://github.com/username1">
-        <img src="https://placehold.co/100x100/17364F/ffffff?text=Dev+1" width="80" style="border-radius:50%" /><br/>
+        <img src="https://placehold.co/100x100/17364F/ffffff?text=Dev+1&font=montserrat" width="80" style="border-radius:50%" /><br/>
         <sub><b>Nome do Integrante</b></sub>
       </a><br/>
       <sub>Função / RA</sub>
     </td>
     <td align="center">
       <a href="https://github.com/username2">
-        <img src="https://placehold.co/100x100/BD0927/ffffff?text=Dev+2" width="80" style="border-radius:50%" /><br/>
+        <img src="https://placehold.co/100x100/BD0927/ffffff?text=Dev+2&font=montserrat" width="80" style="border-radius:50%" /><br/>
         <sub><b>Nome do Integrante</b></sub>
       </a><br/>
       <sub>Função / RA</sub>
     </td>
     <td align="center">
       <a href="https://github.com/username3">
-        <img src="https://placehold.co/100x100/09D8C7/ffffff?text=Dev+3" width="80" style="border-radius:50%" /><br/>
+        <img src="https://placehold.co/100x100/09D8C7/ffffff?text=Dev+3&font=montserrat" width="80" style="border-radius:50%" /><br/>
         <sub><b>Nome do Integrante</b></sub>
       </a><br/>
       <sub>Função / RA</sub>
     </td>
     <td align="center">
       <a href="https://github.com/username4">
-        <img src="https://placehold.co/100x100/17364F/ffffff?text=Dev+4" width="80" style="border-radius:50%" /><br/>
+        <img src="https://placehold.co/100x100/17364F/ffffff?text=Dev+4&font=montserrat" width="80" style="border-radius:50%" /><br/>
         <sub><b>Nome do Integrante</b></sub>
       </a><br/>
       <sub>Função / RA</sub>
     </td>
     <td align="center">
       <a href="https://github.com/username5">
-        <img src="https://placehold.co/100x100/BD0927/ffffff?text=Dev+5" width="80" style="border-radius:50%" /><br/>
+        <img src="https://placehold.co/100x100/BD0927/ffffff?text=Dev+5&font=montserrat" width="80" style="border-radius:50%" /><br/>
+        <sub><b>Nome do Integrante</b></sub>
+      </a><br/>
+      <sub>Função / RA</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/username6">
+        <img src="https://placehold.co/100x100/09D8C7/ffffff?text=Dev+6&font=montserrat" width="80" style="border-radius:50%" /><br/>
         <sub><b>Nome do Integrante</b></sub>
       </a><br/>
       <sub>Função / RA</sub>
