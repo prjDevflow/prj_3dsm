@@ -15,6 +15,7 @@ import Logs from './pages/Logs/page';
 import AdminPage from './pages/Admin/page';
 import { loadSettings, applySettings } from './services/settingsService';
 import { OnboardingModal } from './components/OnboardingModal';
+import { ToastProvider } from './components/Toast';
 
 function App() {
   useEffect(() => {
@@ -23,6 +24,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ToastProvider>
       <AuthProvider>
         <OnboardingModal />
           <Routes>
@@ -110,6 +112,7 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
       </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 }

@@ -143,9 +143,19 @@
 
 /* Animações */
 @keyframes shrink {
-  from { transform: scaleX(1); }
-  to   { transform: scaleX(0); }
+  from { transform: scaleX(1); transform-origin: left; }
+  to   { transform: scaleX(0); transform-origin: left; }
 }
 .animate-shrink {
   animation: shrink 5s linear forwards;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

@@ -1,7 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Lead } from '../types';
-import { ChevronLeft, ChevronRight, Search, Loader2, X, ArrowUpRight, Pencil } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, X, ArrowUpRight, Pencil } from 'lucide-react';
+import { TableSkeleton } from './Skeleton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -159,9 +160,8 @@ const LeadsTable: React.FC<LeadsTableProps> = ({
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-6 py-16 text-center">
-                  <Loader2 className="h-6 w-6 animate-spin text-[var(--color-primary)] mx-auto mb-2" />
-                  <p className="text-sm text-slate-500">Carregando leads...</p>
+                <td colSpan={7} className="p-0">
+                  <TableSkeleton rows={8} cols={6} />
                 </td>
               </tr>
             ) : leads.length === 0 ? (

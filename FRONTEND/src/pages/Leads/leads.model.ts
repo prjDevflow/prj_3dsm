@@ -9,6 +9,7 @@ import { ILead, ILeadsService } from "../../services/ILeadsService";
 import { useUsers } from "../../hooks/useUsers";
 import { useLojas } from "../../hooks/useLojas";
 import api from "../../services/instanceApi";
+import { useToast } from "../../components/Toast";
 
 type LeadsModelProps = {
   leadsService: ILeadsService;
@@ -69,6 +70,7 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
   const [formData, setFormData]         = useState<LeadFormData>(() => emptyForm());
   const [formError, setFormError]       = useState("");
   const [success, setSuccess]           = useState("");
+  const toast = useToast();
 
   const { data: usersData } = useUsers({ limit: 100 });
   const atendentes = useMemo(
@@ -217,9 +219,8 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
   };
 
   const showFeedback = (message: string) => {
-    setSuccess(message);
+    toast.success(message);
     setFormError("");
-    setTimeout(() => setSuccess(""), 3000);
   };
 
   const handleSave = async () => {
@@ -255,7 +256,7 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
         await refetch();
       }
     } catch {
-      setFormError("Erro ao salvar lead. Tente novamente.");
+      toast.error("Erro ao salvar lead. Tente novamente.");
     }
   };
 
@@ -265,7 +266,7 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
       showFeedback("Lead deletado com sucesso!");
       refetch();
     } catch {
-      setFormError("Erro ao deletar lead. Tente novamente.");
+      toast.error("Erro ao deletar lead. Tente novamente.");
     }
   };
 

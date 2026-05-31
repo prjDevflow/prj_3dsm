@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../context/AuthContext";
 import { IClient, IClientsService, ICreateClientRequest, IUpdateClientRequest } from "../../services/IClientsService";
 import { useLeads } from "../../hooks/useLeads";
+import { useToast } from "../../components/Toast";
 
 type ClientsModelProps = {
   clientsService: IClientsService;
@@ -42,6 +43,7 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
   const [formData, setFormData] = useState<ClientFormData>(() => emptyForm());
   const [formError, setFormError] = useState("");
   const [success, setSuccess] = useState("");
+  const toast = useToast();
 
   const assignedTo = isViewAll ? undefined : user?.id;
 
@@ -112,9 +114,8 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
   };
 
   const showFeedback = (msg: string) => {
-    setSuccess(msg);
+    toast.success(msg);
     setFormError("");
-    setTimeout(() => setSuccess(""), 3000);
   };
 
   const handleSave = async () => {
@@ -142,7 +143,7 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
       setShowModal(false);
     } catch (err) {
         console.error("Error saving client:", err);
-      setFormError("Erro ao salvar cliente. Tente novamente.");
+      toast.error("Erro ao salvar cliente. Tente novamente.");
     }
   };
 

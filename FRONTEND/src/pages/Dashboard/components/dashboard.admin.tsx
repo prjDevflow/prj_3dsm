@@ -2,6 +2,7 @@ import { AlertCircle, ChevronDown, ChevronUp, Clock, DollarSign, Inbox, Phone, T
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import KpiCard from "../../../components/KpiCard";
+import { KpiCardSkeleton } from "../../../components/Skeleton";
 import { useDashboardModel } from "../dashboard.model";
 import InteractivePieChart from "../../../components/charts/InteractivePieChart";
 import InteractiveLineChart from "../../../components/charts/InteractiveLineChart";
@@ -143,6 +144,11 @@ export const DashboardAdmin = (props: DashboardProps) => {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          {!metrics ? (
+            <>
+              <KpiCardSkeleton /><KpiCardSkeleton /><KpiCardSkeleton /><KpiCardSkeleton />
+            </>
+          ) : (<>
           <KpiCard
             title="Total de Leads"
             value={metrics?.kpis.totalLeads || 0}
@@ -166,6 +172,7 @@ export const DashboardAdmin = (props: DashboardProps) => {
             value={metrics?.avgTimeToFirstContact || "—"}
             icon={Clock}
           />
+          </>)}
         </div>
 
         {(selectedPeriod || selectedSource) && (

@@ -6,6 +6,7 @@ import {
   AppSettings,
 } from "../../services/settingsService";
 import { useState, useEffect } from "react";
+import { useToast } from "../../components/Toast";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/instanceApi";
 
@@ -20,6 +21,7 @@ export const useSettingsModel = () => {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const toast = useToast();
 
   const [cfg, setCfg] = useState<AppSettings>(loadSettings);
 
@@ -107,10 +109,9 @@ export const useSettingsModel = () => {
     try {
       saveSettings(cfg);
       applySettings(cfg);
-      setSuccess("Configurações salvas com sucesso!");
-      setTimeout(() => setSuccess(""), 3000);
+      toast.success("Configurações salvas com sucesso!");
     } catch {
-      setError("Erro ao salvar as configurações. Tente novamente.");
+      toast.error("Erro ao salvar as configurações. Tente novamente.");
     } finally {
       setSaving(false);
     }
