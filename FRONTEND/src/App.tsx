@@ -14,6 +14,7 @@ import Teams from './pages/Teams/page';
 import Logs from './pages/Logs/page';
 import AdminPage from './pages/Admin/page';
 import { loadSettings, applySettings } from './services/settingsService';
+import { OnboardingModal } from './components/OnboardingModal';
 
 function App() {
   useEffect(() => {
@@ -23,6 +24,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <OnboardingModal />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route

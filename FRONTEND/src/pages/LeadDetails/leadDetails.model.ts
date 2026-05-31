@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLead, useNegotiations, useUpdateLead } from "../../hooks/useLeads";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../services/instanceApi";
 import { Lead, NegotiationImportance, NegotiationStage } from "../../types";
 import { ILeadsService } from "../../services/ILeadsService";
@@ -67,6 +67,54 @@ export const useLeadDetailsModel = ({
     useState<NegotiationStage>("primeiro_contato");
   const [sending, setSending] = useState(false);
   const [negError, setNegError] = useState("");
+
+  // NPS
+  const [showNPSModal, setShowNPSModal] = useState(false);
+  const [npsNegId, setNpsNegId]         = useState<string | null>(null);
+  const [npsPontuacao, setNpsPontuacao] = useState(0);
+  const [npsComentario, setNpsComentario] = useState("");
+  const [npsSent, setNpsSent]           = useState(false);
+
+  const submitNPS = async () => {
+    if (!npsNegId || npsPontuacao === 0) return;
+    try { await api.post(`/leads/negotiations/${npsNegId}/nps`, { pontuacao: npsPontuacao, comentario: npsComentario }); } catch {}
+    setNpsSent(true);
+    setTimeout(() => { setShowNPSModal(false); setNpsSent(false); setNpsPontuacao(0); setNpsComentario(""); }, 1500);
+  };
+
+  // Lembretes
+  const { data: lembretes = [], refetch: refetchLembretes } = useQuery({
+    queryKey: ['lembretes', id],
+    queryFn: async () => {
+      const { data } = await api.get(`/leads/${id}/lembretes`);
+      return data as { id: string; titulo: string; descricao: string; dataLembrete: string; concluido: boolean }[];
+    },
+    enabled: !!id,
+  });
+
+  const [showLembreteForm, setShowLembreteForm] = useState(false);
+  const [lembreteForm, setLembreteForm] = useState({ titulo: "", descricao: "", dataLembrete: "" });
+  const [lembreteError, setLembreteError] = useState("");
+
+  const createLembrete = useMutation({
+    mutationFn: () => api.post(`/leads/${id}/lembretes`, lembreteForm),
+    onSuccess: () => {
+      refetchLembretes();
+      setShowLembreteForm(false);
+      setLembreteForm({ titulo: "", descricao: "", dataLembrete: "" });
+    },
+    onError: () => setLembreteError("Erro ao criar lembrete."),
+  });
+
+  const concluirLembrete = async (lembreteId: string) => {
+    await api.patch(`/leads/lembretes/${lembreteId}/concluir`);
+    refetchLembretes();
+  };
+
+  const deleteLembrete = async (lembreteId: string) => {
+    await api.delete(`/leads/lembretes/${lembreteId}`);
+    refetchLembretes();
+  };
 
   // Fechar negociação
   const [closingId, setClosingId] = useState<string | null>(null);
@@ -195,6 +243,8 @@ export const useLeadDetailsModel = ({
       setShowCloseModal(false);
       setCloseReason("");
       setClosePredefinedReason("");
+      setNpsNegId(selectedNegotiation);
+      setShowNPSModal(true);
       setSelectedNeg(null);
     } catch (err: any) {
       setNegError(
@@ -318,5 +368,23 @@ export const useLeadDetailsModel = ({
     atendentes,
     history,
     historyLoading,
+    showNPSModal,
+    setShowNPSModal,
+    npsPontuacao,
+    setNpsPontuacao,
+    npsComentario,
+    setNpsComentario,
+    npsSent,
+    submitNPS,
+    lembretes,
+    showLembreteForm,
+    setShowLembreteForm,
+    lembreteForm,
+    setLembreteForm,
+    lembreteError,
+    setLembreteError,
+    createLembrete,
+    concluirLembrete,
+    deleteLembrete,
   };
 };

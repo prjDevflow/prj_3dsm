@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useUserAvatar } from '../hooks/useUserAvatar';
 import { useNewLeadNotification } from '../hooks/useNewLeadNotification';
+import { useQuery } from '@tanstack/react-query';
+import api from '../services/instanceApi';
 import { validateDateRange, DateRange, formatDateRange } from '../utils/dateUtils';
 import {
   LayoutDashboard,
@@ -20,6 +22,7 @@ import {
   Building2,
   FileText,
   UserCheck,
+  Bell,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -32,6 +35,16 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { newLeadsCount, clearNewLeads } = useNewLeadNotification();
+
+  const { data: lembretesHoje = [] } = useQuery({
+    queryKey: ['lembretes-hoje'],
+    queryFn: async () => {
+      const { data } = await api.get('/leads/lembretes/hoje');
+      return data as { id: string; titulo: string; leadId: string; clienteName: string }[];
+    },
+    refetchInterval: 5 * 60 * 1000,
+    enabled: !!user,
+  });
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -293,7 +306,15 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
             })}
           </nav>
 
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
+            {lembretesHoje.length > 0 && (
+              <Link to={`/leads/${lembretesHoje[0].leadId}`} className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors" title={`${lembretesHoje.length} lembrete${lembretesHoje.length > 1 ? 's' : ''} para hoje`}>
+                <Bell size={18} className="text-amber-500" />
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-amber-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                  {lembretesHoje.length}
+                </span>
+              </Link>
+            )}
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}

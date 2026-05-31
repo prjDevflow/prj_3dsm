@@ -172,11 +172,28 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
 
   const switchTab = (tab: LeadTab) => { setActiveTab(tab); setTabPage(1); };
 
+  const UTM_ORIGIN_MAP: Record<string, string> = {
+    google: "Google Ads", google_ads: "Google Ads",
+    facebook: "Facebook", fb: "Facebook",
+    instagram: "Instagram", ig: "Instagram",
+    whatsapp: "WhatsApp", wpp: "WhatsApp",
+    linkedin: "LinkedIn",
+    site: "Site", website: "Site",
+    indicacao: "Indicação", referral: "Indicação",
+    evento: "Evento", event: "Evento",
+    telefone: "Telefone", phone: "Telefone",
+  };
+
   const openCreate = () => {
+    const params = new URLSearchParams(window.location.search);
+    const utmSource = (params.get("utm_source") ?? "").toLowerCase().replace(/[^a-z_]/g, "");
+    const utmOrigin = UTM_ORIGIN_MAP[utmSource] ?? "";
+
     setFormData({
       ...emptyForm(),
-      store: lojas[0]?.value ?? "Matriz Jacareí",
+      store:      lojas[0]?.value ?? "Matriz Jacareí",
       assignedTo: (!isAdmin && !isGerente) ? user?.id ?? "" : "",
+      origin:     utmOrigin || emptyForm().origin,
     });
     setEditingLead(null);
     setFormError("");

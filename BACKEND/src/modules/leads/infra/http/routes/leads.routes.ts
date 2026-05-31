@@ -11,6 +11,8 @@ import { ListNegotiationsByLeadController } from '../../../controllers/ListNegot
 import { CloseNegotiationController } from '../../../controllers/CloseNegotiationController';
 import { ListLeadHistoryController } from '../../../controllers/ListLeadHistoryController';
 import { ImportLeadsController } from '../../../controllers/ImportLeadsController';
+import { LembretesController } from '../../../controllers/LembretesController';
+import { NPSController } from '../../../controllers/NPSController';
 import { ensureAuthenticated } from '../../../../../shared/infra/http/middlewares/ensureAuthenticated';
 import { ensureRole } from '../../../../../shared/infra/http/middlewares/ensureRole';
 import { UserRole } from '../../../../../domain/models/UserRole';
@@ -28,6 +30,8 @@ const listNegotiationsByLeadController = new ListNegotiationsByLeadController();
 const closeNegotiationController       = new CloseNegotiationController();
 const listLeadHistoryController        = new ListLeadHistoryController();
 const importLeadsController            = new ImportLeadsController();
+const lembretesController              = new LembretesController();
+const npsController                    = new NPSController();
 
 leadsRoutes.use(ensureAuthenticated);
 
@@ -47,6 +51,16 @@ leadsRoutes.post('/import', importLeadsController.handle);
 
 // Histórico de atividades
 leadsRoutes.get('/:id/history', listLeadHistoryController.handle);
+
+// Lembretes
+leadsRoutes.get('/lembretes/hoje',           (req, res) => lembretesController.hoje(req, res));
+leadsRoutes.get('/:id/lembretes',            (req, res) => lembretesController.list(req, res));
+leadsRoutes.post('/:id/lembretes',           (req, res) => lembretesController.create(req, res));
+leadsRoutes.patch('/lembretes/:id/concluir', (req, res) => lembretesController.concluir(req, res));
+leadsRoutes.delete('/lembretes/:id',         (req, res) => lembretesController.remove(req, res));
+
+// NPS
+leadsRoutes.post('/negotiations/:id/nps', (req, res) => npsController.create(req, res));
 
 // Negociações
 leadsRoutes.get('/:id/negotiations', listNegotiationsByLeadController.handle);

@@ -43,9 +43,10 @@ model Usuario {
 
   papel                Papel                  @relation(fields: [id_papel], references: [id_papel])
   equipe               Equipe?                @relation(fields: [id_equipe], references: [id_equipe])
-  leads                Lead[]                 
-  historicos           HistoricoNegociacao[]  
+  leads                Lead[]
+  historicos           HistoricoNegociacao[]
   logs                 LogOperacao[]          // Logs gerados (RF07)
+  lembretes            Lembrete[]
 
   @@map("usuarios")
 }
@@ -96,11 +97,13 @@ model Lead {
   // id_status e data_atualizacao_lead removidos
   data_criacao_lead     DateTime @default(now()) @db.Timestamp()
 
-  cliente               Cliente      @relation(fields: [id_cliente], references: [id_cliente])
-  usuario               Usuario      @relation(fields: [id_usuario], references: [id_usuario])
-  loja                  Loja         @relation(fields: [id_loja], references: [id_loja])
-  origem                Origem       @relation(fields: [id_origem], references: [id_origem])
+  cliente               Cliente        @relation(fields: [id_cliente], references: [id_cliente])
+  usuario               Usuario        @relation(fields: [id_usuario], references: [id_usuario])
+  loja                  Loja           @relation(fields: [id_loja], references: [id_loja])
+  origem                Origem         @relation(fields: [id_origem], references: [id_origem])
   negociacoes           Negociacao[]
+  lembretes             Lembrete[]
+  avaliacoes_nps        AvaliacaoNPS[]
 
   @@map("leads")
 }
@@ -119,7 +122,8 @@ model Negociacao {
   lead                       Lead                  @relation(fields: [id_lead], references: [id_lead])
   estagio                    Estagio               @relation(fields: [id_estagio], references: [id_estagio])
   status                     Status                @relation(fields: [id_status], references: [id_status])
-  historicos                 HistoricoNegociacao[] // RF03
+  historicos            HistoricoNegociacao[] // RF03
+  avaliacao_nps         AvaliacaoNPS?
 
   @@map("negociacoes")
 }
@@ -135,6 +139,36 @@ model HistoricoNegociacao {
   usuario                  Usuario    @relation(fields: [id_usuario], references: [id_usuario])
 
   @@map("historicos_negociacoes")
+}
+
+model Lembrete {
+  id_lembrete   String   @id @default(uuid()) @db.Uuid
+  id_lead       String   @db.Uuid
+  id_usuario    String   @db.Uuid
+  titulo        String   @db.VarChar(200)
+  descricao     String?  @db.Text
+  data_lembrete DateTime @db.Timestamp()
+  concluido     Boolean  @default(false)
+  data_criacao  DateTime @default(now()) @db.Timestamp()
+
+  lead    Lead    @relation(fields: [id_lead],    references: [id_lead],    onDelete: Cascade)
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+
+  @@map("lembretes")
+}
+
+model AvaliacaoNPS {
+  id_avaliacao   String   @id @default(uuid()) @db.Uuid
+  id_negociacao  String   @unique @db.Uuid
+  id_lead        String   @db.Uuid
+  pontuacao      Int
+  comentario     String?  @db.Text
+  data_avaliacao DateTime @default(now()) @db.Timestamp()
+
+  negociacao Negociacao @relation(fields: [id_negociacao], references: [id_negociacao])
+  lead       Lead       @relation(fields: [id_lead],       references: [id_lead])
+
+  @@map("avaliacoes_nps")
 }
 
 model LogOperacao {

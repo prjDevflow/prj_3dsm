@@ -15,6 +15,10 @@ import {
   TrendingUp,
   X,
   History,
+  Bell,
+  Plus,
+  Trash2,
+  Star,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useLeadDetailsModel } from "./leadDetails.model";
@@ -82,6 +86,24 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
     atendentes,
     history,
     historyLoading,
+    showNPSModal,
+    setShowNPSModal,
+    npsPontuacao,
+    setNpsPontuacao,
+    npsComentario,
+    setNpsComentario,
+    npsSent,
+    submitNPS,
+    lembretes,
+    showLembreteForm,
+    setShowLembreteForm,
+    lembreteForm,
+    setLembreteForm,
+    lembreteError,
+    setLembreteError,
+    createLembrete,
+    concluirLembrete,
+    deleteLembrete,
   } = props;
 
   if (leadLoading) {
@@ -557,6 +579,93 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
         </div>
       </main>
 
+      {/* ── Lembretes ── */}
+      <div className="card overflow-hidden mt-6">
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bell size={16} className="text-slate-400" />
+            <h3 className="text-sm font-semibold text-slate-800">Lembretes</h3>
+            {lembretes.filter((l) => !l.concluido).length > 0 && (
+              <span className="text-xs bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded-full">
+                {lembretes.filter((l) => !l.concluido).length} pendente{lembretes.filter((l) => !l.concluido).length > 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+          <button onClick={() => setShowLembreteForm((v: boolean) => !v)} className="flex items-center gap-1.5 text-xs font-medium text-[var(--color-primary)] hover:underline">
+            <Plus size={13} /> Novo lembrete
+          </button>
+        </div>
+
+        {showLembreteForm && (
+          <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 space-y-3">
+            {lembreteError && <p className="text-xs text-rose-600">{lembreteError}</p>}
+            <input
+              type="text"
+              placeholder="Título do lembrete *"
+              value={lembreteForm.titulo}
+              onChange={(e) => setLembreteForm((f: typeof lembreteForm) => ({ ...f, titulo: e.target.value }))}
+              className="input w-full text-sm"
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="datetime-local"
+                value={lembreteForm.dataLembrete}
+                onChange={(e) => setLembreteForm((f: typeof lembreteForm) => ({ ...f, dataLembrete: e.target.value }))}
+                className="input text-sm"
+              />
+              <input
+                type="text"
+                placeholder="Detalhe (opcional)"
+                value={lembreteForm.descricao}
+                onChange={(e) => setLembreteForm((f: typeof lembreteForm) => ({ ...f, descricao: e.target.value }))}
+                className="input text-sm"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowLembreteForm(false)} className="btn-secondary text-sm">Cancelar</button>
+              <button
+                onClick={() => { setLembreteError(""); createLembrete.mutate(); }}
+                disabled={!lembreteForm.titulo.trim() || !lembreteForm.dataLembrete || createLembrete.isPending}
+                className="btn-primary text-sm flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {createLembrete.isPending ? <Loader2 size={14} className="animate-spin" /> : <Bell size={14} />}
+                Salvar
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="divide-y divide-slate-50">
+          {lembretes.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-6">Nenhum lembrete criado.</p>
+          ) : lembretes.map((l) => (
+            <div key={l.id} className={`px-6 py-3 flex items-center gap-3 ${l.concluido ? 'opacity-50' : ''}`}>
+              <button
+                onClick={() => !l.concluido && concluirLembrete(l.id)}
+                className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
+                  l.concluido ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 hover:border-emerald-400'
+                }`}
+              >
+                {l.concluido && <CheckCircle size={12} className="text-white" />}
+              </button>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium ${l.concluido ? 'line-through text-slate-400' : 'text-slate-700'}`}>{l.titulo}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <Clock size={11} className="text-slate-400" />
+                  <span className="text-xs text-slate-400">
+                    {format(new Date(l.dataLembrete), "dd/MM/yyyy 'às' HH:mm")}
+                  </span>
+                  {l.descricao && <span className="text-xs text-slate-400">· {l.descricao}</span>}
+                </div>
+              </div>
+              <button onClick={() => deleteLembrete(l.id)} className="text-slate-300 hover:text-rose-400 transition-colors p-1">
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ── Histórico de atividades ── */}
       <div id="historico-atividades" className="card overflow-hidden mt-6">
         <div className="px-6 py-5 border-b border-slate-200 flex items-center gap-2">
@@ -879,6 +988,69 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
                 Salvar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal NPS ── */}
+      {showNPSModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            {npsSent ? (
+              <div className="text-center py-4">
+                <CheckCircle size={40} className="text-emerald-500 mx-auto mb-3" />
+                <p className="font-semibold text-slate-800">Obrigado pelo feedback!</p>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-base font-semibold text-slate-800 mb-1">Avalie o atendimento</h3>
+                <p className="text-sm text-slate-500 mb-5">Como foi a experiência nessa negociação? (Opcional)</p>
+
+                <div className="flex justify-center gap-2 mb-5">
+                  {[1,2,3,4,5,6,7,8,9,10].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setNpsPontuacao(n)}
+                      className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all border-2 ${
+                        n <= npsPontuacao
+                          ? n <= 4  ? "bg-rose-500 border-rose-500 text-white"
+                          : n <= 7  ? "bg-amber-400 border-amber-400 text-white"
+                          :           "bg-emerald-500 border-emerald-500 text-white"
+                          : "border-slate-200 text-slate-400 hover:border-slate-300"
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+
+                {npsPontuacao > 0 && (
+                  <p className="text-xs text-center text-slate-400 mb-4">
+                    {npsPontuacao <= 4 ? "Ruim" : npsPontuacao <= 7 ? "Neutro" : "Ótimo"}
+                    {" "}· {npsPontuacao <= 4 ? "😞" : npsPontuacao <= 7 ? "😐" : "😊"}
+                  </p>
+                )}
+
+                <textarea
+                  rows={2}
+                  value={npsComentario}
+                  onChange={(e) => setNpsComentario(e.target.value)}
+                  placeholder="Comentário opcional..."
+                  className="input w-full mb-4 text-sm"
+                />
+
+                <div className="flex gap-3">
+                  <button onClick={() => setShowNPSModal(false)} className="flex-1 btn-secondary text-sm">Pular</button>
+                  <button
+                    onClick={submitNPS}
+                    disabled={npsPontuacao === 0}
+                    className="flex-1 btn-primary text-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Star size={14} /> Enviar
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
