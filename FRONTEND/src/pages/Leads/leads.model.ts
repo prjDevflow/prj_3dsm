@@ -276,7 +276,9 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
     const a = document.createElement('a');
     a.href = url;
     a.download = `leads_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
