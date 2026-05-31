@@ -19,6 +19,7 @@ export const useDashboardModel = ({ dashboardService }: DashModelProps) => {
   const [store, setStore] = useState<string>("all");
   const [team, setTeam] = useState<string>("all");
   const [metrics, setMetrics] = useState<DashboardViewModel | null>(null);
+  const [prevMetrics, setPrevMetrics] = useState<DashboardViewModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,18 +28,34 @@ export const useDashboardModel = ({ dashboardService }: DashModelProps) => {
     setError(null);
     try {
       const startFormatted = dateRange.start.toISOString().split("T")[0];
-      const endFormatted = dateRange.end.toISOString().split("T")[0];
-      const data = await dashboardService.getMetrics({
-        start: startFormatted,
-        end: endFormatted,
-      });
+      const endFormatted   = dateRange.end.toISOString().split("T")[0];
+
+      // Período anterior: mesma duração, imediatamente antes
+      const days = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24)) || 1;
+      const prevEnd   = new Date(dateRange.start); prevEnd.setDate(prevEnd.getDate() - 1);
+      const prevStart = new Date(prevEnd);          prevStart.setDate(prevStart.getDate() - days);
+
+      const [data, prevData] = await Promise.all([
+        dashboardService.getMetrics({ start: startFormatted, end: endFormatted }),
+        dashboardService.getMetrics({
+          start: prevStart.toISOString().split("T")[0],
+          end:   prevEnd.toISOString().split("T")[0],
+        }),
+      ]);
+
       setMetrics(mapToViewModel(data));
+      setPrevMetrics(mapToViewModel(prevData));
     } catch (err) {
       console.error("Error fetching dashboard metrics:", err);
       setError("Failed to load dashboard metrics.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const kpiDelta = (current: number, prev: number) => {
+    if (!prev) return undefined;
+    return Math.round(((current - prev) / prev) * 100);
   };
 
   useEffect(() => {
@@ -83,6 +100,8 @@ export const useDashboardModel = ({ dashboardService }: DashModelProps) => {
     team,
     setTeam,
     metrics,
+    prevMetrics,
+    kpiDelta,
     isLoading,
     error,
     refetch,

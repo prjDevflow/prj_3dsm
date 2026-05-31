@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { LEAD_CREATED_BY_ME_EVENT } from "../../hooks/useNewLeadNotification";
 import { useLocation } from "react-router-dom";
@@ -7,6 +8,7 @@ import { DateRange } from "../../utils/dateUtils";
 import { ILead, ILeadsService } from "../../services/ILeadsService";
 import { useUsers } from "../../hooks/useUsers";
 import { useLojas } from "../../hooks/useLojas";
+import api from "../../services/instanceApi";
 
 type LeadsModelProps = {
   leadsService: ILeadsService;
@@ -256,6 +258,90 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
     }
   };
 
+  // #2 — Export CSV
+  const exportCSV = () => {
+    const statusLabel: Record<string, string> = { novo: 'Novo', contatado: 'Contatado', qualificado: 'Qualificado', ganho: 'Ganho', perdido: 'Perdido' };
+    const impLabel: Record<string, string> = { baixa: 'Baixa', media: 'Média', alta: 'Alta' };
+    const headers = ['Nome', 'Email', 'Telefone', 'Status', 'Importância', 'Origem', 'Loja', 'Atendente', 'Criado em'];
+    const rows = allLeads.map((l) => [
+      l.name, l.email, l.phone ?? '', statusLabel[l.status] ?? l.status,
+      impLabel[l.importance] ?? l.importance, l.origin, l.store ?? '',
+      l.assignedTo ?? '', format(new Date(l.createdAt), 'dd/MM/yyyy'),
+    ]);
+    const csv = [headers, ...rows]
+      .map((r) => r.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leads_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // #21 — Import CSV
+  const importFileRef = useRef<HTMLInputElement>(null);
+  const [importPreview, setImportPreview] = useState<Record<string, string>[]>([]);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{ created: number; errors: { row: number; reason: string }[] } | null>(null);
+
+  const parseCSV = (text: string): Record<string, string>[] => {
+    const lines = text.replace(/\r/g, '').split('\n').filter((l) => l.trim());
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(',').map((h) => h.replace(/^"|"$/g, '').trim().toLowerCase());
+    return lines.slice(1).map((line) => {
+      const vals = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g) ?? [];
+      const obj: Record<string, string> = {};
+      headers.forEach((h, i) => {
+        obj[h] = (vals[i] ?? '').replace(/^"|"$/g, '').trim();
+      });
+      return obj;
+    });
+  };
+
+  const FIELD_MAP: Record<string, string> = {
+    nome: 'name', name: 'name', email: 'email',
+    telefone: 'phone', phone: 'phone', fone: 'phone',
+    loja: 'store', store: 'store',
+    origem: 'origin', origin: 'origin',
+    atendente: 'assignedTo', 'assigned to': 'assignedTo', assignedto: 'assignedTo',
+  };
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      const raw = parseCSV(text);
+      const mapped = raw.map((row) => {
+        const norm: Record<string, string> = {};
+        Object.entries(row).forEach(([k, v]) => { norm[FIELD_MAP[k] ?? k] = v; });
+        return norm;
+      });
+      setImportPreview(mapped);
+      setImportResult(null);
+      setShowImportModal(true);
+    };
+    reader.readAsText(file, 'utf-8');
+    e.target.value = '';
+  };
+
+  const handleImportSubmit = async () => {
+    setImporting(true);
+    try {
+      const { data } = await api.post('/leads/import', { rows: importPreview });
+      setImportResult(data);
+      await refetch();
+    } catch {
+      setImportResult({ created: 0, errors: [{ row: 0, reason: 'Erro ao enviar para o servidor.' }] });
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const isSaving  = false;
   const canCreate = isAdmin || isGerente || user?.role === "atendente";
 
@@ -303,5 +389,14 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
     handleDeleteLead,
     lojas,
     duplicateWarning,
+    exportCSV,
+    importFileRef,
+    importPreview,
+    showImportModal,
+    setShowImportModal,
+    importing,
+    importResult,
+    handleImportFile,
+    handleImportSubmit,
   };
 };

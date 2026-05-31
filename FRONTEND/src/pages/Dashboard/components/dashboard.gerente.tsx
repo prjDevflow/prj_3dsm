@@ -51,6 +51,8 @@ export const DashboardGerente = (props: DashboardProps) => {
   const [showAllLoss, setShowAllLoss] = useState(false);
   const {
     metrics,
+    prevMetrics,
+    kpiDelta,
     safeArray,
     selectedPeriod,
     selectedSource,
@@ -135,16 +137,19 @@ export const DashboardGerente = (props: DashboardProps) => {
             title="Leads da Equipe"
             value={metrics?.kpis.totalLeads || 0}
             icon={UsersIcon}
+            change={kpiDelta?.(metrics?.kpis.totalLeads ?? 0, prevMetrics?.kpis.totalLeads ?? 0)}
           />
           <KpiCard
             title="Conversões da Equipe"
             value={metrics?.kpis.convertedLeads || 0}
             icon={Target}
+            change={kpiDelta?.(metrics?.kpis.convertedLeads ?? 0, prevMetrics?.kpis.convertedLeads ?? 0)}
           />
           <KpiCard
             title="Taxa da Equipe"
             value={`${metrics?.kpis.conversionRate || 0}%`}
             icon={TrendingUp}
+            change={kpiDelta?.(parseFloat(String(metrics?.kpis.conversionRate ?? 0)), parseFloat(String(prevMetrics?.kpis.conversionRate ?? 0)))}
           />
           <KpiCard
             title="Tempo Médio de Atendimento"

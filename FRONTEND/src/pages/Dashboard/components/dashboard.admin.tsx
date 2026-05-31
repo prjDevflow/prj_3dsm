@@ -54,6 +54,8 @@ export const DashboardAdmin = (props: DashboardProps) => {
   const [showAllLoss, setShowAllLoss] = useState(false);
   const {
     metrics,
+    prevMetrics,
+    kpiDelta,
     safeArray,
     selectedPeriod,
     selectedSource,
@@ -145,16 +147,19 @@ export const DashboardAdmin = (props: DashboardProps) => {
             title="Total de Leads"
             value={metrics?.kpis.totalLeads || 0}
             icon={Users}
+            change={kpiDelta?.(metrics?.kpis.totalLeads ?? 0, prevMetrics?.kpis.totalLeads ?? 0)}
+          />
+          <KpiCard
+            title="Conversões"
+            value={metrics?.kpis.convertedLeads || 0}
+            icon={Target}
+            change={kpiDelta?.(metrics?.kpis.convertedLeads ?? 0, prevMetrics?.kpis.convertedLeads ?? 0)}
           />
           <KpiCard
             title="Taxa de Conversão"
             value={`${metrics?.kpis.conversionRate || 0}%`}
-            icon={Target}
-          />
-          <KpiCard
-            title="Ticket Médio"
-            value={`R$ ${metrics?.kpis.avgDealValue?.toLocaleString() || 0}`}
-            icon={DollarSign}
+            icon={Phone}
+            change={kpiDelta?.(parseFloat(String(metrics?.kpis.conversionRate ?? 0)), parseFloat(String(prevMetrics?.kpis.conversionRate ?? 0)))}
           />
           <KpiCard
             title="Tempo Médio Atendimento"

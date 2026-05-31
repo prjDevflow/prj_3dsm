@@ -9,6 +9,8 @@ import { CreateNegotiationController } from '../../../controllers/CreateNegotiat
 import { UpdateNegotiationController } from '../../../controllers/UpdateNegotiationController';
 import { ListNegotiationsByLeadController } from '../../../controllers/ListNegotiationsByLeadController';
 import { CloseNegotiationController } from '../../../controllers/CloseNegotiationController';
+import { ListLeadHistoryController } from '../../../controllers/ListLeadHistoryController';
+import { ImportLeadsController } from '../../../controllers/ImportLeadsController';
 import { ensureAuthenticated } from '../../../../../shared/infra/http/middlewares/ensureAuthenticated';
 import { ensureRole } from '../../../../../shared/infra/http/middlewares/ensureRole';
 import { UserRole } from '../../../../../domain/models/UserRole';
@@ -24,6 +26,8 @@ const createNegotiationController      = new CreateNegotiationController();
 const updateNegotiationController      = new UpdateNegotiationController();
 const listNegotiationsByLeadController = new ListNegotiationsByLeadController();
 const closeNegotiationController       = new CloseNegotiationController();
+const listLeadHistoryController        = new ListLeadHistoryController();
+const importLeadsController            = new ImportLeadsController();
 
 leadsRoutes.use(ensureAuthenticated);
 
@@ -37,6 +41,12 @@ leadsRoutes.put(
   updateLeadController.handle,
 );
 leadsRoutes.delete('/:id', deleteLeadController.handle);
+
+// Importação em massa
+leadsRoutes.post('/import', importLeadsController.handle);
+
+// Histórico de atividades
+leadsRoutes.get('/:id/history', listLeadHistoryController.handle);
 
 // Negociações
 leadsRoutes.get('/:id/negotiations', listNegotiationsByLeadController.handle);

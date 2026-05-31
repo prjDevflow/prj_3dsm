@@ -8,6 +8,9 @@ import {
   Loader2,
   Clock,
   CheckSquare,
+  Download,
+  Upload,
+  FileSpreadsheet,
 } from "lucide-react";
 import { useLeadsModel, LeadTab } from "./leads.model";
 
@@ -64,6 +67,15 @@ export const LeadsView = (props: LeadsViewProps) => {
     counts,
     lojas,
     duplicateWarning,
+    exportCSV,
+    importFileRef,
+    importPreview,
+    showImportModal,
+    setShowImportModal,
+    importing,
+    importResult,
+    handleImportFile,
+    handleImportSubmit,
   } = props;
 
   if (error) {
@@ -94,6 +106,17 @@ export const LeadsView = (props: LeadsViewProps) => {
             <p className="text-sm text-slate-500 mt-1">Gerencie e acompanhe todos os seus leads</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            {(isAdmin || isGerente) && (
+              <>
+                <button onClick={exportCSV} className="btn-secondary flex items-center gap-2 text-sm py-2">
+                  <Download size={15} /> Exportar CSV
+                </button>
+                <label className="btn-secondary flex items-center gap-2 text-sm py-2 cursor-pointer">
+                  <Upload size={15} /> Importar CSV
+                  <input ref={importFileRef} type="file" accept=".csv" className="hidden" onChange={handleImportFile} />
+                </label>
+              </>
+            )}
             <select
               value={store}
               onChange={(e) => onStoreChange(e.target.value)}
@@ -329,6 +352,101 @@ export const LeadsView = (props: LeadsViewProps) => {
                   : <CheckCircle size={15} />}
                 {editingLead ? "Salvar" : "Criar Lead"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal importação CSV ── */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <FileSpreadsheet size={18} className="text-[var(--color-primary)]" />
+                <h2 className="text-base font-semibold text-slate-800">Importar Leads via CSV</h2>
+              </div>
+              <button onClick={() => setShowImportModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1">
+              {!importResult ? (
+                <>
+                  <p className="text-sm text-slate-500 mb-1">
+                    <strong>{importPreview.length}</strong> linha{importPreview.length !== 1 ? 's' : ''} detectada{importPreview.length !== 1 ? 's' : ''}.
+                    Colunas esperadas: <code className="text-xs bg-slate-100 px-1 rounded">nome, email, telefone, loja, origem, atendente</code>
+                  </p>
+                  <p className="text-xs text-slate-400 mb-4">Lojas e origens devem corresponder exatamente aos cadastrados. Atendente é opcional.</p>
+
+                  <div className="overflow-x-auto rounded-xl border border-slate-200">
+                    <table className="w-full text-xs">
+                      <thead className="bg-slate-50">
+                        <tr>
+                          {['name','email','phone','store','origin','assignedTo'].map((h) => (
+                            <th key={h} className="px-3 py-2 text-left font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {importPreview.slice(0, 10).map((row, i) => (
+                          <tr key={i} className="hover:bg-slate-50">
+                            {['name','email','phone','store','origin','assignedTo'].map((f) => (
+                              <td key={f} className={`px-3 py-1.5 text-slate-700 max-w-[120px] truncate ${!row[f] && f !== 'assignedTo' ? 'text-rose-400 italic' : ''}`}>
+                                {row[f] || (f === 'assignedTo' ? '—' : 'vazio')}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {importPreview.length > 10 && (
+                      <p className="text-xs text-slate-400 text-center py-2">
+                        + {importPreview.length - 10} linha{importPreview.length - 10 > 1 ? 's' : ''} não exibida{importPreview.length - 10 > 1 ? 's' : ''}
+                      </p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle size={20} className="text-emerald-500" />
+                    <p className="text-sm font-semibold text-slate-800">
+                      {importResult.created} lead{importResult.created !== 1 ? 's' : ''} criado{importResult.created !== 1 ? 's' : ''} com sucesso.
+                    </p>
+                  </div>
+                  {importResult.errors.length > 0 && (
+                    <div>
+                      <p className="text-sm font-semibold text-rose-600 mb-2">{importResult.errors.length} erro{importResult.errors.length > 1 ? 's' : ''}:</p>
+                      <div className="space-y-1 max-h-48 overflow-y-auto">
+                        {importResult.errors.map((e, i) => (
+                          <div key={i} className="flex items-start gap-2 text-xs text-rose-600 bg-rose-50 px-3 py-1.5 rounded-lg">
+                            <AlertCircle size={12} className="mt-0.5 flex-shrink-0" />
+                            <span>Linha {e.row}: {e.reason}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+              <button onClick={() => setShowImportModal(false)} className="btn-secondary">
+                {importResult ? 'Fechar' : 'Cancelar'}
+              </button>
+              {!importResult && (
+                <button
+                  onClick={handleImportSubmit}
+                  disabled={importing || importPreview.length === 0}
+                  className="btn-primary flex items-center gap-2 disabled:opacity-50"
+                >
+                  {importing ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
+                  {importing ? 'Importando...' : `Importar ${importPreview.length} leads`}
+                </button>
+              )}
             </div>
           </div>
         </div>

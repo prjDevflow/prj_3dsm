@@ -14,6 +14,7 @@ import {
   Pencil,
   TrendingUp,
   X,
+  History,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useLeadDetailsModel } from "./leadDetails.model";
@@ -79,6 +80,8 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
     closeFinalStatus,
     setCloseFinalStatus,
     atendentes,
+    history,
+    historyLoading,
   } = props;
 
   if (leadLoading) {
@@ -548,6 +551,46 @@ export const LeadDetailsView = (props: LeadDetailsProps) => {
           </div>
         </div>
       </main>
+
+      {/* ── Histórico de atividades ── */}
+      <div className="card overflow-hidden mt-6">
+        <div className="px-6 py-5 border-b border-slate-200 flex items-center gap-2">
+          <History size={16} className="text-slate-400" />
+          <h3 className="text-sm font-semibold text-slate-800">Histórico de Atividades</h3>
+        </div>
+        <div className="p-6">
+          {historyLoading ? (
+            <div className="flex justify-center py-6">
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--color-primary)]" />
+            </div>
+          ) : history.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-6">Nenhuma atividade registrada ainda.</p>
+          ) : (
+            <div className="relative">
+              <div className="absolute left-3 top-3 bottom-3 w-px bg-slate-100" />
+              <div className="space-y-4">
+                {history.map((item) => (
+                  <div key={item.id} className="relative flex items-start gap-4">
+                    <div className="relative z-10 w-6 h-6 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className="w-2 h-2 rounded-full bg-slate-400" />
+                    </div>
+                    <div className="flex-1 min-w-0 pb-1">
+                      <p className="text-sm text-slate-700">{item.description}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-slate-400">{item.userName}</span>
+                        <span className="text-xs text-slate-300">·</span>
+                        <span className="text-xs text-slate-400">
+                          {format(new Date(item.createdAt), "dd/MM/yyyy 'às' HH:mm")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* ── Modal finalizar negociação ── */}
       {showCloseModal && (

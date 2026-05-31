@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLead, useNegotiations, useUpdateLead } from "../../hooks/useLeads";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import api from "../../services/instanceApi";
 import { Lead, NegotiationImportance, NegotiationStage } from "../../types";
 import { ILeadsService } from "../../services/ILeadsService";
 import {
@@ -88,6 +89,15 @@ export const useLeadDetailsModel = ({
 
   const { data: lead, isLoading: leadLoading, error: leadError } = useLead(id!);
   const { data: negotiations, isLoading: negLoading } = useNegotiations(id!);
+
+  const { data: history = [], isLoading: historyLoading } = useQuery({
+    queryKey: ['lead-history', id],
+    queryFn: async () => {
+      const { data } = await api.get(`/leads/${id}/history`);
+      return data as { id: string; description: string; userName: string; createdAt: string }[];
+    },
+    enabled: !!id,
+  });
   const { data: usersData } = useUsers({ limit: 100 });
   const atendentes = (usersData?.data ?? []).filter((u) => u.role === "atendente");
   const { data: lojasData } = useLojas();
@@ -306,5 +316,7 @@ export const useLeadDetailsModel = ({
     closeFinalStatus,
     setCloseFinalStatus,
     atendentes,
+    history,
+    historyLoading,
   };
 };
