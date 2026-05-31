@@ -88,7 +88,7 @@ export const Header: React.FC<HeaderProps> = ({ onDateRangeChange }) => {
     switch (preset) {
       case 'week':  start.setDate(end.getDate() - 7); break;
       case 'month': start.setMonth(end.getMonth() - 1); break;
-      case 'year':  start.setDate(end.getDate() - 365); break;
+      case 'year':  start.setFullYear(end.getFullYear() - 1); break;
     }
     const newStart = start.toISOString().split('T')[0];
     const newEnd = end.toISOString().split('T')[0];
