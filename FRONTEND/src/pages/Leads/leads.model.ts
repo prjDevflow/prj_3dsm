@@ -110,13 +110,7 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
   const filteredLeads = useMemo(() => {
     const q = search.toLowerCase().trim();
     return allLeads.filter((l) => {
-      if (q) {
-        const matchName     = l.name.toLowerCase().includes(q);
-        const matchEmail    = l.email.toLowerCase().includes(q);
-        const matchPhone    = l.phone ? l.phone.replace(/\D/g, '').includes(q.replace(/\D/g, '')) : false;
-        const matchAgent    = (l.assignedTo ?? '').toLowerCase().includes(q);
-        if (!matchName && !matchEmail && !matchPhone && !matchAgent) return false;
-      }
+      if (q && !l.name.toLowerCase().includes(q)) return false;
       if (importance && l.importance !== importance) return false;
       return true;
     });

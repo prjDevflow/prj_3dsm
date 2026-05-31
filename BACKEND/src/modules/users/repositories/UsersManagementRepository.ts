@@ -7,10 +7,7 @@ export class UsersManagementRepository {
     const where: any = {};
 
     if (filters?.search) {
-      where.OR = [
-        { nome_usuario:  { contains: filters.search, mode: 'insensitive' } },
-        { email_usuario: { contains: filters.search, mode: 'insensitive' } },
-      ];
+      where.nome_usuario = { contains: filters.search, mode: 'insensitive' };
     }
 
     if (filters?.role) {

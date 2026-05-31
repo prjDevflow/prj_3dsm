@@ -53,11 +53,7 @@ export const useTeamsModel = ({ teamsService }: TeamsServiceModelProps) => {
 
   const visibleTeams = isGerente
     ? teams.filter((t) => t.managerId === user?.id)
-    : teams.filter(
-        (t) =>
-          t.name.toLowerCase().includes(search.toLowerCase()) ||
-          (t.description ?? "").toLowerCase().includes(search.toLowerCase()),
-      );
+    : teams.filter((t) => t.name.toLowerCase().includes(search.toLowerCase()));
 
   const openCreate = () => {
     setFormData({ name: "", description: "", managerId: "", members: [] });

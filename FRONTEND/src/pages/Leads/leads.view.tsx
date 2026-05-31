@@ -81,7 +81,7 @@ export const LeadsView = (props: LeadsViewProps) => {
   if (error) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <Header onDateRangeChange={onDateRangeChange} />
+        <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-rose-50 p-8 rounded-lg text-center">
             <AlertCircle className="h-12 w-12 text-rose-500 mx-auto mb-4" />
@@ -96,7 +96,7 @@ export const LeadsView = (props: LeadsViewProps) => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header onDateRangeChange={onDateRangeChange} />
+      <Header />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* ── Cabeçalho ── */}

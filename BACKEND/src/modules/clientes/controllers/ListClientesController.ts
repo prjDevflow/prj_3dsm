@@ -15,11 +15,7 @@ export class ListClientesController {
     const where: any = {};
 
     if (search) {
-      where.OR = [
-        { nome_cliente:     { contains: search, mode: 'insensitive' as const } },
-        { email_cliente:    { contains: search, mode: 'insensitive' as const } },
-        { telefone_cliente: { contains: search, mode: 'insensitive' as const } },
-      ];
+      where.nome_cliente = { contains: search, mode: 'insensitive' as const };
     }
 
     if (hasLead === 'true') {
