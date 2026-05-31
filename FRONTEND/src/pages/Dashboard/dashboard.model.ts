@@ -40,11 +40,11 @@ export const useDashboardModel = ({ dashboardService }: DashModelProps) => {
         dashboardService.getMetrics({
           start: prevStart.toISOString().split("T")[0],
           end:   prevEnd.toISOString().split("T")[0],
-        }),
+        }).catch(() => null), // período anterior pode ser rejeitado por limite de 1 ano
       ]);
 
       setMetrics(mapToViewModel(data));
-      setPrevMetrics(mapToViewModel(prevData));
+      setPrevMetrics(prevData ? mapToViewModel(prevData) : null);
     } catch (err) {
       console.error("Error fetching dashboard metrics:", err);
       setError("Failed to load dashboard metrics.");
