@@ -21,6 +21,7 @@ import { equipesRoutes } from '../../../../modules/equipes/infra/http/routes/equ
 import { usersRoutes } from '../../../../modules/users/infra/http/routes/users.routes';
 import { CreateUserController } from '../../../../modules/users/controllers/CreateUserController';
 import { PapeisController } from '../../../../modules/papeis/PapeisController';
+import { PermissoesController } from '../../../../modules/papeis/PermissoesController';
 
 const router = Router();
 
@@ -38,6 +39,7 @@ const deleteOrigemController  = new DeleteOrigemController();
 const dashboardController     = new DashboardController();
 const createUserController    = new CreateUserController();
 const papeisController        = new PapeisController();
+const permissoesController    = new PermissoesController();
 
 // Auth
 router.use('/sessions', authRoutes);
@@ -80,6 +82,12 @@ router.delete('/lojas/:id',   ensureAuthenticated, ensureRole([UserRole.ADMIN]),
 router.get('/origens',        ensureAuthenticated, listOrigensController.handle);
 router.post('/origens',       ensureAuthenticated, ensureRole([UserRole.ADMIN]), createOrigemController.handle);
 router.delete('/origens/:id', ensureAuthenticated, ensureRole([UserRole.ADMIN]), deleteOrigemController.handle);
+
+// Permissoes do sistema
+router.get('/permissoes',          ensureAuthenticated, (req, res) => permissoesController.list(req, res));
+router.post('/permissoes',         ensureAuthenticated, ensureRole([UserRole.ADMIN]), (req, res) => permissoesController.create(req, res));
+router.put('/permissoes/:id',      ensureAuthenticated, ensureRole([UserRole.ADMIN]), (req, res) => permissoesController.update(req, res));
+router.delete('/permissoes/:id',   ensureAuthenticated, ensureRole([UserRole.ADMIN]), (req, res) => permissoesController.remove(req, res));
 
 // Papeis & capabilities
 router.get('/papeis',                  ensureAuthenticated, (req, res) => papeisController.list(req, res));

@@ -147,6 +147,17 @@ model HistoricoNegociacao {
   @@map("historicos_negociacoes")
 }
 
+model PermissaoSistema {
+  id_permissao String  @id @default(uuid()) @db.Uuid
+  chave        String  @unique @db.VarChar(100)
+  nome         String  @db.VarChar(200)
+  descricao    String? @db.Text
+  categoria    String  @db.VarChar(50)
+  ativa        Boolean @default(true)
+
+  @@map("permissoes_sistema")
+}
+
 model Lembrete {
   id_lembrete   String   @id @default(uuid()) @db.Uuid
   id_lead       String   @db.Uuid
