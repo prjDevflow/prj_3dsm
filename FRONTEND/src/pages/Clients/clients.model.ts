@@ -2,9 +2,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../context/AuthContext";
 import { IClient, IClientsService, ICreateClientRequest, IUpdateClientRequest } from "../../services/IClientsService";
-import { useLeads } from "../../hooks/useLeads";
-import { useUsers } from "../../hooks/useUsers";
 import { useToast } from "../../components/Toast";
+import api from "../../services/instanceApi";
 
 type ClientsModelProps = {
   clientsService: IClientsService;
@@ -15,7 +14,6 @@ type ClientFormData = {
   email: string;
   phone: string;
   cpf?: string;
-  leadId?: string;
   consultorId?: string;
 };
 
@@ -24,7 +22,6 @@ const emptyForm = (): ClientFormData => ({
   email: "",
   phone: "",
   cpf: "",
-  leadId: "",
   consultorId: "",
 });
 
@@ -57,11 +54,14 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
     queryFn: () => clientsService.getClients({ page, limit, search, assignedTo, hasLead: hasLeadParam }),
   });
 
-  const { data: leadsData } = useLeads({ limit: 500 });
-  const leads = leadsData?.data ?? [];
-
-  const { data: usersData } = useUsers({ limit: 100 });
-  const atendentes = (usersData?.data ?? []).filter((u) => u.role === "atendente" || u.role === "gerente");
+  const { data: consultores = [] } = useQuery({
+    queryKey: ["consultores"],
+    queryFn: async () => {
+      const { data } = await api.get<{ id: string; name: string; role: string }[]>("/consultores");
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
   const createClientMutation = useMutation<IClient, Error, ICreateClientRequest>({
     mutationFn: (newClient) => clientsService.createClient(newClient),
@@ -103,7 +103,6 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
       email:       client.email,
       phone:       client.phone,
       cpf:         client.cpf,
-      leadId:      client.leadId,
       consultorId: client.consultorId ?? "",
     });
     setEditingClient(client);
@@ -218,6 +217,6 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
     total,
     deleteClientMutation,
     editingClient,
-    atendentes,
+    consultores,
   };
 };

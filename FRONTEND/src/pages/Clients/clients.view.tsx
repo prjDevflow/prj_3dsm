@@ -51,7 +51,7 @@ export const ClientsView = (props: ClientsViewProps) => {
     deleteClientMutation,
     closeModal,
     editingClient,
-    atendentes,
+    consultores,
   } = props;
 
   return (
@@ -422,24 +422,6 @@ export const ClientsView = (props: ClientsViewProps) => {
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                  Lead Vinculado
-                </label>
-                <select
-                  value={formData.leadId ?? ""}
-                  onChange={(e) => handleFormChange("leadId", e.target.value)}
-                  className="input w-full"
-                >
-                  <option value="">Sem lead vinculado</option>
-                  {leads.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.name} — {l.status} — {l.store ?? ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
                   Consultor Responsável
                 </label>
                 <select
@@ -448,9 +430,9 @@ export const ClientsView = (props: ClientsViewProps) => {
                   className="input w-full"
                 >
                   <option value="">Sem consultor</option>
-                  {atendentes.map((u) => (
+                  {consultores.map((u) => (
                     <option key={u.id} value={u.id}>
-                      {u.name} ({u.role === "gerente" ? "Gerente" : "Atendente"})
+                      {u.name} — {u.role.charAt(0).toUpperCase() + u.role.slice(1).toLowerCase()}
                     </option>
                   ))}
                 </select>
