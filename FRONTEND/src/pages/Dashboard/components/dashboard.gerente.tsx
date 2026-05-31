@@ -46,7 +46,9 @@ const ROLE_LABELS: Record<string, string> = {
 type DashboardProps = ReturnType<typeof useDashboardModel>;
 
 export const DashboardGerente = (props: DashboardProps) => {
+  const [showAllConv, setShowAllConv] = useState(false);
   const [showAllPerf, setShowAllPerf] = useState(false);
+  const [showAllLoss, setShowAllLoss] = useState(false);
   const {
     metrics,
     safeArray,
@@ -238,7 +240,7 @@ export const DashboardGerente = (props: DashboardProps) => {
             Taxa de Conversão por Atendente
           </h3>
           <div className="space-y-4">
-            {performance.map((agent) => (
+            {performance.slice(0, showAllConv ? undefined : 5).map((agent) => (
               <div
                 key={agent.agent}
                 className={`group p-2 rounded-lg transition-colors ${selectedAgent === agent.agent ? "bg-slate-100" : "hover:bg-slate-50"}`}
@@ -277,6 +279,18 @@ export const DashboardGerente = (props: DashboardProps) => {
               </div>
             ))}
           </div>
+          {performance.length > 5 && (
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowAllConv((v) => !v)}
+                className="flex items-center gap-1 text-xs font-medium text-[var(--color-primary)] hover:underline"
+              >
+                {showAllConv
+                  ? <><ChevronUp size={13} /> Ver menos</>
+                  : <><ChevronDown size={13} /> Ver todos ({performance.length})</>}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="card p-5">
@@ -285,9 +299,9 @@ export const DashboardGerente = (props: DashboardProps) => {
             Motivos de Finalização
           </h3>
           <div className="space-y-4">
-            {lossReasons.map((reason) => (
+            {lossReasons.slice(0, showAllLoss ? undefined : 5).map((reason) => (
               <div key={reason.reason} className="flex items-center">
-                <span className="text-sm text-slate-600 w-24">
+                <span className="text-sm text-slate-600 w-24 truncate" title={reason.reason}>
                   {reason.reason}
                 </span>
                 <div className="flex-1 mx-4">
@@ -304,6 +318,18 @@ export const DashboardGerente = (props: DashboardProps) => {
               </div>
             ))}
           </div>
+          {lossReasons.length > 5 && (
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowAllLoss((v) => !v)}
+                className="flex items-center gap-1 text-xs font-medium text-[var(--color-primary)] hover:underline"
+              >
+                {showAllLoss
+                  ? <><ChevronUp size={13} /> Ver menos</>
+                  : <><ChevronDown size={13} /> Ver todos ({lossReasons.length})</>}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── Carga por Atendente ── */}

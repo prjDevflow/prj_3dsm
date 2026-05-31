@@ -49,7 +49,9 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 export const DashboardAdmin = (props: DashboardProps) => {
+  const [showAllConv, setShowAllConv] = useState(false);
   const [showAllPerf, setShowAllPerf] = useState(false);
+  const [showAllLoss, setShowAllLoss] = useState(false);
   const {
     metrics,
     safeArray,
@@ -291,7 +293,7 @@ export const DashboardAdmin = (props: DashboardProps) => {
               const rateB = b.leads > 0 ? b.conversions / b.leads : 0;
               return rateB - rateA;
             });
-            const visible = showAllPerf ? sorted : sorted.slice(0, 5);
+            const visible = showAllConv ? sorted : sorted.slice(0, 5);
             return (
               <>
                 <div className="space-y-3">
@@ -327,14 +329,16 @@ export const DashboardAdmin = (props: DashboardProps) => {
                   })}
                 </div>
                 {sorted.length > 5 && (
-                  <button
-                    onClick={() => setShowAllPerf((v) => !v)}
-                    className="mt-4 flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
-                  >
-                    {showAllPerf
-                      ? <><ChevronUp size={13} /> Ver menos</>
-                      : <><ChevronDown size={13} /> Ver todos ({sorted.length - 5} mais)</>}
-                  </button>
+                  <div className="flex justify-end mt-4">
+                    <button
+                      onClick={() => setShowAllConv((v) => !v)}
+                      className="flex items-center gap-1 text-xs font-medium text-[var(--color-primary)] hover:underline"
+                    >
+                      {showAllConv
+                        ? <><ChevronUp size={13} /> Ver menos</>
+                        : <><ChevronDown size={13} /> Ver todos ({sorted.length})</>}
+                    </button>
+                  </div>
                 )}
               </>
             );
@@ -377,9 +381,9 @@ export const DashboardAdmin = (props: DashboardProps) => {
             Motivos de Perda
           </h3>
           <div className="space-y-4">
-            {lossReasons.map((reason) => (
+            {lossReasons.slice(0, showAllLoss ? undefined : 5).map((reason) => (
               <div key={reason.reason} className="flex items-center">
-                <span className="text-sm text-slate-600 w-24">
+                <span className="text-sm text-slate-600 w-24 truncate" title={reason.reason}>
                   {reason.reason}
                 </span>
                 <div className="flex-1 mx-4">
@@ -396,6 +400,18 @@ export const DashboardAdmin = (props: DashboardProps) => {
               </div>
             ))}
           </div>
+          {lossReasons.length > 5 && (
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowAllLoss((v) => !v)}
+                className="flex items-center gap-1 text-xs font-medium text-[var(--color-primary)] hover:underline"
+              >
+                {showAllLoss
+                  ? <><ChevronUp size={13} /> Ver menos</>
+                  : <><ChevronDown size={13} /> Ver todos ({lossReasons.length})</>}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── Carga por Atendente ── */}
