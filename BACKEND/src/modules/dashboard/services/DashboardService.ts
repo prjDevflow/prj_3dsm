@@ -143,17 +143,26 @@ export class DashboardService {
     });
     const performance = Object.entries(perfMap).map(([agent, v]) => ({ agent, ...v }));
 
-    // evolution (leads e conversões agrupados por dia)
+    // evolution — leads agrupados por data de criação, conversões por data de finalização
     const evoMap: Record<string, { leads: number; conversions: number }> = {};
+
     leads.forEach(l => {
       const day = l.data_criacao_lead.toISOString().slice(0, 10);
       if (!evoMap[day]) evoMap[day] = { leads: 0, conversions: 0 };
       evoMap[day].leads++;
-      const ganhou = l.negociacoes.some(
+    });
+
+    leads.forEach(l => {
+      const negGanha = l.negociacoes.find(
         n => n.status.nome_status.toUpperCase() === 'GANHA'
       );
-      if (ganhou) evoMap[day].conversions++;
+      if (!negGanha) return;
+      const dataConversao = (negGanha as any).data_finalizacao_negociacao ?? negGanha.data_criacao_negociacao;
+      const day = dataConversao.toISOString().slice(0, 10);
+      if (!evoMap[day]) evoMap[day] = { leads: 0, conversions: 0 };
+      evoMap[day].conversions++;
     });
+
     const evolution = Object.entries(evoMap)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, v]) => ({ date, ...v }));

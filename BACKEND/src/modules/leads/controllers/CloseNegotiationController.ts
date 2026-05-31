@@ -39,6 +39,7 @@ export class CloseNegotiationController {
       data: {
         estado_abertura_negociacao:    false,
         motivo_finalizacao_negociacao: reason ?? null,
+        data_finalizacao_negociacao:   new Date(),
         ...(newStatusId ? { id_status: newStatusId } : {}),
       },
     });
