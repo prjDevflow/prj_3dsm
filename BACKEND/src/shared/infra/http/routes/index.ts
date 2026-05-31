@@ -20,6 +20,7 @@ import { authRoutes } from '../../../../modules/auth/infra/http/routes/auth.rout
 import { equipesRoutes } from '../../../../modules/equipes/infra/http/routes/equipes.routes';
 import { usersRoutes } from '../../../../modules/users/infra/http/routes/users.routes';
 import { CreateUserController } from '../../../../modules/users/controllers/CreateUserController';
+import { PapeisController } from '../../../../modules/papeis/PapeisController';
 
 const router = Router();
 
@@ -36,6 +37,7 @@ const listOrigensController   = new ListOrigensController();
 const deleteOrigemController  = new DeleteOrigemController();
 const dashboardController     = new DashboardController();
 const createUserController    = new CreateUserController();
+const papeisController        = new PapeisController();
 
 // Auth
 router.use('/sessions', authRoutes);
@@ -78,5 +80,13 @@ router.delete('/lojas/:id',   ensureAuthenticated, ensureRole([UserRole.ADMIN]),
 router.get('/origens',        ensureAuthenticated, listOrigensController.handle);
 router.post('/origens',       ensureAuthenticated, ensureRole([UserRole.ADMIN]), createOrigemController.handle);
 router.delete('/origens/:id', ensureAuthenticated, ensureRole([UserRole.ADMIN]), deleteOrigemController.handle);
+
+// Papeis & capabilities
+router.get('/papeis',                  ensureAuthenticated, (req, res) => papeisController.list(req, res));
+router.post('/papeis',                 ensureAuthenticated, ensureRole([UserRole.ADMIN]), (req, res) => papeisController.create(req, res));
+router.put('/papeis/:id',              ensureAuthenticated, ensureRole([UserRole.ADMIN]), (req, res) => papeisController.update(req, res));
+router.delete('/papeis/:id',           ensureAuthenticated, ensureRole([UserRole.ADMIN]), (req, res) => papeisController.remove(req, res));
+router.get('/papeis/user/:id',         ensureAuthenticated, (req, res) => papeisController.userCapabilities(req, res));
+router.put('/papeis/user/:id/extras',  ensureAuthenticated, ensureRole([UserRole.ADMIN]), (req, res) => papeisController.updateUserExtras(req, res));
 
 export { router };

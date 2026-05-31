@@ -1,5 +1,10 @@
 export type UserRole = 'atendente' | 'gerente' | 'gerente_geral' | 'admin';
 
+export interface Capabilities {
+  pages:   Record<string, boolean>;
+  actions: Record<string, boolean>;
+}
+
 export interface User {
   id: string;
   nome?: string;
@@ -8,6 +13,7 @@ export interface User {
   role: UserRole;
   teamId?: string;
   active?: boolean;
+  capabilities?: Capabilities;
 }
 
 export interface Team {

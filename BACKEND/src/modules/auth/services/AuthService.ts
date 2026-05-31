@@ -1,8 +1,11 @@
 import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
 import { UsersRepository } from '../repositories/UsersRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
+
+const prisma = new PrismaClient();
 
 interface IAuthRequest {
   email: string;
@@ -56,16 +59,29 @@ export class AuthService {
       detalhes: `Login realizado por ${user.nome} (${user.email})`,
     });
 
-    // 5. Retorna os dados do utilizador e o token (omitindo a palavra-passe por segurança)
+    // 5. Carrega capabilities do papel + extras do usuário
+    const papelData = await prisma.usuario.findUnique({
+      where: { id_usuario: user.id },
+      select: { papel: { select: { capabilities: true } }, permissoes_extras: true },
+    });
+    const roleCaps = (papelData?.papel?.capabilities as any) ?? {};
+    const extras   = (papelData?.permissoes_extras as any) ?? {};
+    const capabilities = {
+      pages:   { ...roleCaps.pages,   ...(extras.pages   ?? {}) },
+      actions: { ...roleCaps.actions, ...(extras.actions ?? {}) },
+    };
+
+    // 6. Retorna os dados do utilizador e o token
     return {
       user: {
-        id: user.id,
-        name: user.nome,      // inglês para o frontend
-        nome: user.nome,      // português mantido por compatibilidade
-        email: user.email,
-        role: user.role,
-        teamId: user.equipeId, // inglês para o frontend
-        equipeId: user.equipeId,
+        id:           user.id,
+        name:         user.nome,
+        nome:         user.nome,
+        email:        user.email,
+        role:         user.role,
+        teamId:       user.equipeId,
+        equipeId:     user.equipeId,
+        capabilities,
       },
       token
     };

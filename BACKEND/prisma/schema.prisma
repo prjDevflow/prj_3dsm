@@ -8,9 +8,13 @@ datasource db {
 }
 
 model Papel {
-  id_papel   String    @id @default(uuid()) @db.Uuid
-  nome_papel String    @unique @db.VarChar(50)
-  usuarios   Usuario[]
+  id_papel     String    @id @default(uuid()) @db.Uuid
+  nome_papel   String    @unique @db.VarChar(50)
+  descricao    String?   @db.VarChar(200)
+  cor          String?   @db.VarChar(20)
+  editavel     Boolean   @default(true)
+  capabilities Json      @default("{}")
+  usuarios     Usuario[]
 
   @@map("papeis")
 }
@@ -45,8 +49,9 @@ model Usuario {
   equipe               Equipe?                @relation(fields: [id_equipe], references: [id_equipe])
   leads                Lead[]
   historicos           HistoricoNegociacao[]
-  logs                 LogOperacao[]          // Logs gerados (RF07)
+  logs                 LogOperacao[]
   lembretes            Lembrete[]
+  permissoes_extras    Json                   @default("{}")
 
   @@map("usuarios")
 }

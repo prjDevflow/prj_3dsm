@@ -17,6 +17,7 @@ import { loadSettings, applySettings } from './services/settingsService';
 import { OnboardingModal } from './components/OnboardingModal';
 import { ToastProvider } from './components/Toast';
 import { AppShell } from './components/AppShell';
+import { CapabilitiesProvider } from './context/CapabilitiesContext';
 
 function App() {
   useEffect(() => {
@@ -27,6 +28,7 @@ function App() {
     <BrowserRouter>
       <ToastProvider>
       <AuthProvider>
+        <CapabilitiesProvider>
         <OnboardingModal />
         <AppShell>
           <Routes>
@@ -114,6 +116,7 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </AppShell>
+        </CapabilitiesProvider>
       </AuthProvider>
       </ToastProvider>
     </BrowserRouter>
