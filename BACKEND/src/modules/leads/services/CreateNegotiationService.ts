@@ -1,7 +1,10 @@
+import { PrismaClient } from '@prisma/client';
 import { NegotiationsRepository } from '../repositories/NegotiationsRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
 import { NegotiationStatus } from '../../../domain/models/Negotiation';
+
+const prisma = new PrismaClient();
 
 interface ICreateNegotiationRequest {
   leadId: string;
@@ -51,11 +54,19 @@ export class CreateNegotiationService {
     });
 
     // 3. Regista a operação na tabela de auditoria (RF07)
+    const leadInfo = await prisma.lead.findUnique({
+      where: { id_lead: data.leadId },
+      include: { cliente: { select: { nome_cliente: true } } },
+    });
+
+    const importanciaLabel: Record<string, string> = { QUENTE: 'quente', MORNO: 'morno', FRIO: 'frio' };
+
     await this.createLogService.execute({
       acao: LogAction.CREATE,
       entidade: 'NEGOCIACAO',
       entidadeId: negotiation.id,
-      usuarioResponsavelId: data.usuarioLogadoId
+      usuarioResponsavelId: data.usuarioLogadoId,
+      detalhes: `Nova negociação para lead de '${leadInfo?.cliente?.nome_cliente ?? '—'}' — estágio: ${negotiation.estagio}, importância: ${importanciaLabel[data.importancia] ?? data.importancia}`,
     });
 
     return negotiation;

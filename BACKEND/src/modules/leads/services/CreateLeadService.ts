@@ -1,6 +1,9 @@
+import { PrismaClient } from '@prisma/client';
 import { LeadsRepository } from '../repositories/LeadsRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
+
+const prisma = new PrismaClient();
 
 interface ICreateLeadRequest {
   clienteId: string;
@@ -29,11 +32,18 @@ export class CreateLeadService {
 
     // 2. Regista a operação na tabela de auditoria (RF07)
     // Utilizamos lead.id_lead pois é o nome exato da PK no schema.prisma
+    const [cliente, atendente, loja] = await Promise.all([
+      prisma.cliente.findUnique({ where: { id_cliente: clienteId }, select: { nome_cliente: true } }),
+      prisma.usuario.findUnique({ where: { id_usuario: usuarioLogadoId }, select: { nome_usuario: true } }),
+      prisma.loja.findUnique({ where: { id_loja: lojaId }, select: { nome_loja: true } }),
+    ]);
+
     await this.createLogService.execute({
       acao: LogAction.CREATE,
       entidade: 'LEAD',
       entidadeId: lead.id_lead,
-      usuarioResponsavelId: usuarioLogadoId
+      usuarioResponsavelId: usuarioLogadoId,
+      detalhes: `Lead de '${cliente?.nome_cliente ?? 'cliente'}' criado — loja: ${loja?.nome_loja ?? '—'}, atendente: ${atendente?.nome_usuario ?? '—'}`,
     });
 
     return lead;

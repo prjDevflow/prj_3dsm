@@ -52,7 +52,8 @@ export class AuthService {
       acao: LogAction.LOGIN,
       entidade: 'USUARIO',
       entidadeId: user.id,
-      usuarioResponsavelId: user.id
+      usuarioResponsavelId: user.id,
+      detalhes: `Login realizado por ${user.nome} (${user.email})`,
     });
 
     // 5. Retorna os dados do utilizador e o token (omitindo a palavra-passe por segurança)

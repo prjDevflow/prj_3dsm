@@ -61,7 +61,8 @@ export class CreateUserService {
       acao: LogAction.CREATE,
       entidade: 'USUARIO',
       entidadeId: usuarioCriado.id_usuario,
-      usuarioResponsavelId: usuarioResponsavelId
+      usuarioResponsavelId: usuarioResponsavelId,
+      detalhes: `Usuário '${nome}' (${email}) criado com perfil ${role}`,
     });
 
     // 6. Retorna os dados do utilizador criado (mascateando a palavra-passe por segurança)

@@ -143,6 +143,7 @@ model LogOperacao {
   acao_log              String   @db.VarChar(50)
   tabela_afetada_log    String   @db.VarChar(50)
   id_registro_afetado   String?  @db.Uuid
+  detalhes_log          String?  @db.Text
   data_hora_log         DateTime @default(now()) @db.Timestamp()
 
   usuario               Usuario  @relation(fields: [id_usuario], references: [id_usuario])

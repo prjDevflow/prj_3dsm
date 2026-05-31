@@ -1,6 +1,9 @@
+import { PrismaClient } from '@prisma/client';
 import { LeadsRepository } from '../repositories/LeadsRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
+
+const prisma = new PrismaClient();
 
 interface IUpdateLeadRequest {
   leadId: string;
@@ -57,11 +60,22 @@ export class UpdateLeadService {
     });
 
     // Auditoria (RF07)
+    const clienteInfo = await prisma.lead.findUnique({
+      where: { id_lead: data.leadId },
+      include: { cliente: { select: { nome_cliente: true } }, loja: { select: { nome_loja: true } } },
+    });
+
+    const alteracoes: string[] = [];
+    if (data.lojaId) alteracoes.push(`loja: ${clienteInfo?.loja?.nome_loja ?? '—'}`);
+    if (data.atendenteId) alteracoes.push('responsável reatribuído');
+    if (data.origemId) alteracoes.push('origem');
+
     await this.createLogService.execute({
       acao: LogAction.UPDATE,
       entidade: 'LEAD',
       entidadeId: leadAtualizado.id_lead,
-      usuarioResponsavelId: data.usuarioLogadoId
+      usuarioResponsavelId: data.usuarioLogadoId,
+      detalhes: `Lead de '${clienteInfo?.cliente?.nome_cliente ?? '—'}' atualizado — ${alteracoes.join(', ') || 'dados gerais'}`,
     });
 
     return leadAtualizado;

@@ -32,7 +32,8 @@ export class CreateEquipeService {
       acao: LogAction.CREATE,
       entidade: 'EQUIPE',
       entidadeId: equipe.id_equipe,
-      usuarioResponsavelId: usuarioLogadoId
+      usuarioResponsavelId: usuarioLogadoId,
+      detalhes: `Equipe '${nome}' criada`,
     });
 
     return equipe;

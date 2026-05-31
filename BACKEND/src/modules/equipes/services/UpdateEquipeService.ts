@@ -33,7 +33,8 @@ export class UpdateEquipeService {
       acao: LogAction.UPDATE,
       entidade: 'EQUIPE',
       entidadeId: equipeAtualizada.id_equipe,
-      usuarioResponsavelId: usuarioLogadoId
+      usuarioResponsavelId: usuarioLogadoId,
+      detalhes: `Equipe renomeada de '${equipe.nome_equipe}' para '${nome}'`,
     });
 
     return equipeAtualizada;

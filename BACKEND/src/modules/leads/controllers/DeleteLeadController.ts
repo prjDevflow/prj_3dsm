@@ -13,7 +13,10 @@ export class DeleteLeadController {
 
     const lead = await prisma.lead.findUnique({
       where: { id_lead: id },
-      include: { usuario: { select: { id_usuario: true, id_equipe: true } } },
+      include: {
+        usuario: { select: { id_usuario: true, id_equipe: true } },
+        cliente: { select: { nome_cliente: true } },
+      },
     });
 
     if (!lead) {
@@ -38,6 +41,7 @@ export class DeleteLeadController {
       entidade: 'LEAD',
       entidadeId: id,
       usuarioResponsavelId: userId,
+      detalhes: `Lead de '${lead.cliente?.nome_cliente ?? '—'}' excluído`,
     });
 
     return res.status(204).send();

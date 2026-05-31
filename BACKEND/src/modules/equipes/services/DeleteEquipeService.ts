@@ -38,7 +38,8 @@ export class DeleteEquipeService {
       acao: LogAction.DELETE,
       entidade: 'EQUIPE',
       entidadeId: id,
-      usuarioResponsavelId: usuarioLogadoId
+      usuarioResponsavelId: usuarioLogadoId,
+      detalhes: `Equipe '${equipe.nome_equipe}' excluída`,
     });
   }
 }

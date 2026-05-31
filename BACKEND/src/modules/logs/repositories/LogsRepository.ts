@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export class LogsRepository {
   // Chamado por debaixo dos panos pelos outros serviços
-  async create(data: { id_usuario: string; acao_log: string; tabela_afetada_log: string; id_registro_afetado?: string | null }) {
+  async create(data: { id_usuario: string; acao_log: string; tabela_afetada_log: string; id_registro_afetado?: string | null; detalhes_log?: string }) {
     return prisma.logOperacao.create({
       data
     });

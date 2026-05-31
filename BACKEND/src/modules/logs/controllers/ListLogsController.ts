@@ -21,7 +21,7 @@ export class ListLogsController {
       action:     log.acao_log?.toLowerCase() ?? 'create',
       entityType: log.tabela_afetada_log?.toLowerCase() ?? '',
       entityId:   log.id_registro_afetado ?? undefined,
-      details:    log.acao_log ?? '',
+      details:    log.detalhes_log ?? log.acao_log ?? '',
       ipAddress:  '',
       userAgent:  '',
       createdAt:  log.data_hora_log?.toISOString() ?? new Date().toISOString(),

@@ -54,12 +54,18 @@ export class AdminUpdateUserService {
       ...(ativo !== undefined ? { ativo_usuario: ativo } : {}),
     });
 
-    // Auditoria (RF07)
+    const campos: string[] = [];
+    if (nome) campos.push('nome');
+    if (papelId) campos.push('perfil');
+    if (equipeId !== undefined) campos.push('equipe');
+    if (ativo !== undefined) campos.push(ativo ? 'reativado' : 'desativado');
+
     await this.createLogService.execute({
       acao: LogAction.UPDATE,
       entidade: 'USUARIO',
       entidadeId: id,
-      usuarioResponsavelId: usuarioLogadoId
+      usuarioResponsavelId: usuarioLogadoId,
+      detalhes: `Dados de '${user.nome_usuario}' (${user.email_usuario}) atualizados — campos: ${campos.join(', ') || 'sem alterações'}`,
     });
 
     return updatedUser;

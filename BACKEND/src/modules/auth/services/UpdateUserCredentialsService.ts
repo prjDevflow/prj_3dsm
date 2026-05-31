@@ -57,11 +57,16 @@ export class UpdateUserCredentialsService {
     const updatedUser = await this.usersRepository.save(user);
 
     // 5. Rastreabilidade (RF07): Registra a ação no banco
+    const alteracoes: string[] = [];
+    if (email && email !== user.email) alteracoes.push('email');
+    if (senha) alteracoes.push('senha');
+
     await this.createLogService.execute({
       acao: LogAction.UPDATE,
       entidade: 'USUARIO',
       entidadeId: user.id,
-      usuarioResponsavelId: userId // O próprio utilizador fez a alteração
+      usuarioResponsavelId: userId,
+      detalhes: `Credenciais de '${user.nome}' atualizadas — campos: ${alteracoes.join(', ') || 'nenhum campo alterado'}`,
     });
 
     // Retorna os dados atualizados omitindo a senha para segurança

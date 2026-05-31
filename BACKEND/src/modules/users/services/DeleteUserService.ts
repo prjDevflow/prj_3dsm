@@ -39,7 +39,8 @@ export class DeleteUserService {
       acao: LogAction.DELETE,
       entidade: 'USUARIO',
       entidadeId: id,
-      usuarioResponsavelId: usuarioLogadoId
+      usuarioResponsavelId: usuarioLogadoId,
+      detalhes: `Usuário '${user.nome_usuario}' (${user.email_usuario}) excluído`,
     });
   }
 }

@@ -44,7 +44,8 @@ export class BindUserToTeamService {
       acao: LogAction.UPDATE,
       entidade: 'USUARIO',
       entidadeId: atendenteAlvoId,
-      usuarioResponsavelId: gerenteLogadoId
+      usuarioResponsavelId: gerenteLogadoId,
+      detalhes: `Atendente '${atendente.nome}' (${atendente.email}) vinculado à equipe por '${gerente.nome}'`,
     });
 
     return updatedUser;

@@ -5,6 +5,7 @@ interface ICreateLogRequest {
   entidade: string;
   entidadeId?: string | null;
   usuarioResponsavelId: string;
+  detalhes?: string;
 }
 
 export class CreateLogService {
@@ -14,12 +15,13 @@ export class CreateLogService {
     this.logsRepository = new LogsRepository();
   }
 
-  async execute({ acao, entidade, entidadeId, usuarioResponsavelId }: ICreateLogRequest) {
+  async execute({ acao, entidade, entidadeId, usuarioResponsavelId, detalhes }: ICreateLogRequest) {
     await this.logsRepository.create({
       id_usuario: usuarioResponsavelId,
       acao_log: acao,
       tabela_afetada_log: entidade,
-      id_registro_afetado: entidadeId
+      id_registro_afetado: entidadeId,
+      ...(detalhes ? { detalhes_log: detalhes } : {}),
     });
   }
 }

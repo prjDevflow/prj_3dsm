@@ -11,7 +11,10 @@ export class CloseNegotiationController {
     const { reason } = req.body;
     const userId = req.user.id;
 
-    const neg = await prisma.negociacao.findUnique({ where: { id_negociacao: id } });
+    const neg = await prisma.negociacao.findUnique({
+      where: { id_negociacao: id },
+      include: { lead: { include: { cliente: { select: { nome_cliente: true } } } } },
+    });
 
     if (!neg) {
       return res.status(404).json({ error: 'Negociação não encontrada.' });
@@ -40,11 +43,16 @@ export class CloseNegotiationController {
       },
     });
 
+    const nomeCliente = (neg as any)?.lead?.cliente?.nome_cliente ?? '—';
+    const statusLabel = finalStatus ?? 'encerrada';
+    const motivoLabel = reason ? ` — motivo: ${reason}` : '';
+
     await new CreateLogService().execute({
       acao: LogAction.UPDATE,
       entidade: 'NEGOCIACAO',
       entidadeId: id,
       usuarioResponsavelId: userId,
+      detalhes: `Negociação de '${nomeCliente}' encerrada como ${statusLabel}${motivoLabel}`,
     });
 
     return res.json({

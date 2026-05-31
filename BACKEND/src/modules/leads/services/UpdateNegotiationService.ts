@@ -1,6 +1,9 @@
+import { PrismaClient } from '@prisma/client';
 import { NegotiationsRepository } from '../repositories/NegotiationsRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
+
+const prisma = new PrismaClient();
 
 interface IUpdateNegotiationRequest {
   negotiationId: string;
@@ -47,11 +50,21 @@ export class UpdateNegotiationService {
     });
 
     // 3. Auditoria (RF07)
+    const negInfo = await prisma.negociacao.findUnique({
+      where: { id_negociacao: data.negotiationId },
+      include: {
+        lead: { include: { cliente: { select: { nome_cliente: true } } } },
+        status: { select: { nome_status: true } },
+        estagio: { select: { nome_estagio: true } },
+      },
+    });
+
     await this.createLogService.execute({
       acao: LogAction.UPDATE,
       entidade: 'NEGOCIACAO',
       entidadeId: data.negotiationId,
-      usuarioResponsavelId: data.usuarioLogadoId
+      usuarioResponsavelId: data.usuarioLogadoId,
+      detalhes: `Negociação de '${negInfo?.lead?.cliente?.nome_cliente ?? '—'}' atualizada — status: ${negInfo?.status?.nome_status ?? '—'}, estágio: ${negInfo?.estagio?.nome_estagio ?? '—'}`,
     });
 
     return negociacaoAtualizada;
