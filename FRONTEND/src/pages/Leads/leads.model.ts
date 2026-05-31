@@ -262,20 +262,67 @@ export const useLeadsModel = ({ leadsService }: LeadsModelProps) => {
   const exportCSV = () => {
     const statusLabel: Record<string, string> = { novo: 'Novo', contatado: 'Contatado', qualificado: 'Qualificado', ganho: 'Ganho', perdido: 'Perdido' };
     const impLabel: Record<string, string> = { baixa: 'Baixa', media: 'Média', alta: 'Alta' };
-    const headers = ['Nome', 'Email', 'Telefone', 'Status', 'Importância', 'Origem', 'Loja', 'Atendente', 'Criado em'];
-    const rows = allLeads.map((l) => [
-      l.name, l.email, l.phone ?? '', statusLabel[l.status] ?? l.status,
-      impLabel[l.importance] ?? l.importance, l.origin, l.store ?? '',
-      l.assignedTo ?? '', format(new Date(l.createdAt), 'dd/MM/yyyy'),
-    ]);
-    const csv = [headers, ...rows]
-      .map((r) => r.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `leads_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    const statusColor: Record<string, string> = { novo: '#3B82F6', contatado: '#F59E0B', qualificado: '#8B5CF6', ganho: '#10B981', perdido: '#EF4444' };
+    const impColor: Record<string, string>    = { baixa: '#6B7280', media: '#6366F1', alta: '#F97316' };
+
+    const cols = [
+      { key: 'name',       label: 'Nome',        width: 200 },
+      { key: 'email',      label: 'Email',        width: 220 },
+      { key: 'phone',      label: 'Telefone',     width: 130 },
+      { key: 'status',     label: 'Status',       width: 110 },
+      { key: 'importance', label: 'Importância',  width: 110 },
+      { key: 'origin',     label: 'Origem',       width: 130 },
+      { key: 'store',      label: 'Loja',         width: 150 },
+      { key: 'assignedTo', label: 'Atendente',    width: 160 },
+      { key: 'createdAt',  label: 'Criado em',    width: 110 },
+    ];
+
+    const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    const headerRow = cols.map((c) =>
+      `<th style="background:#17364F;color:#fff;font-weight:bold;padding:8px 12px;border:1px solid #0f2438;white-space:nowrap;width:${c.width}px">${esc(c.label)}</th>`
+    ).join('');
+
+    const dataRows = allLeads.map((l, i) => {
+      const bg = i % 2 === 0 ? '#ffffff' : '#F8FAFC';
+      const statusTxt = statusLabel[l.status] ?? l.status;
+      const impTxt    = impLabel[l.importance] ?? l.importance;
+      const sColor    = statusColor[l.status]    ?? '#6B7280';
+      const iColor    = impColor[l.importance]   ?? '#6B7280';
+      const vals: Record<string, string> = {
+        name:       esc(l.name ?? ''),
+        email:      esc(l.email ?? ''),
+        phone:      esc(l.phone ?? ''),
+        status:     `<span style="color:${sColor};font-weight:600">${esc(statusTxt)}</span>`,
+        importance: `<span style="color:${iColor};font-weight:600">${esc(impTxt)}</span>`,
+        origin:     esc(l.origin ?? ''),
+        store:      esc(l.store ?? ''),
+        assignedTo: esc(l.assignedTo ?? ''),
+        createdAt:  esc(format(new Date(l.createdAt), 'dd/MM/yyyy')),
+      };
+      const cells = cols.map((c) =>
+        `<td style="padding:6px 12px;border:1px solid #E2E8F0;background:${bg}">${vals[c.key]}</td>`
+      ).join('');
+      return `<tr>${cells}</tr>`;
+    }).join('');
+
+    const html = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head><meta charset="UTF-8">
+      <style>table{border-collapse:collapse;font-family:Calibri,Arial,sans-serif;font-size:12px}</style>
+      </head><body>
+      <h2 style="font-family:Calibri,Arial;color:#17364F;margin-bottom:4px">Relatório de Leads</h2>
+      <p style="font-family:Calibri,Arial;color:#64748B;font-size:11px;margin-top:0">
+        Exportado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")} · ${allLeads.length} leads
+      </p>
+      <table><thead><tr>${headerRow}</tr></thead><tbody>${dataRows}</tbody></table>
+      </body></html>`;
+
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `leads_${format(new Date(), 'yyyy-MM-dd')}.xls`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
