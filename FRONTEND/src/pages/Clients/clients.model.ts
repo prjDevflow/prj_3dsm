@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { IClient, IClientsService, ICreateClientRequest, IUpdateClientRequest } from "../../services/IClientsService";
 import { useToast } from "../../components/Toast";
 import api from "../../services/instanceApi";
+import { useLeads } from "../../hooks/useLeads";
 
 type ClientsModelProps = {
   clientsService: IClientsService;
@@ -53,6 +54,9 @@ export const useClientsModel = ({ clientsService }: ClientsModelProps) => {
     queryKey: ["clients", { page, limit, search, assignedTo, leadFilter }],
     queryFn: () => clientsService.getClients({ page, limit, search, assignedTo, hasLead: hasLeadParam }),
   });
+
+  const { data: leadsData } = useLeads({ limit: 500 });
+  const leads = leadsData?.data ?? [];
 
   const { data: consultores = [] } = useQuery({
     queryKey: ["consultores"],
