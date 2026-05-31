@@ -419,6 +419,7 @@ export const DashboardAdmin = (props: DashboardProps) => {
                 <tbody className="divide-y divide-slate-50">
                   {[...performance]
                     .sort((a, b) => (b.openLeads ?? 0) - (a.openLeads ?? 0))
+                    .slice(0, showAllPerf ? undefined : 5)
                     .map((agent) => {
                       const taxa = agent.leads > 0 ? Math.round((agent.conversions / agent.leads) * 100) : 0;
                       const openLeads = agent.openLeads ?? 0;
@@ -439,9 +440,23 @@ export const DashboardAdmin = (props: DashboardProps) => {
                     })}
                 </tbody>
               </table>
-              <p className="text-xs text-slate-400 mt-3">
-                Vermelho: ≥20 leads em aberto · Amarelo: ≥10 leads em aberto
-              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-xs text-slate-400">
+                  Vermelho: ≥20 leads em aberto · Amarelo: ≥10 leads em aberto
+                </p>
+                {performance.length > 5 && (
+                  <button
+                    onClick={() => setShowAllPerf((v) => !v)}
+                    className="flex items-center gap-1 text-xs font-medium text-[var(--color-primary)] hover:underline"
+                  >
+                    {showAllPerf ? (
+                      <><ChevronUp size={13} /> Ver menos</>
+                    ) : (
+                      <><ChevronDown size={13} /> Ver todos ({performance.length})</>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}
