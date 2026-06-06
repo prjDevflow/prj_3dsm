@@ -4,6 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 import { router } from './routes'; // Verifique se o caminho está correto
 import swaggerFile from '../../../docs/swagger.json';
 import cors from "cors";
+import { errorHandler } from './middlewares/errorHandler';
 
 const app = express();
 
@@ -20,9 +21,14 @@ app.use(
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 // Rotas - LINHA 17
-app.use(router); 
+app.use(router);
 
-app.listen(3333, () => {
-  console.log("🚀 Server started on http://localhost:3333");
-  console.log("📖 Swagger docs available on http://localhost:3333/api-docs");
+// Tratamento global de erros — DEVE ser o último middleware registrado
+app.use(errorHandler);
+
+const port = Number(process.env.PORT) || 3333;
+
+app.listen(port, () => {
+  console.log(`🚀 Server started on http://localhost:${port}`);
+  console.log(`📖 Swagger docs available on http://localhost:${port}/api-docs`);
 });

@@ -22,6 +22,8 @@ import { usersRoutes } from '../../../../modules/users/infra/http/routes/users.r
 import { CreateUserController } from '../../../../modules/users/controllers/CreateUserController';
 import { PapeisController } from '../../../../modules/papeis/PapeisController';
 import { PermissoesController } from '../../../../modules/papeis/PermissoesController';
+import { validateRequest } from '../middlewares/validateRequest';
+import { createClienteSchema, createLojaSchema, createOrigemSchema } from '../validators/schemas';
 
 const router = Router();
 
@@ -67,20 +69,20 @@ router.get('/consultores', ensureAuthenticated, listConsultoresController.handle
 
 // Clientes — exposto em /clientes e /clients (alias para o frontend)
 router.get('/clientes',         ensureAuthenticated, listClientesController.handle);
-router.post('/clientes',        ensureAuthenticated, createClienteController.handle);
+router.post('/clientes',        ensureAuthenticated, validateRequest(createClienteSchema), createClienteController.handle);
 router.put('/clientes/:id',     ensureAuthenticated, updateClienteController.handle);
 router.delete('/clientes/:id',  ensureAuthenticated, deleteClienteController.handle);
 router.get('/clients',          ensureAuthenticated, listClientesController.handle);
-router.post('/clients',         ensureAuthenticated, createClienteController.handle);
+router.post('/clients',         ensureAuthenticated, validateRequest(createClienteSchema), createClienteController.handle);
 router.put('/clients/:id',      ensureAuthenticated, updateClienteController.handle);
 router.delete('/clients/:id',   ensureAuthenticated, deleteClienteController.handle);
 
 // Lojas e Origens
 router.get('/lojas',          ensureAuthenticated, listLojasController.handle);
-router.post('/lojas',         ensureAuthenticated, ensureRole([UserRole.ADMIN]), createLojaController.handle);
+router.post('/lojas',         ensureAuthenticated, ensureRole([UserRole.ADMIN]), validateRequest(createLojaSchema), createLojaController.handle);
 router.delete('/lojas/:id',   ensureAuthenticated, ensureRole([UserRole.ADMIN]), deleteLojaController.handle);
 router.get('/origens',        ensureAuthenticated, listOrigensController.handle);
-router.post('/origens',       ensureAuthenticated, ensureRole([UserRole.ADMIN]), createOrigemController.handle);
+router.post('/origens',       ensureAuthenticated, ensureRole([UserRole.ADMIN]), validateRequest(createOrigemSchema), createOrigemController.handle);
 router.delete('/origens/:id', ensureAuthenticated, ensureRole([UserRole.ADMIN]), deleteOrigemController.handle);
 
 // Permissoes do sistema

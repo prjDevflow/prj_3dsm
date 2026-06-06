@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../shared/infra/prisma/client';
 
-const prisma = new PrismaClient();
 
 interface ImportRow {
   name: string;

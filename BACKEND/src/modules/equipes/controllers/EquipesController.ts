@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../shared/infra/prisma/client';
 import { CreateEquipeService } from '../services/CreateEquipeService';
 import { UpdateEquipeService } from '../services/UpdateEquipeService';
 import { DeleteEquipeService } from '../services/DeleteEquipeService';
 
-const prisma = new PrismaClient();
 
 function mapEquipe(e: any) {
   const manager = e.usuarios?.find((u: any) =>

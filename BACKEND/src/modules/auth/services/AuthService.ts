@@ -1,11 +1,11 @@
 import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../shared/infra/prisma/client';
 import { UsersRepository } from '../repositories/UsersRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
+import { AppError } from '../../../shared/errors/AppError';
 
-const prisma = new PrismaClient();
 
 interface IAuthRequest {
   email: string;
@@ -26,19 +26,22 @@ export class AuthService {
     const user = await this.usersRepository.findByEmail(email);
 
     if (!user) {
-      throw new Error("E-mail incorreto.");
+      throw new AppError("E-mail incorreto.", 401);
     }
 
     // 2. Compara a palavra-passe informada com o hash armazenado no banco (RNF02)
     const passwordMatch = await compare(senha, user.senha);
 
     if (!passwordMatch) {
-      throw new Error("Senha incorreta.");
+      throw new AppError("Senha incorreta.", 401);
     }
 
     // 3. Gera o Token JWT (RF01)
     // A chave secreta deve vir das variáveis de ambiente (.env)
-    const secret = process.env.JWT_SECRET || 'chave_super_secreta_padrao_desenvolvimento';
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new AppError('JWT_SECRET não está definido nas variáveis de ambiente.', 500);
+    }
     
     const token = sign(
       { role: user.role, equipeId: user.equipeId ?? null },

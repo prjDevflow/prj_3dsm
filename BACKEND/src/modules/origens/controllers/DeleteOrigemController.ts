@@ -1,12 +1,11 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { DeleteOrigemService } from '../services/DeleteOrigemService';
 
 export class DeleteOrigemController {
   async handle(req: Request, res: Response) {
-    const { id } = req.params;
-    await prisma.origem.delete({ where: { id_origem: id } });
+    const deleteOrigemService = new DeleteOrigemService();
+    await deleteOrigemService.execute(req.params.id);
+
     return res.status(204).send();
   }
 }

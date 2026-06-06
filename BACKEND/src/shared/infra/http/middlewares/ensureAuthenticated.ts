@@ -21,9 +21,12 @@ export async function ensureAuthenticated(
 
   const [, token] = authHeader.split(" ");
 
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new AppError("JWT_SECRET não está definido nas variáveis de ambiente.", 500);
+  }
+
   try {
-    // IMPORTANTE: Agora a chave secreta é idêntica à do AuthService
-    const secret = process.env.JWT_SECRET || 'chave_super_secreta_padrao_desenvolvimento';
     
     const decoded = verify(token, secret) as IPayload;
 

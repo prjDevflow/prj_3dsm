@@ -64,6 +64,7 @@ model Cliente {
   cpf_cliente       String? @db.VarChar(14)
   id_lead_principal String? @db.Uuid
   id_consultor      String? @db.Uuid
+  data_criacao_cliente DateTime @default(now()) @db.Timestamp()
   leads             Lead[]
 
   @@map("clientes")

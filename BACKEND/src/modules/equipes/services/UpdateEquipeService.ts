@@ -1,3 +1,4 @@
+import { AppError } from '../../../shared/errors/AppError';
 import { EquipesRepository } from '../repositories/EquipesRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
@@ -21,9 +22,7 @@ export class UpdateEquipeService {
     const equipe = await this.equipesRepository.findById(id);
 
     if (!equipe) {
-      const error = new Error("Equipe não encontrada.");
-      (error as any).statusCode = 404;
-      throw error;
+      throw new AppError("Equipe não encontrada.", 404);
     }
 
     const equipeAtualizada = await this.equipesRepository.update(id, nome);

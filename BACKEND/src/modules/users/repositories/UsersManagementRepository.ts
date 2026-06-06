@@ -1,17 +1,17 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { prisma } from '../../../shared/infra/prisma/client';
 
-const prisma = new PrismaClient();
 
 export class UsersManagementRepository {
   async findAll(filters?: { search?: string; role?: string; equipeId?: string }) {
-    const where: any = {};
+    const where: Prisma.UsuarioWhereInput = {};
 
     if (filters?.search) {
-      where.nome_usuario = { contains: filters.search, mode: 'insensitive' };
+      where.nome_usuario = { contains: filters.search, mode: 'insensitive' as const };
     }
 
     if (filters?.role) {
-      where.papel = { nome_papel: { equals: filters.role.toUpperCase(), mode: 'insensitive' } };
+      where.papel = { nome_papel: { equals: filters.role.toUpperCase(), mode: 'insensitive' as const } };
     }
 
     if (filters?.equipeId) {

@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { AppError } from '../../../shared/errors/AppError';
+import { prisma } from '../../../shared/infra/prisma/client';
 import { NegotiationsRepository } from '../repositories/NegotiationsRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
 
-const prisma = new PrismaClient();
 
 interface IUpdateNegotiationRequest {
   negotiationId: string;
@@ -26,9 +26,7 @@ export class UpdateNegotiationService {
     const negociacaoAntiga = await this.negotiationsRepository.findById(data.negotiationId);
     
     if (!negociacaoAntiga) {
-        const error = new Error("Negociação não encontrada.");
-        (error as any).statusCode = 404;
-        throw error;
+        throw new AppError("Negociação não encontrada.", 404);
     }
 
     // 1. Atualiza a Negociação

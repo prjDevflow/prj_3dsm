@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { AppError } from '../../../shared/errors/AppError';
+import { prisma } from '../../../shared/infra/prisma/client';
 import { UsersManagementRepository } from '../repositories/UsersManagementRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
 
-const prisma = new PrismaClient();
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface IAdminUpdateUserRequest {
@@ -28,9 +28,7 @@ export class AdminUpdateUserService {
     const user = await this.usersRepository.findById(id);
 
     if (!user) {
-      const error = new Error("Usuário não encontrado.");
-      (error as any).statusCode = 404;
-      throw error;
+      throw new AppError("Usuário não encontrado.", 404);
     }
 
     // Resolve papelId: aceita nome ('atendente') ou UUID diretamente
@@ -40,9 +38,7 @@ export class AdminUpdateUserService {
         where: { nome_papel: { equals: papelId, mode: 'insensitive' } }
       });
       if (!papel) {
-        const error = new Error(`Papel '${papelId}' não encontrado.`);
-        (error as any).statusCode = 400;
-        throw error;
+        throw new AppError(`Papel '${papelId}' não encontrado.`, 400);
       }
       resolvedPapelId = papel.id_papel;
     }

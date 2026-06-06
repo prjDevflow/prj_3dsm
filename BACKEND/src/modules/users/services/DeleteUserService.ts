@@ -1,3 +1,4 @@
+import { AppError } from '../../../shared/errors/AppError';
 import { UsersManagementRepository } from '../repositories/UsersManagementRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
@@ -20,16 +21,12 @@ export class DeleteUserService {
     const user = await this.usersRepository.findById(id);
 
     if (!user) {
-      const error = new Error("Usuário não encontrado.");
-      (error as any).statusCode = 404;
-      throw error;
+      throw new AppError("Usuário não encontrado.", 404);
     }
 
     // Regra de segurança: O Admin não deve conseguir excluir a si mesmo
     if (id === usuarioLogadoId) {
-      const error = new Error("Não é permitido excluir o próprio usuário ativo.");
-      (error as any).statusCode = 400;
-      throw error;
+      throw new AppError("Não é permitido excluir o próprio usuário ativo.", 400);
     }
 
     await this.usersRepository.softDelete(id);

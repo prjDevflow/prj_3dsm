@@ -1,9 +1,8 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../shared/infra/prisma/client';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
 
-const prisma = new PrismaClient();
 
 export class CloseNegotiationController {
   async handle(req: Request, res: Response): Promise<Response> {

@@ -1,6 +1,6 @@
-import { PrismaClient, Equipe } from '@prisma/client';
+import { Equipe } from '@prisma/client';
+import { prisma } from '../../../shared/infra/prisma/client';
 
-const prisma = new PrismaClient();
 
 export class EquipesRepository {
   async create(nome_equipe: string): Promise<Equipe> {

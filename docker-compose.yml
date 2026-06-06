@@ -37,7 +37,7 @@ services:
         condition: service_healthy # ADICIONADO: Só inicia se o DB estiver "healthy"
     environment:
       DATABASE_URL: "postgresql://admin_abp:abp_secure_password@db:5432/abp_leads?schema=public"
-      JWT_SECRET: "chave-super-secreta-para-jwt-mudar-em-producao"
+      JWT_SECRET: "d88e6adacf675f8f30cf2124c4b64452908cf6996b98e540721edc75ceb639c95819eba92f7524d43d0464f615e624e0"
       PORT: 3333
     ports:
       - "3333:3333"

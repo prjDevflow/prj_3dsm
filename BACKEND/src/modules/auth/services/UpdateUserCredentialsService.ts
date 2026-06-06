@@ -1,3 +1,4 @@
+import { AppError } from '../../../shared/errors/AppError';
 import { hash, compare } from 'bcryptjs';
 import { UsersRepository } from '../repositories/UsersRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
@@ -39,15 +40,11 @@ export class UpdateUserCredentialsService {
     // 3. Regra de Negócio: Atualização de Senha com Hash Seguro (RNF02)
     if (senha) {
       if (!senhaAtual) {
-        const error = new Error("A senha atual é obrigatória para alterar a senha.");
-        (error as any).statusCode = 400;
-        throw error;
+        throw new AppError("A senha atual é obrigatória para alterar a senha.", 400);
       }
       const passwordMatch = await compare(senhaAtual, user.senha);
       if (!passwordMatch) {
-        const error = new Error("Senha atual incorreta.");
-        (error as any).statusCode = 400;
-        throw error;
+        throw new AppError("Senha atual incorreta.", 400);
       }
       const hashedPassword = await hash(senha, 10);
       user.senha = hashedPassword;

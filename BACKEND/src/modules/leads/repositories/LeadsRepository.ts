@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../shared/infra/prisma/client';
 
-const prisma = new PrismaClient();
 
 export class LeadsRepository {
   // ---------------------------------------------------------

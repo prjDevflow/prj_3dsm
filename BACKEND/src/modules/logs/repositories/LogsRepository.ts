@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../shared/infra/prisma/client';
 
-const prisma = new PrismaClient();
 
 export class LogsRepository {
   // Chamado por debaixo dos panos pelos outros serviços

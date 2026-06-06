@@ -1,7 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../shared/infra/prisma/client';
 import { DateValidator } from '../../../shared/utils/DateValidator';
+import { Prisma } from '@prisma/client';
+import { AppError } from '../../../shared/errors/AppError';
 
-const prisma = new PrismaClient();
 
 interface IDashboardRequest {
   role: string;
@@ -17,14 +18,14 @@ export class DashboardService {
 
     const normalizedRole = role.toUpperCase();
 
-    const baseWhere: any = {
+    const baseWhere: Prisma.LeadWhereInput = {
       data_criacao_lead: { gte: startDate, lte: endDate }
     };
 
     if (normalizedRole === 'ATENDENTE') {
       baseWhere.id_usuario = userId;
     } else if (normalizedRole === 'GERENTE') {
-      if (!equipeId) throw new Error("Gerente sem equipa vinculada.");
+      if (!equipeId) throw new AppError("Gerente sem equipa vinculada.", 400);
       baseWhere.usuario = { id_equipe: equipeId };
     }
 

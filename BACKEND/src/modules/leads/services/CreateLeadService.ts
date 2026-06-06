@@ -1,9 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../shared/infra/prisma/client';
 import { LeadsRepository } from '../repositories/LeadsRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
 
-const prisma = new PrismaClient();
 
 interface ICreateLeadRequest {
   clienteId: string;

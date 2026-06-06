@@ -16,6 +16,12 @@ import { NPSController } from '../../../controllers/NPSController';
 import { ensureAuthenticated } from '../../../../../shared/infra/http/middlewares/ensureAuthenticated';
 import { ensureRole } from '../../../../../shared/infra/http/middlewares/ensureRole';
 import { UserRole } from '../../../../../domain/models/UserRole';
+import { validateRequest } from '../../../../../shared/infra/http/middlewares/validateRequest';
+import {
+  createLeadSchema,
+  createNegotiationSchema,
+  updateNegotiationSchema,
+} from '../../../../../shared/infra/http/validators/schemas';
 
 const leadsRoutes = Router();
 
@@ -36,7 +42,7 @@ const npsController                    = new NPSController();
 leadsRoutes.use(ensureAuthenticated);
 
 // Leads
-leadsRoutes.post('/', createLeadController.handle);
+leadsRoutes.post('/', validateRequest(createLeadSchema), createLeadController.handle);
 leadsRoutes.get('/',   listLeadsController.handle);
 leadsRoutes.get('/:id', getLeadByIdController.handle);
 leadsRoutes.put(
@@ -64,8 +70,8 @@ leadsRoutes.post('/negotiations/:id/nps', (req, res) => npsController.create(req
 
 // Negociações
 leadsRoutes.get('/:id/negotiations', listNegotiationsByLeadController.handle);
-leadsRoutes.post('/negotiations', createNegotiationController.handle);
-leadsRoutes.put('/negotiations/:id', updateNegotiationController.handle);
+leadsRoutes.post('/negotiations', validateRequest(createNegotiationSchema), createNegotiationController.handle);
+leadsRoutes.put('/negotiations/:id', validateRequest(updateNegotiationSchema), updateNegotiationController.handle);
 leadsRoutes.put('/negotiations/:id/close', closeNegotiationController.handle);
 
 export { leadsRoutes };

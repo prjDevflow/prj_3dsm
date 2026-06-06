@@ -1,10 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../shared/infra/prisma/client';
 import { NegotiationsRepository } from '../repositories/NegotiationsRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
 import { NegotiationStatus } from '../../../domain/models/Negotiation';
+import { AppError } from '../../../shared/errors/AppError';
 
-const prisma = new PrismaClient();
 
 interface ICreateNegotiationRequest {
   leadId: string;
@@ -28,9 +28,7 @@ export class CreateNegotiationService {
     const negociacaoAtiva = await this.negotiationsRepository.findActiveByLeadId(data.leadId);
 
     if (negociacaoAtiva) {
-      const error = new Error("Regra de Negócio Violada (RF03): Este Lead já possui uma negociação ativa aberta.");
-      (error as any).statusCode = 400; // O nosso controller agora sabe ler isto e devolverá o Status 400!
-      throw error;
+      throw new AppError("Regra de Negócio Violada (RF03): Este Lead já possui uma negociação ativa aberta.", 400);
     }
 
     // 1. Cria a negociação (agora segura!)

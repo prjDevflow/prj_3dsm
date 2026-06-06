@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../shared/infra/prisma/client';
 import { CreateLeadService } from '../services/CreateLeadService';
 
-const prisma = new PrismaClient();
 
 export class CreateLeadController {
   async handle(request: Request, response: Response): Promise<Response> {

@@ -1,3 +1,4 @@
+import { AppError } from '../../../shared/errors/AppError';
 import { EquipesRepository } from '../repositories/EquipesRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
@@ -20,9 +21,7 @@ export class CreateEquipeService {
     const equipeExists = await this.equipesRepository.findByName(nome);
 
     if (equipeExists) {
-      const error = new Error("Já existe uma equipe com este nome.");
-      (error as any).statusCode = 400;
-      throw error;
+      throw new AppError("Já existe uma equipe com este nome.", 400);
     }
 
     const equipe = await this.equipesRepository.create(nome);

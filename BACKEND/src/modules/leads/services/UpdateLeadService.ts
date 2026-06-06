@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { AppError } from '../../../shared/errors/AppError';
+import { prisma } from '../../../shared/infra/prisma/client';
 import { LeadsRepository } from '../repositories/LeadsRepository';
 import { CreateLogService } from '../../logs/services/CreateLogService';
 import { LogAction } from '../../../domain/models/Log';
 
-const prisma = new PrismaClient();
 
 interface IUpdateLeadRequest {
   leadId: string;
@@ -28,28 +28,20 @@ export class UpdateLeadService {
     const lead = await this.leadsRepository.findByIdWithDetails(data.leadId);
 
     if (!lead) {
-      const error = new Error("Lead não encontrado.");
-      (error as any).statusCode = 404;
-      throw error;
+      throw new AppError("Lead não encontrado.", 404);
     }
 
     // 🚨 REGRA DE OURO (RF02) - Validação Granular de Pertencimento no Backend 🚨
     if (data.usuarioLogadoRole === 'ATENDENTE') {
       if (lead.usuario.id_usuario !== data.usuarioLogadoId) {
-        const error = new Error("Acesso negado: Só pode editar leads sob a sua responsabilidade.");
-        (error as any).statusCode = 403;
-        throw error;
+        throw new AppError("Acesso negado: Só pode editar leads sob a sua responsabilidade.", 403);
       }
     } else if (data.usuarioLogadoRole === 'GERENTE') {
       if (lead.usuario.id_equipe !== data.usuarioLogadoEquipeId) {
-        const error = new Error("Acesso negado: Só pode editar leads de atendentes da sua equipa.");
-        (error as any).statusCode = 403;
-        throw error;
+        throw new AppError("Acesso negado: Só pode editar leads de atendentes da sua equipa.", 403);
       }
     } else if (data.usuarioLogadoRole === 'GERENTE_GERAL') {
-      const error = new Error("Acesso negado: O Gerente Geral não tem permissão para editar leads.");
-      (error as any).statusCode = 403;
-      throw error;
+      throw new AppError("Acesso negado: O Gerente Geral não tem permissão para editar leads.", 403);
     }
     // Se for ADMIN, passa direto (tem acesso total)
 

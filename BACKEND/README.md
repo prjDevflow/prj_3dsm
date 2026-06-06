@@ -43,7 +43,7 @@ Utilizado em classes como `LeadsRepository` e `NegotiationsRepository`.
 - **Vantagem:** Trocar o Prisma por outro ORM ou mudar de banco de dados afeta apenas os Repositórios — o restante do sistema permanece intacto.
 
 ### 2. Singleton Pattern
-Implementado na conexão com o banco de dados (`const prisma = new PrismaClient()`).
+Centralizado em `src/shared/infra/prisma/client.ts`, que exporta uma **única** instância `prisma` reutilizada por todos os controllers, services e repositories (nenhum outro arquivo faz `new PrismaClient()`).
 
 - **O que faz:** Garante uma única instância de conexão com o banco durante o ciclo de vida do servidor.
 - **Vantagem:** Evita esgotamento do pool de conexões (*Too Many Connections*) com o PostgreSQL.

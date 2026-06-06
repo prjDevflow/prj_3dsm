@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../shared/infra/prisma/client';
 
-const prisma = new PrismaClient();
 
 const DEFAULT_CAPABILITIES = {
   pages:   { dashboard: true, leads: true, clients: false, logs: false, admin: false, settings: false, users: false, teams: false },

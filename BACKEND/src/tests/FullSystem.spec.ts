@@ -1,8 +1,7 @@
 import { describe, it, expect } from '@jest/globals';
 import request from 'supertest';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../shared/infra/prisma/client';
 
-const prisma = new PrismaClient();
 // Tente usar 127.0.0.1 para evitar problemas de resolução de DNS do localhost em alguns ambientes
 const api = "http://127.0.0.1:3333"; 
 
