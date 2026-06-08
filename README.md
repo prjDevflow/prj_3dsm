@@ -424,12 +424,12 @@ Projeto desenvolvido pela equipe **DevFlow** — FATEC Jacareí.
 
 | Integrante | Função |
 |:---|:---|
-| Rafael Medeiros | Desenvolvimento |
-| Matheus Sales | Desenvolvimento |
-| Eduardo Silva Machado | Desenvolvimento |
-| Lucas Paiva | Desenvolvimento |
-| Matheus Soldesi | Desenvolvimento |
-| Pedro | Desenvolvimento |
+| Rafael Medeiros | Dev Front |
+| Matheus Sales | Dev Back |
+| Eduardo Silva Machado | Dev Back |
+| Lucas Paiva | Dev B.D |
+| Matheus Soldesi | P.O |
+| Pedro | S.M |
 
 </div>
 
