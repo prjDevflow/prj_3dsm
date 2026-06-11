@@ -416,6 +416,25 @@ docker compose up -d
 
 ---
 
+### Sprint 3 — Poker Planning
+
+| #  | Item                                                 | Pontos | Status |
+| -- | ---------------------------------------------------- | :----: | :----: |
+| 1  | Tela de Permissões (CRUD e listagem)                 |    8   |    ✅   |
+| 2  | Tela de Perfis com seleção visual de permissões      |    8   |    ✅   |
+| 3  | Tela de Usuários com paginação e alteração de perfil |    5   |    ✅   |
+| 4  | Controle de acesso por capabilities no frontend      |    5   |    ✅   |
+| 5  | Reestruturação do Dashboard                          |    8   |    ✅   |
+| 6  | Melhorias em gráficos e indicadores                  |    5   |    ✅   |
+| 7  | Ranking de Atendentes (Top 5 e Ver Todos)            |    3   |    ✅   |
+| 8  | Organização da página de Leads em abas               |    3   |    ✅   |
+| 9  | Busca em tempo real e filtros client-side            |    5   |    ✅   |
+| 10 | Fluxo de negociação e modal de fechamento            |    3   |    ✅   |
+|    | **Total**                                            | **53** |        |
+
+<img alt="Burndown Sprint 3" src="https://github.com/prjDevflow/prj_3dsm/blob/main/imagens/burndown_sprint3.png" />
+
+
 ## Equipe
 
 Projeto desenvolvido pela equipe **DevFlow** — FATEC Jacareí.
